@@ -1,0 +1,1077 @@
+<TaskerData sr="" dvi="1" tv="6.7.6-beta">
+	<dmetric>1080.0,2307.0</dmetric>
+	<Profile sr="prof2020" ve="2">
+		<cdate>1785555105867</cdate>
+		<edate>1785593921091</edate>
+		<flags>40</flags>
+		<id>2020</id>
+		<limit>true</limit>
+		<mid0>2017</mid0>
+		<nme>Iniciar Monitor de Acessibilidade</nme>
+		<Event sr="con0" ve="2">
+			<code>307</code>
+			<pri>0</pri>
+		</Event>
+	</Profile>
+	<Project sr="proj0" ve="2">
+		<cdate>1745400000000</cdate>
+		<id>3fc9c99c-2059-4be3-b354-4c4df60830e9</id>
+		<name>Reactor</name>
+		<pids>2020</pids>
+		<scenes>REACTOR UI,REACTOR</scenes>
+		<tids>2021,2013,2022,2017,2019</tids>
+		<tsort>Alpha</tsort>
+	</Project>
+	<Scene sr="sceneREACTOR">
+		<cdate>1785556154439</cdate>
+		<edate>1785558346136</edate>
+		<heightLand>-1</heightLand>
+		<heightPort>-1</heightPort>
+		<lj>H4sIAAAAAAAA/4WQTW/CMAyG/8qUM6yrdhq30oHEgYEADWkTh7QxbUYST07Kp/jvc2Ar0y47WfZj+33tkyDEIHonEQ6fIHoiR9NYJzpCqzZLOa2R9BFdkCYzunIWXIicAxDjLVDQJUMi6Sr4iy0qvdZAXvTeW6mhNmaujyDOnbbWl+WmImyc4qkSDRIXfUNrWXLfimu1NorA/V60hOJVw+7H9HjyMlpMZv/LxnV80tVr4gOSrCB56A+fuunjME3Su+7dM2wvcUr4AQH9JVlIvwFKZiBLHkq0U7C/r4M1rKlkkIX0MHCyMBD9BGqAQdFoE0buDdHmrEpo/A02HpZaQTxjihRuwKBUSx3qCX94y3SMCm7U6j2o/HrDN8nMTh58ZgzGh8gY+WLIyhJ8K3henTvCSRsHZoMsv76rZgfzgw9g+zL+LLaevwA8jyA9IgIAAA==</lj>
+		<nme>REACTOR</nme>
+		<widthLand>-1</widthLand>
+		<widthPort>-1</widthPort>
+	</Scene>
+	<Scene sr="sceneREACTOR UI">
+		<cdate>1785555490821</cdate>
+		<edate>1785555587490</edate>
+		<heightLand>-1</heightLand>
+		<heightPort>2400</heightPort>
+		<nme>REACTOR UI</nme>
+		<widthLand>-1</widthLand>
+		<widthPort>1080</widthPort>
+		<WebElement sr="elements0" ve="2">
+			<flags>6</flags>
+			<geom>0,0,1080,2400,-1,-1,-1,-1</geom>
+			<Str sr="arg0" ve="3">ENGINE</Str>
+			<Int sr="arg1" val="1"/>
+			<Str sr="arg2" ve="3">/storage/0BF9-13F1/1 - Dev/1 - Projetos/1 - Tasker/Reactor/index.html</Str>
+			<Int sr="arg3" val="1"/>
+			<Int sr="arg4" val="1"/>
+			<Int sr="arg5" val="0"/>
+			<Int sr="arg6" val="1"/>
+			<Int sr="arg7" val="1"/>
+			<Str sr="arg8" ve="3"/>
+		</WebElement>
+		<PropertiesElement sr="props">
+			<keyTask>2021</keyTask>
+			<Int sr="arg0" val="1"/>
+			<Int sr="arg1" val="0"/>
+			<Str sr="arg2" ve="3">#00FFFFFF</Str>
+			<Int sr="arg3" val="0"/>
+			<Str sr="arg4" ve="3">REACTOR UI</Str>
+			<Str sr="arg5" ve="3"/>
+			<Img sr="arg6" ve="2"/>
+			<Str sr="arg7" ve="3"/>
+			<LinkClickFilter sr="filter0">
+				<stopEvent>true</stopEvent>
+				<urlMatch>back</urlMatch>
+			</LinkClickFilter>
+		</PropertiesElement>
+	</Scene>
+	<Task sr="task2013">
+		<cdate>1745400000000</cdate>
+		<edate>1785595631085</edate>
+		<id>2013</id>
+		<nme>TK_ModuleManager</nme>
+		<pri>100</pri>
+		<Action sr="act0" ve="7">
+			<code>548</code>
+			<on>false</on>
+			<Str sr="arg0" ve="3">%par1
+
+%par2</Str>
+			<Int sr="arg1" val="0"/>
+			<Str sr="arg10" ve="3"/>
+			<Int sr="arg11" val="1"/>
+			<Int sr="arg12" val="0"/>
+			<Str sr="arg13" ve="3">1</Str>
+			<Int sr="arg14" val="0"/>
+			<Str sr="arg15" ve="3"/>
+			<Int sr="arg2" val="1"/>
+			<Str sr="arg3" ve="3"/>
+			<Str sr="arg4" ve="3"/>
+			<Str sr="arg5" ve="3"/>
+			<Str sr="arg6" ve="3">#FF1A61AF</Str>
+			<Str sr="arg7" ve="3"/>
+			<Str sr="arg8" ve="3">99999</Str>
+			<Int sr="arg9" val="1"/>
+		</Action>
+		<Action sr="act1" ve="7">
+			<code>37</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>get_status</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act10" ve="7">
+			<code>474</code>
+			<Str sr="arg0" ve="3">import org.json.JSONObject;
+import java.io.File;
+import java.io.FileWriter;
+import java.util.regex.Pattern;
+import com.joaomgcd.taskerm.action.java.JavaCodeException;
+
+CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
+rawCfg = tasker.getJavaVariable("wmModulesConfig");
+if (rawCfg == null || rawCfg == void) throw new JavaCodeException("Configuração não carregada.");
+cfgRoot = (JSONObject) rawCfg;
+
+payload = new JSONObject(tasker.getVariable("par2"));
+moduleId = payload.getString("moduleId");
+token = payload.getString("trigger");
+modulesObj = cfgRoot.getJSONObject("modules");
+if (!modulesObj.has(moduleId)) throw new JavaCodeException("Módulo não encontrado.");
+moduleObj = modulesObj.getJSONObject(moduleId);
+engine = moduleObj.getString("engine");
+
+if (engine.equals("expander") &amp;&amp; !Pattern.matches("^@[a-z0-9_]+$", token)) {
+    throw new JavaCodeException("Gatilho de expansão deve ser minúsculo, sem espaços, começando com '@' (ex: @pix)");
+}
+if (engine.equals("command") &amp;&amp; !Pattern.matches("^[a-z0-9_-]+$", token)) {
+    throw new JavaCodeException("Nome de comando deve ser minúsculo, sem espaços e sem ':' (ex: flash)");
+}
+
+triggersObj = moduleObj.getJSONObject("triggers");
+entry = new JSONObject();
+entry.put("enabled", true);
+if (engine.equals("expander")) {
+    kind = payload.getString("kind");
+    entry.put("kind", kind);
+    if (kind.equals("static")) entry.put("value", payload.optString("value", ""));
+    if (kind.equals("translate")) entry.put("lang", payload.optString("lang", "en"));
+    if (kind.equals("ai")) entry.put("instruction", payload.optString("instruction", ""));
+} else {
+    entry.put("description", payload.optString("description", ""));
+}
+triggersObj.put(token, entry);
+
+writer = new FileWriter(new File(CONFIG_PATH), false);
+writer.write(cfgRoot.toString(2));
+writer.close();
+
+result = new JSONObject();
+result.put("ok", true);
+result.put("needsRestart", false);
+result.put("message", "Gatilho adicionado");
+return result.toString();</Str>
+			<Str sr="arg1" ve="3">%jc_result</Str>
+			<Int sr="arg2" val="0"/>
+		</Action>
+		<Action sr="act11" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>remove_trigger</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act12" ve="7">
+			<code>474</code>
+			<Str sr="arg0" ve="3">import org.json.JSONObject;
+import java.io.File;
+import java.io.FileWriter;
+import com.joaomgcd.taskerm.action.java.JavaCodeException;
+
+CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
+rawCfg = tasker.getJavaVariable("wmModulesConfig");
+if (rawCfg == null || rawCfg == void) throw new JavaCodeException("Configuração não carregada.");
+cfgRoot = (JSONObject) rawCfg;
+
+payload = new JSONObject(tasker.getVariable("par2"));
+moduleId = payload.getString("moduleId");
+token = payload.getString("trigger");
+modulesObj = cfgRoot.getJSONObject("modules");
+if (!modulesObj.has(moduleId)) throw new JavaCodeException("Módulo não encontrado.");
+triggersObj = modulesObj.getJSONObject(moduleId).getJSONObject("triggers");
+triggersObj.remove(token);
+
+writer = new FileWriter(new File(CONFIG_PATH), false);
+writer.write(cfgRoot.toString(2));
+writer.close();
+
+result = new JSONObject();
+result.put("ok", true);
+result.put("needsRestart", false);
+result.put("message", "Gatilho removido");
+return result.toString();</Str>
+			<Str sr="arg1" ve="3">%jc_result</Str>
+			<Int sr="arg2" val="0"/>
+		</Action>
+		<Action sr="act13" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>toggle_trigger</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act14" ve="7">
+			<code>474</code>
+			<Str sr="arg0" ve="3">import org.json.JSONObject;
+import java.io.File;
+import java.io.FileWriter;
+import com.joaomgcd.taskerm.action.java.JavaCodeException;
+
+CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
+rawCfg = tasker.getJavaVariable("wmModulesConfig");
+if (rawCfg == null || rawCfg == void) throw new JavaCodeException("Configuração não carregada.");
+cfgRoot = (JSONObject) rawCfg;
+
+payload = new JSONObject(tasker.getVariable("par2"));
+moduleId = payload.getString("moduleId");
+token = payload.getString("trigger");
+modulesObj = cfgRoot.getJSONObject("modules");
+if (!modulesObj.has(moduleId)) throw new JavaCodeException("Módulo não encontrado.");
+triggersObj = modulesObj.getJSONObject(moduleId).getJSONObject("triggers");
+if (!triggersObj.has(token)) throw new JavaCodeException("Gatilho não encontrado.");
+triggersObj.getJSONObject(token).put("enabled", payload.getBoolean("enabled"));
+
+writer = new FileWriter(new File(CONFIG_PATH), false);
+writer.write(cfgRoot.toString(2));
+writer.close();
+
+result = new JSONObject();
+result.put("ok", true);
+result.put("needsRestart", false);
+result.put("message", "Gatilho atualizado");
+return result.toString();</Str>
+			<Str sr="arg1" ve="3">%jc_result</Str>
+			<Int sr="arg2" val="0"/>
+		</Action>
+		<Action sr="act15" ve="7">
+			<code>43</code>
+		</Action>
+		<Action sr="act16" ve="7">
+			<code>547</code>
+			<Str sr="arg0" ve="3">%jc_result</Str>
+			<Str sr="arg1" ve="3">{"ok":false,"error":"ação desconhecida"}</Str>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="0"/>
+		</Action>
+		<Action sr="act17" ve="7">
+			<code>38</code>
+		</Action>
+		<Action sr="act18" ve="7">
+			<code>126</code>
+			<Str sr="arg0" ve="3">%jc_result</Str>
+			<Int sr="arg1" val="0"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Str sr="arg4" ve="3"/>
+		</Action>
+		<Action sr="act2" ve="7">
+			<code>474</code>
+			<Str sr="arg0" ve="3">import org.json.JSONObject;
+import org.json.JSONArray;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.Map;
+
+String CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
+
+String DEFAULT_CONFIG = "{\"modules\":{"
+    + "\"expander_default\":{\"displayName\":\"Expansor de Texto\",\"engine\":\"expander\",\"enabled\":true,"
+    +   "\"config\":{\"apiKey\":\"\",\"model\":\"\",\"systemInstructions\":\"\"},"
+    +   "\"triggers\":{"
+    +   "\"@pix\":{\"enabled\":true,\"kind\":\"static\",\"value\":\"Chave PIX: 123.456.789-00\"},"
+    +   "\"@mail\":{\"enabled\":true,\"kind\":\"static\",\"value\":\"john.smith@email.com\"},"
+    +   "\"@en\":{\"enabled\":true,\"kind\":\"translate\",\"lang\":\"en\"},"
+    +   "\"@es\":{\"enabled\":true,\"kind\":\"translate\",\"lang\":\"es\"},"
+    +   "\"@ia\":{\"enabled\":true,\"kind\":\"ai\",\"instruction\":\"\"},"
+    +   "\"@yt\":{\"enabled\":true,\"kind\":\"youtube\"}"
+    + "}},"
+    + "\"command_default\":{\"displayName\":\"Executor de Comandos\",\"engine\":\"command\",\"enabled\":true,"
+    +   "\"config\":{\"prefix\":\"&gt;&gt;\",\"taskName\":\"TK_CommandRouter\",\"restrictToKnown\":false},"
+    +   "\"triggers\":{"
+    +     "\"flash\":{\"enabled\":true,\"description\":\"Liga/desliga a lanterna\"},"
+    +     "\"wifi\":{\"enabled\":true,\"description\":\"Alterna o Wi-Fi\"}"
+    +   "}}}}";
+
+/* Carrega a config em memória, se ainda não estiver. */
+rawCfg = tasker.getJavaVariable("wmModulesConfig");
+if (rawCfg == null || rawCfg == void) {
+    file = new File(CONFIG_PATH);
+    if (file.exists()) {
+        reader = new FileReader(file);
+        buf = new char[(int) file.length()];
+        reader.read(buf);
+        reader.close();
+        cfgRoot = new JSONObject(new String(buf));
+    } else {
+        cfgRoot = new JSONObject(DEFAULT_CONFIG);
+        file.getParentFile().mkdirs();
+        writer = new FileWriter(file, false);
+        writer.write(cfgRoot.toString(2));
+        writer.close();
+    }
+    tasker.setJavaVariable("wmModulesConfig", cfgRoot);
+} else {
+    cfgRoot = (JSONObject) rawCfg;
+}
+
+/* Estado ao vivo: monitor ligado? quais módulos estão realmente registrados? */
+monStatus = tasker.getJavaVariable("stopAccessibilityMonitor");
+monitorActive = (monStatus != null &amp;&amp; monStatus != void);
+
+rawLogics = tasker.getJavaVariable("accessibilityLogics");
+activeIds = new JSONArray();
+if (rawLogics != null &amp;&amp; rawLogics != void) {
+    logicsMap = (Map) rawLogics;
+    it = logicsMap.keySet().iterator();
+    while (it.hasNext()) {
+        activeIds.put(it.next().toString());
+    }
+}
+
+result = new JSONObject();
+result.put("ok", true);
+result.put("monitorActive", monitorActive);
+result.put("activeModuleIds", activeIds);
+result.put("config", cfgRoot);
+
+return result.toString();</Str>
+			<Str sr="arg1" ve="3">%jc_result</Str>
+			<Int sr="arg2" val="0"/>
+		</Action>
+		<Action sr="act3" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>toggle_monitor</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act4" ve="7">
+			<code>474</code>
+			<Str sr="arg0" ve="3">import io.reactivex.subjects.CompletableSubject;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import org.json.JSONObject;
+import org.json.JSONArray;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.os.Bundle;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
+import android.content.pm.LabeledIntent;
+import android.net.Uri;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.net.URLEncoder;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import com.joaomgcd.taskerm.action.java.JavaCodeException;
+
+rawCfg = tasker.getJavaVariable("wmModulesConfig");
+if (rawCfg == null || rawCfg == void) {
+    throw new JavaCodeException("Configuração não carregada. Abra o painel primeiro.");
+}
+cfgRoot = (JSONObject) rawCfg;
+
+sig = tasker.getJavaVariable("stopAccessibilityMonitor");
+currentlyActive = (sig != null &amp;&amp; sig != void);
+
+if (currentlyActive) {
+    /* --- DESLIGAR --- */
+    s = (CompletableSubject) sig;
+    s.onComplete();
+    tasker.setJavaVariable("stopAccessibilityMonitor", null);
+
+    result = new JSONObject();
+    result.put("ok", true);
+    result.put("monitorActive", false);
+    result.put("message", "Monitor parado");
+    return result.toString();
+}
+
+/* --- LIGAR --- */
+if (tasker.getAccessibilityService() == null) {
+    throw new JavaCodeException("Acessibilidade do Tasker está desligada.");
+}
+
+/* Monta o registro de módulos habilitados a partir da configuração. */
+logics = new HashMap();
+modulesObj = cfgRoot.getJSONObject("modules");
+ids = modulesObj.keys();
+while (ids.hasNext()) {
+    moduleId = ids.next().toString();
+    moduleObj = modulesObj.getJSONObject(moduleId);
+    if (!moduleObj.getBoolean("enabled")) continue;
+    engine = moduleObj.getString("engine");
+    final String finalModuleId = moduleId;
+
+    if (engine.equals("expander")) {
+        consumer = new Consumer() {
+            accept(Object eventObj) {
+                try {
+                    event = (AccessibilityEvent) eventObj;
+                    if (event.getEventType() != AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) return;
+                    source = event.getSource();
+                    if (source == null || source.getText() == null) return;
+                    currentText = source.getText().toString();
+
+                    liveCfg = (JSONObject) tasker.getJavaVariable("wmModulesConfig");
+                    liveModule = liveCfg.getJSONObject("modules").getJSONObject(finalModuleId);
+                    if (!liveModule.getBoolean("enabled")) return;
+                    triggers = liveModule.getJSONObject("triggers");
+
+                    keys = triggers.keys();
+                    matchedKey = null;
+                    matchLen = 0;
+                    while (keys.hasNext()) {
+                        k = keys.next().toString();
+                        trg = triggers.getJSONObject(k);
+                        if (!trg.getBoolean("enabled")) continue;
+                        needle = k.toLowerCase() + " ";
+                        if (currentText.toLowerCase().endsWith(needle)) { matchedKey = k; matchLen = needle.length(); break; }
+                    }
+                    if (matchedKey == null) return;
+                    
+                    trg = triggers.getJSONObject(matchedKey);
+                    kind = trg.getString("kind");
+                    baseText = currentText.substring(0, currentText.length() - matchLen);
+
+                    if (kind.equals("static")) {
+                        newText = baseText + trg.getString("value");
+                        args = new Bundle();
+                        args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, newText);
+                        source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
+                        return;
+                    }
+
+                    if (kind.equals("youtube")) {
+                        query = baseText.trim();
+                        args = new Bundle();
+                        args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "");
+                        source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
+                        if (query.length() == 0) return;
+                        try {
+                            pm = context.getPackageManager();
+                            targets = new ArrayList();
+
+                            ytIntent = new Intent(Intent.ACTION_SEARCH);
+                            ytIntent.setPackage("com.google.android.youtube");
+                            ytIntent.putExtra("query", query);
+                            ytMatches = pm.queryIntentActivities(ytIntent, 0);
+                            for (i = 0; i &lt; ytMatches.size(); i++) {
+                                info = (ResolveInfo) ytMatches.get(i);
+                                target = new Intent(ytIntent);
+                                target.setClassName(info.activityInfo.packageName, info.activityInfo.name);
+                                targets.add(new LabeledIntent(target, info.activityInfo.packageName, info.loadLabel(pm), info.icon));
+                            }
+
+                            searchUri = Uri.parse("https://www.youtube.com/results?search_query=" + URLEncoder.encode(query, "UTF-8"));
+                            viewIntent = new Intent(Intent.ACTION_VIEW, searchUri);
+                            viewMatches = pm.queryIntentActivities(viewIntent, 0);
+                            for (i = 0; i &lt; viewMatches.size(); i++) {
+                                info = (ResolveInfo) viewMatches.get(i);
+                                target = new Intent(Intent.ACTION_VIEW, searchUri);
+                                target.setClassName(info.activityInfo.packageName, info.activityInfo.name);
+                                targets.add(new LabeledIntent(target, info.activityInfo.packageName, info.loadLabel(pm), info.icon));
+                            }
+                            if (targets.size() == 0) { tasker.log("YouTube: nenhum app encontrado"); return; }
+
+                            first = (LabeledIntent) targets.remove(0);
+                            chooser = Intent.createChooser(first, "Abrir pesquisa com");
+                            rest = new LabeledIntent[targets.size()];
+                            for (i = 0; i &lt; targets.size(); i++) rest[i] = (LabeledIntent) targets.get(i);
+                            chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, rest);
+                            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            context.startActivity(chooser);
+                        } catch (Exception e) {
+                            tasker.log("Erro YouTube: " + e.toString());
+                        }
+                        return;
+                    }
+
+                    /* translate / ai seguem em background. */
+                    finalKind = kind; finalSource = source; finalBaseText = baseText; finalTrg = trg;
+
+                    /* Chave/modelo Gemini vêm da própria config do módulo (definida no app). */
+                    moduleConfig = liveModule.optJSONObject("config");
+                    finalApiKey = moduleConfig != null ? moduleConfig.optString("apiKey", "") : "";
+                    finalModel = moduleConfig != null ? moduleConfig.optString("model", "") : "";
+                    finalSysInstr = moduleConfig != null ? moduleConfig.optString("systemInstructions", "") : "";
+
+                    new Thread(new Runnable() {
+                        run() {
+                            try {
+                                client = new OkHttpClient();
+                                resultText = null;
+
+                                if (finalKind.equals("translate")) {
+                                    lang = finalTrg.getString("lang");
+                                    text = finalBaseText.trim();
+                                    if (text.length() == 0) return;
+                                    url = "https://translate.googleapis.com/translate_a/single?client=gtx&amp;sl=auto&amp;dt=t&amp;q="
+                                        + URLEncoder.encode(text, "UTF-8") + "&amp;tl=" + lang;
+                                    req = new Request.Builder().url(url).build();
+                                    resp = client.newCall(req).execute();
+                                    if (resp.isSuccessful()) {
+                                        root = new JSONArray(resp.body().string());
+                                        sentences = root.getJSONArray(0);
+                                        sb = new StringBuilder();
+                                        for (i = 0; i &lt; sentences.length(); i++) sb.append(sentences.getJSONArray(i).getString(0));
+                                        resultText = sb.toString();
+                                    }
+                                    resp.close();
+                                } else if (finalKind.equals("ai")) {
+                                    text = finalBaseText.trim();
+                                    instruction = finalTrg.optString("instruction", "");
+                                    apiKey = finalApiKey;
+                                    model = finalModel;
+                                    sysInstr = finalSysInstr;
+                                    if (text.length() == 0 || apiKey.length() == 0 || model.length() == 0) {
+                                        tasker.log("Modulo IA (" + finalModuleId + "): chave de API ou modelo Gemini não configurados nas Configurações do módulo.");
+                                        return;
+                                    }
+
+                                    userText = instruction.length() &gt; 0 ? instruction + "\n\nTexto:\n" + text : text;
+                                    part = new JSONObject(); part.put("text", userText);
+                                    parts = new JSONArray(); parts.put(part);
+                                    contentObj = new JSONObject(); contentObj.put("parts", parts);
+                                    contents = new JSONArray(); contents.put(contentObj);
+                                    body = new JSONObject();
+                                    if (sysInstr != null &amp;&amp; sysInstr.length() &gt; 0) {
+                                        sp = new JSONObject(); sp.put("text", sysInstr);
+                                        spArr = new JSONArray(); spArr.put(sp);
+                                        si = new JSONObject(); si.put("parts", spArr);
+                                        body.put("systemInstruction", si);
+                                    }
+                                    body.put("contents", contents);
+
+                                    url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
+                                    mediaType = MediaType.parse("application/json; charset=utf-8");
+                                    reqBody = RequestBody.create(mediaType, body.toString());
+                                    req = new Request.Builder().url(url).post(reqBody).build();
+                                    resp = client.newCall(req).execute();
+                                    if (resp.isSuccessful()) {
+                                        root = new JSONObject(resp.body().string());
+                                        cand = root.getJSONArray("candidates").getJSONObject(0);
+                                        respParts = cand.getJSONObject("content").getJSONArray("parts");
+                                        sb = new StringBuilder();
+                                        for (i = 0; i &lt; respParts.length(); i++) sb.append(respParts.getJSONObject(i).getString("text"));
+                                        resultText = sb.toString().trim();
+                                    }
+                                    resp.close();
+                                }
+
+                                if (resultText != null &amp;&amp; resultText.length() &gt; 0) {
+                                    args = new Bundle();
+                                    args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, resultText);
+                                    finalSource.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
+                                }
+                            } catch (Exception e) {
+                                tasker.log("Erro modulo expander (" + finalModuleId + "): " + e.toString());
+                            }
+                        }
+                    }).start();
+
+                } catch (Exception e) {
+                    tasker.log("Erro modulo expander: " + e.toString());
+                }
+            }
+        };
+        logics.put(moduleId, consumer);
+    }
+
+    if (engine.equals("command")) {
+        consumer = new Consumer() {
+            accept(Object eventObj) {
+                try {
+                    event = (AccessibilityEvent) eventObj;
+                    if (event.getEventType() != AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) return;
+                    source = event.getSource();
+                    if (source == null || source.getText() == null) return;
+                    currentText = source.getText().toString();
+
+                    liveCfg = (JSONObject) tasker.getJavaVariable("wmModulesConfig");
+                    liveModule = liveCfg.getJSONObject("modules").getJSONObject(finalModuleId);
+                    if (!liveModule.getBoolean("enabled")) return;
+                    cfg = liveModule.getJSONObject("config");
+                    prefix = cfg.getString("prefix");
+                    taskName = cfg.getString("taskName");
+                    restrictToKnown = cfg.optBoolean("restrictToKnown", false);
+
+                    pattern = Pattern.compile(Pattern.quote(prefix) + "(\\S+)\\s$");
+                    matcher = pattern.matcher(currentText);
+                    if (!matcher.find()) return;
+
+                    commandName = matcher.group(1);
+                    if (commandName == null || commandName.length() == 0) return;
+
+                    if (restrictToKnown) {
+                        triggers = liveModule.getJSONObject("triggers");
+                        if (!triggers.has(commandName) || !triggers.getJSONObject(commandName).getBoolean("enabled")) return;
+                    }
+
+                    newText = currentText.substring(0, matcher.start()) + currentText.substring(matcher.end());
+                    args = new Bundle();
+                    args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, newText);
+                    source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
+
+                    vars = new HashMap();
+                    vars.put("par1", commandName);
+                    tasker.callTask(taskName, vars);
+                    tasker.log("Comando enviado: " + commandName + " -&gt; " + taskName);
+
+                } catch (Exception e) {
+                    tasker.log("Erro modulo comando: " + e.toString());
+                }
+            }
+        };
+        logics.put(moduleId, consumer);
+    }
+}
+tasker.setJavaVariable("accessibilityLogics", logics);
+
+/* Assina o stream de eventos de acessibilidade — despachante genérico. */
+stopSignal = CompletableSubject.create();
+tasker.setJavaVariable("stopAccessibilityMonitor", stopSignal);
+
+events = tasker.getAccessibilityEvents();
+disposable = events.subscribe(new Consumer() {
+    accept(Object eventObject) {
+        rawVar = tasker.getJavaVariable("accessibilityLogics");
+        if (rawVar == null || rawVar == void) return;
+        currentLogics = (Map) rawVar;
+        if (currentLogics.isEmpty()) return;
+        snapshot = currentLogics.values().toArray();
+        for (i = 0; i &lt; snapshot.length; i++) {
+            try {
+                mod = (Consumer) snapshot[i];
+                mod.accept(eventObject);
+            } catch (Exception e) {
+                tasker.log("Erro em modulo: " + e.toString());
+            }
+        }
+    }
+}, new Consumer() {
+    accept(Object errorObject) {
+        tasker.setJavaVariable("stopAccessibilityMonitor", null);
+    }
+});
+
+tasker.setJavaVariable("accessibilityMonitorDisposable", disposable);
+
+cleanupAction = new Action() {
+    run() {
+        globalDisp = tasker.getJavaVariable("accessibilityMonitorDisposable");
+        if (globalDisp != null &amp;&amp; globalDisp != void) {
+            d = (Disposable) globalDisp;
+            if (!d.isDisposed()) d.dispose();
+        }
+        tasker.setJavaVariable("stopAccessibilityMonitor", null);
+        tasker.setJavaVariable("accessibilityMonitorDisposable", null);
+    }
+};
+stopSignal.subscribe(cleanupAction);
+
+result = new JSONObject();
+result.put("ok", true);
+result.put("monitorActive", true);
+result.put("message", "Monitor iniciado");
+return result.toString();</Str>
+			<Str sr="arg1" ve="3">%jc_result</Str>
+			<Int sr="arg2" val="0"/>
+		</Action>
+		<Action sr="act5" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>toggle_module</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act6" ve="7">
+			<code>474</code>
+			<Str sr="arg0" ve="3">import org.json.JSONObject;
+import java.io.File;
+import java.io.FileWriter;
+import com.joaomgcd.taskerm.action.java.JavaCodeException;
+
+CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
+rawCfg = tasker.getJavaVariable("wmModulesConfig");
+if (rawCfg == null || rawCfg == void) throw new JavaCodeException("Configuração não carregada.");
+cfgRoot = (JSONObject) rawCfg;
+
+payload = new JSONObject(tasker.getVariable("par2"));
+moduleId = payload.getString("id");
+modulesObj = cfgRoot.getJSONObject("modules");
+if (!modulesObj.has(moduleId)) throw new JavaCodeException("Módulo não encontrado.");
+modulesObj.getJSONObject(moduleId).put("enabled", payload.getBoolean("enabled"));
+
+writer = new FileWriter(new File(CONFIG_PATH), false);
+writer.write(cfgRoot.toString(2));
+writer.close();
+
+monStatus = tasker.getJavaVariable("stopAccessibilityMonitor");
+result = new JSONObject();
+result.put("ok", true);
+result.put("needsRestart", monStatus != null &amp;&amp; monStatus != void);
+result.put("message", "Módulo atualizado");
+return result.toString();</Str>
+			<Str sr="arg1" ve="3">%jc_result</Str>
+			<Int sr="arg2" val="0"/>
+		</Action>
+		<Action sr="act7" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>update_module_config</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act8" ve="7">
+			<code>474</code>
+			<Str sr="arg0" ve="3">import org.json.JSONObject;
+import java.io.File;
+import java.io.FileWriter;
+import com.joaomgcd.taskerm.action.java.JavaCodeException;
+
+CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
+rawCfg = tasker.getJavaVariable("wmModulesConfig");
+if (rawCfg == null || rawCfg == void) throw new JavaCodeException("Configuração não carregada.");
+cfgRoot = (JSONObject) rawCfg;
+
+payload = new JSONObject(tasker.getVariable("par2"));
+moduleId = payload.getString("moduleId");
+modulesObj = cfgRoot.getJSONObject("modules");
+if (!modulesObj.has(moduleId)) throw new JavaCodeException("Módulo não encontrado.");
+moduleObj = modulesObj.getJSONObject(moduleId);
+
+if (payload.has("displayName")) moduleObj.put("displayName", payload.getString("displayName"));
+
+engine = moduleObj.getString("engine");
+if (engine.equals("command") &amp;&amp; payload.has("config")) {
+    incoming = payload.getJSONObject("config");
+    cfgObj = moduleObj.has("config") ? moduleObj.getJSONObject("config") : new JSONObject();
+    if (incoming.has("prefix")) cfgObj.put("prefix", incoming.getString("prefix"));
+    if (incoming.has("taskName")) cfgObj.put("taskName", incoming.getString("taskName"));
+    if (incoming.has("restrictToKnown")) cfgObj.put("restrictToKnown", incoming.getBoolean("restrictToKnown"));
+    moduleObj.put("config", cfgObj);
+}
+if (engine.equals("expander") &amp;&amp; payload.has("config")) {
+    incoming = payload.getJSONObject("config");
+    cfgObj = moduleObj.has("config") ? moduleObj.getJSONObject("config") : new JSONObject();
+    if (incoming.has("apiKey")) cfgObj.put("apiKey", incoming.getString("apiKey"));
+    if (incoming.has("model")) cfgObj.put("model", incoming.getString("model"));
+    if (incoming.has("systemInstructions")) cfgObj.put("systemInstructions", incoming.getString("systemInstructions"));
+    moduleObj.put("config", cfgObj);
+}
+
+writer = new FileWriter(new File(CONFIG_PATH), false);
+writer.write(cfgRoot.toString(2));
+writer.close();
+
+result = new JSONObject();
+result.put("ok", true);
+result.put("needsRestart", false);
+result.put("message", "Configuração atualizada");
+return result.toString();</Str>
+			<Str sr="arg1" ve="3">%jc_result</Str>
+			<Int sr="arg2" val="0"/>
+		</Action>
+		<Action sr="act9" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>add_trigger</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+	</Task>
+	<Task sr="task2017">
+		<cdate>1745400000000</cdate>
+		<edate>1785593921091</edate>
+		<id>2017</id>
+		<pri>100</pri>
+		<Action sr="act0" ve="7">
+			<code>130</code>
+			<on>false</on>
+			<Str sr="arg0" ve="3">TK_ModuleManager</Str>
+			<Int sr="arg1" val="10"/>
+			<Int sr="arg10" val="0"/>
+			<Str sr="arg2" ve="3">toggle_monitor</Str>
+			<Str sr="arg3" ve="3"/>
+			<Str sr="arg4" ve="3"/>
+			<Int sr="arg5" val="0"/>
+			<Int sr="arg6" val="0"/>
+			<Str sr="arg7" ve="3"/>
+			<Int sr="arg8" val="0"/>
+			<Int sr="arg9" val="0"/>
+		</Action>
+	</Task>
+	<Task sr="task2019">
+		<cdate>1745400000000</cdate>
+		<edate>1785594806861</edate>
+		<id>2019</id>
+		<nme>TK_CommandRouter</nme>
+		<pri>1000</pri>
+		<Action sr="act0" ve="7">
+			<code>37</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>flash</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act1" ve="7">
+			<code>511</code>
+			<Int sr="arg0" val="2"/>
+			<Str sr="arg1" ve="3"/>
+		</Action>
+		<Action sr="act10" ve="7">
+			<code>20</code>
+			<App sr="arg0">
+				<appClass>com.foxdebug.acode.MainActivity</appClass>
+				<appPkg>com.foxdebug.acode</appPkg>
+				<label>Acode</label>
+			</App>
+			<Str sr="arg1" ve="3"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+		</Action>
+		<Action sr="act11" ve="7">
+			<code>43</code>
+		</Action>
+		<Action sr="act12" ve="7">
+			<code>548</code>
+			<Str sr="arg0" ve="3">Comando desconhecido: %par1</Str>
+			<Int sr="arg1" val="0"/>
+			<Str sr="arg10" ve="3">0</Str>
+			<Int sr="arg11" val="1"/>
+			<Int sr="arg12" val="0"/>
+			<Str sr="arg13" ve="3"/>
+			<Int sr="arg14" val="0"/>
+			<Str sr="arg15" ve="3"/>
+			<Int sr="arg2" val="1"/>
+			<Str sr="arg3" ve="3"/>
+			<Str sr="arg4" ve="3"/>
+			<Str sr="arg5" ve="3"/>
+			<Str sr="arg6" ve="3"/>
+			<Str sr="arg7" ve="3"/>
+			<Str sr="arg8" ve="3"/>
+			<Int sr="arg9" val="1"/>
+		</Action>
+		<Action sr="act13" ve="7">
+			<code>38</code>
+		</Action>
+		<Action sr="act14" ve="7">
+			<code>548</code>
+			<Str sr="arg0" ve="3">Comando executado: %par1</Str>
+			<Int sr="arg1" val="0"/>
+			<Str sr="arg10" ve="3"/>
+			<Int sr="arg11" val="1"/>
+			<Int sr="arg12" val="0"/>
+			<Str sr="arg13" ve="3"/>
+			<Int sr="arg14" val="0"/>
+			<Str sr="arg15" ve="3"/>
+			<Int sr="arg2" val="1"/>
+			<Str sr="arg3" ve="3"/>
+			<Str sr="arg4" ve="3"/>
+			<Str sr="arg5" ve="3"/>
+			<Str sr="arg6" ve="3"/>
+			<Str sr="arg7" ve="3"/>
+			<Str sr="arg8" ve="3"/>
+			<Int sr="arg9" val="1"/>
+		</Action>
+		<Action sr="act2" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>kill</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act3" ve="7">
+			<code>335</code>
+			<Bundle sr="arg0">
+				<Vals sr="val">
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%app_icon
+Icon
+Icon for the app&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;%app_name
+Name
+Name of the App&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES1&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&gt;%app_package
+Package
+Unique package name for the app&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES2&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+				</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3"/>
+			<Str sr="arg2" ve="3"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+		</Action>
+		<Action sr="act4" ve="7">
+			<code>18</code>
+			<App sr="arg0">
+				<appClass></appClass>
+				<appPkg>%app_package</appPkg>
+				<label>%app_package</label>
+			</App>
+			<Int sr="arg1" val="0"/>
+		</Action>
+		<Action sr="act5" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>wifi</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act6" ve="7">
+			<code>341</code>
+			<Int sr="arg0" val="0"/>
+			<Str sr="arg1" ve="3"/>
+			<Str sr="arg2" ve="3">%type</Str>
+		</Action>
+		<Action sr="act7" ve="7">
+			<code>375</code>
+			<Bundle sr="arg0">
+				<Vals sr="val">
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%aw_output
+Output
+Output resulting from the command. May be empty.&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+				</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">svc wifi enable</Str>
+			<Str sr="arg2" ve="3"/>
+			<Str sr="arg3" ve="3"/>
+			<Int sr="arg4" val="10"/>
+			<Int sr="arg5" val="0"/>
+			<Str sr="arg6" ve="3"/>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%type</lhs>
+					<op>3</op>
+					<rhs>wifi</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act8" ve="7">
+			<code>375</code>
+			<Bundle sr="arg0">
+				<Vals sr="val">
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""&gt;&lt;_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;%aw_output
+Output
+Output resulting from the command. May be empty.&lt;/_array_net.dinglisch.android.tasker.RELEVANT_VARIABLES0&gt;&lt;/StringArray&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+				</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">svc wifi disable</Str>
+			<Str sr="arg2" ve="3"/>
+			<Str sr="arg3" ve="3"/>
+			<Int sr="arg4" val="10"/>
+			<Int sr="arg5" val="0"/>
+			<Str sr="arg6" ve="3"/>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%type</lhs>
+					<op>2</op>
+					<rhs>wifi</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act9" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>acode</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+	</Task>
+	<Task sr="task2021">
+		<cdate>1785555576149</cdate>
+		<edate>1785555576149</edate>
+		<id>2021</id>
+		<pri>102</pri>
+		<Action sr="act0" ve="7">
+			<code>49</code>
+			<Str sr="arg0" ve="3">REACTOR UI</Str>
+		</Action>
+	</Task>
+	<Task sr="task2022">
+		<cdate>1785555608857</cdate>
+		<edate>1785587414368</edate>
+		<id>2022</id>
+		<nme>RC 01 - MAIN</nme>
+		<pri>100</pri>
+		<Action sr="act0" ve="7">
+			<code>47</code>
+			<on>false</on>
+			<Str sr="arg0" ve="3">REACTOR UI</Str>
+			<Int sr="arg1" val="10"/>
+			<Int sr="arg10" val="1"/>
+			<Int sr="arg2" val="100"/>
+			<Int sr="arg3" val="100"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="0"/>
+			<Int sr="arg6" val="1"/>
+			<Int sr="arg7" val="1"/>
+			<Int sr="arg8" val="1"/>
+			<Int sr="arg9" val="1"/>
+		</Action>
+		<Action sr="act1" ve="7">
+			<code>479</code>
+			<Bundle sr="arg0">
+				<Vals sr="val">
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""/&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+				</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">REACTOR</Str>
+			<Str sr="arg10" ve="3"/>
+			<Str sr="arg11" ve="3"/>
+			<Int sr="arg12" val="0"/>
+			<Int sr="arg13" val="0"/>
+			<Int sr="arg14" val="0"/>
+			<Str sr="arg15" ve="3"/>
+			<Int sr="arg16" val="1"/>
+			<Str sr="arg2" ve="3"/>
+			<Str sr="arg3" ve="3">Fullscreen</Str>
+			<Str sr="arg4" ve="3"/>
+			<Str sr="arg5" ve="3"/>
+			<Str sr="arg6" ve="3"/>
+			<Str sr="arg7" ve="3"/>
+			<Int sr="arg8" val="1"/>
+			<Str sr="arg9" ve="3"/>
+		</Action>
+	</Task>
+</TaskerData>
