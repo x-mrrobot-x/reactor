@@ -14,686 +14,1031 @@
     <title>Reactor</title>
     <style>
       :root {
-        --bg: #0b0d12;
-        --surface: #12151c;
-        --surface-2: #171b24;
-        --surface-3: #1e2330;
-        --border: #232838;
-        --border-soft: #1a1e28;
-        --text: #e7e9ee;
-        --text-dim: #8b93a6;
-        --text-faint: #545c6e;
-        --accent: #e8a33d;
-        --accent-dim: #6b4e22;
-        --accent-soft: rgba(232, 163, 61, 0.12);
-        --ok: #4fbf82;
-        --danger: #e2584a;
-        --mono:
-          ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono",
-          monospace;
-        --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      html,
-      body {
-        margin: 0;
-        padding: 0;
-        background: var(--bg);
-        color: var(--text);
-        font-family: var(--sans);
-        -webkit-tap-highlight-color: transparent;
-      }
-      body {
-        padding-bottom: 90px;
-      }
-      button {
-        font-family: inherit;
-        cursor: pointer;
-        border: 0;
-        background: none;
-        color: inherit;
-        -webkit-tap-highlight-color: transparent;
-      }
-      :focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-      }
+  --bg: #0b0d12;
+  --surface: #12151c;
+  --surface-2: #171b24;
+  --surface-3: #1e2330;
+  --border: #232838;
+  --border-soft: #1a1e28;
+  --text: #e7e9ee;
+  --text-dim: #8b93a6;
+  --text-faint: #545c6e;
+  --accent: #e8a33d;
+  --accent-dim: #6b4e22;
+  --accent-soft: rgba(232, 163, 61, 0.12);
+  --ok: #4fbf82;
+  --danger: #e2584a;
+  --mono:
+    ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+:root[data-theme="light"] {
+  --bg: #f3f1ea;
+  --surface: #ffffff;
+  --surface-2: #f2f0e7;
+  --surface-3: #e8e4d6;
+  --border: #ddd7c4;
+  --border-soft: #e6e1d1;
+  --text: #201d16;
+  --text-dim: #6c6656;
+  --text-faint: #9d9683;
+  --accent: #a86a1a;
+  --accent-dim: #ecd7ac;
+  --accent-soft: rgba(168, 106, 26, 0.12);
+  --ok: #2f8f5b;
+  --danger: #bb3d2c;
+}
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+body {
+  padding-bottom: 90px;
+}
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: 0;
+  background: none;
+  color: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
-      header {
-        position: sticky;
-        top: 0;
-        z-index: 10;
-        overflow: hidden;
-        background: linear-gradient(
-          180deg,
-          var(--surface-2) 0%,
-          var(--bg) 100%
-        );
-        border-bottom: 1px solid var(--border);
-        padding: 18px 16px 14px;
-      }
-      header::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        opacity: 0.05;
-        background-image:
-          linear-gradient(var(--text-faint) 1px, transparent 1px),
-          linear-gradient(90deg, var(--text-faint) 1px, transparent 1px);
-        background-size: 22px 22px;
-        pointer-events: none;
-      }
-      .header-inner {
-        position: relative;
-        z-index: 1;
-      }
-      .brand {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .brand-mark {
-        color: var(--accent);
-        display: flex;
-        flex-shrink: 0;
-      }
-      .brand-word {
-        font-family: var(--mono);
-        font-size: 19px;
-        font-weight: 700;
-        letter-spacing: 0.09em;
-      }
-      .tagline {
-        font-size: 12px;
-        color: var(--text-dim);
-        margin: 6px 0 0;
-        line-height: 1.45;
-        max-width: 38ch;
-      }
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--surface-2) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 18px 16px 14px;
+}
+header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.05;
+  background-image:
+    linear-gradient(var(--text-faint) 1px, transparent 1px),
+    linear-gradient(90deg, var(--text-faint) 1px, transparent 1px);
+  background-size: 22px 22px;
+  pointer-events: none;
+}
+.header-inner {
+  position: relative;
+  z-index: 1;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand-mark {
+  color: var(--accent);
+  display: flex;
+  padding: 6px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.logo-img {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+}
+.brand-word {
+  font-family: var(--mono);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+}
+.tagline {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 6px 0 0;
+  line-height: 1.45;
+  max-width: 38ch;
+}
 
-      .power {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        background: var(--surface-2);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 11px 14px;
-        margin-top: 14px;
-      }
-      .led {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: var(--text-faint);
-        flex-shrink: 0;
-        transition: background 0.2s;
-      }
-      .led.on {
-        background: var(--ok);
-        box-shadow: 0 0 8px 1px rgba(79, 191, 130, 0.55);
-        animation: ledPulse 2.4s ease-in-out infinite;
-      }
-      .led.off {
-        background: var(--danger);
-        box-shadow: 0 0 8px 1px rgba(226, 88, 74, 0.3);
-      }
-      @keyframes ledPulse {
-        0%,
-        100% {
-          box-shadow: 0 0 8px 1px rgba(79, 191, 130, 0.5);
-        }
-        50% {
-          box-shadow: 0 0 13px 3px rgba(79, 191, 130, 0.75);
-        }
-      }
-      .power-info {
-        flex: 1;
-        min-width: 0;
-      }
-      .power-info b {
-        display: block;
-        font-size: 13.5px;
-        font-weight: 600;
-      }
-      .power-info span {
-        font-size: 11px;
-        color: var(--text-dim);
-        font-family: var(--mono);
-        letter-spacing: 0.03em;
-      }
+.power {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 11px 14px;
+  margin-top: 14px;
+}
+.led {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.led.on {
+  background: var(--ok);
+  box-shadow: 0 0 8px 1px rgba(79, 191, 130, 0.55);
+  animation: ledPulse 2.4s ease-in-out infinite;
+}
+.led.off {
+  background: var(--danger);
+  box-shadow: 0 0 8px 1px rgba(226, 88, 74, 0.3);
+}
+.led.restarting {
+  background: var(--accent);
+  box-shadow: 0 0 8px 1px rgba(232, 163, 61, 0.45);
+  animation: ledPulseAccent 0.9s ease-in-out infinite;
+}
+@keyframes ledPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 8px 1px rgba(79, 191, 130, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 13px 3px rgba(79, 191, 130, 0.75);
+  }
+}
+@keyframes ledPulseAccent {
+  0%,
+  100% {
+    box-shadow: 0 0 8px 1px rgba(232, 163, 61, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 13px 3px rgba(232, 163, 61, 0.8);
+  }
+}
+.power-info {
+  flex: 1;
+  min-width: 0;
+}
+.power-info b {
+  display: block;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.power-info span {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  letter-spacing: 0.03em;
+}
 
-      .switch {
-        position: relative;
-        width: 46px;
-        height: 26px;
-        flex-shrink: 0;
-      }
-      .switch.sm {
-        width: 38px;
-        height: 22px;
-      }
-      .switch input {
-        position: absolute;
-        opacity: 0;
-        inset: 0;
-        margin: 0;
-        cursor: pointer;
-        z-index: 2;
-      }
-      .switch .track {
-        position: absolute;
-        inset: 0;
-        background: #242a38;
-        border-radius: 14px;
-        border: 1px solid var(--border);
-        transition: background 0.18s;
-      }
-      .switch .knob {
-        position: absolute;
-        top: 2px;
-        left: 2px;
-        width: 20px;
-        height: 20px;
-        border-radius: 50%;
-        background: #7a8194;
-        transition:
-          transform 0.18s,
-          background 0.18s;
-      }
-      .switch.sm .knob {
-        width: 16px;
-        height: 16px;
-      }
-      .switch input:checked + .track {
-        background: var(--accent-dim);
-      }
-      .switch input:checked + .track + .knob {
-        transform: translateX(20px);
-        background: var(--accent);
-      }
-      .switch.sm input:checked + .track + .knob {
-        transform: translateX(16px);
-      }
+.switch {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  flex-shrink: 0;
+}
+.switch.sm {
+  width: 38px;
+  height: 22px;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+.switch input:disabled {
+  cursor: not-allowed;
+}
+.switch input:disabled + .track,
+.switch input:disabled + .track + .knob {
+  opacity: 0.55;
+}
+.switch .track {
+  position: absolute;
+  inset: 0;
+  background: #242a38;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  transition: background 0.18s;
+}
+:root[data-theme="light"] .switch .track {
+  background: #e2ddcc;
+}
+.switch .knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #7a8194;
+  transition:
+    transform 0.18s,
+    background 0.18s;
+}
+.switch.sm .knob {
+  width: 16px;
+  height: 16px;
+}
+.switch input:checked + .track {
+  background: var(--accent-dim);
+}
+.switch input:checked + .track + .knob {
+  transform: translateX(20px);
+  background: var(--accent);
+}
+.switch.sm input:checked + .track + .knob {
+  transform: translateX(16px);
+}
 
-      #banner {
-        display: none;
-        margin: 12px 16px 0;
-        background: var(--accent-soft);
-        border: 1px solid var(--accent-dim);
-        border-radius: 10px;
-        padding: 10px 12px;
-        font-size: 12.5px;
-        color: var(--text-dim);
-        align-items: center;
-        gap: 10px;
-      }
-      #banner button {
-        background: var(--accent);
-        color: #1a1408;
-        font-family: var(--mono);
-        font-weight: 700;
-        font-size: 11.5px;
-        padding: 6px 10px;
-        border-radius: 7px;
-        flex-shrink: 0;
-      }
+.tabs {
+  display: flex;
+  gap: 6px;
+  margin: 14px 16px 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 4px;
+}
+.tab {
+  flex: 1;
+  padding: 9px 6px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.tab.active {
+  background: var(--surface-3);
+  color: var(--text);
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
 
-      .tabs {
-        display: flex;
-        gap: 6px;
-        margin: 14px 16px 4px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 4px;
-      }
-      .tab {
-        flex: 1;
-        padding: 9px 10px;
-        border-radius: 9px;
-        font-size: 12.5px;
-        font-weight: 600;
-        color: var(--text-dim);
-        transition:
-          background 0.15s,
-          color 0.15s;
-      }
-      .tab.active {
-        background: var(--surface-3);
-        color: var(--text);
-        box-shadow: inset 0 -2px 0 var(--accent);
-      }
+main {
+  padding: 4px 16px 0;
+}
 
-      main {
-        padding: 4px 16px 0;
-      }
+.page-head {
+  margin: 16px 2px 16px;
+}
+.page-head-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.page-head-top h2 {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.page-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.btn-header-add {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid var(--accent-dim);
+  border-radius: 8px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11.5px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.btn-header-add:active {
+  background: var(--accent-dim);
+  color: #1a1408;
+}
+.page-stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 9px 9px 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.page-stats-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+.page-stats-info .count {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chip {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+  border-radius: 20px;
+  border: 1px solid;
+  font-family: var(--sans);
+  font-weight: 700;
+}
+.chip.ok {
+  color: var(--ok);
+  border-color: rgba(79, 191, 130, 0.35);
+  background: rgba(79, 191, 130, 0.08);
+}
 
-      .page-head {
-        margin: 16px 2px 16px;
-      }
-      .page-head-top {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-      }
-      .page-head-top h2 {
-        font-family: var(--mono);
-        font-size: 16px;
-        font-weight: 600;
-        letter-spacing: -0.01em;
-        margin: 0;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .page-head-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-shrink: 0;
-      }
-      .btn-header-add {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        padding: 6px 10px;
-        border: 1px solid var(--accent-dim);
-        border-radius: 8px;
-        background: var(--accent-soft);
-        color: var(--accent);
-        font-size: 11.5px;
-        font-weight: 700;
-        flex-shrink: 0;
-      }
-      .btn-header-add:active {
-        background: var(--accent-dim);
-        color: #1a1408;
-      }
-      .page-stats {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 10px;
-        margin-top: 10px;
-        padding: 9px 9px 9px 12px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 10px;
-      }
-      .page-stats-info {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        min-width: 0;
-        font-family: var(--mono);
-        font-size: 11.5px;
-        color: var(--text-dim);
-      }
-      .page-stats-info .count {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .chip {
-        font-size: 9.5px;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        padding: 2px 7px;
-        border-radius: 20px;
-        border: 1px solid;
-        font-family: var(--sans);
-        font-weight: 700;
-      }
-      .chip.ok {
-        color: var(--ok);
-        border-color: rgba(79, 191, 130, 0.35);
-        background: rgba(79, 191, 130, 0.08);
-      }
+.section-label,
+.editor-section-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  margin: 0 2px 8px;
+}
+.editor-section-label {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.editor-section-label .n {
+  color: var(--accent);
+}
 
-      .section-label {
-        font-family: var(--mono);
-        font-size: 11px;
-        letter-spacing: 0.1em;
-        color: var(--text-faint);
-        text-transform: uppercase;
-        margin: 0 2px 8px;
-      }
+.field-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.field-row label {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  width: 84px;
+  flex-shrink: 0;
+}
+.field-row input[type="text"],
+.field-row input[type="number"] {
+  flex: 1;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: var(--mono);
+  min-width: 0;
+}
+.field-row select {
+  flex: 1;
+}
+.field-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+.field-block {
+  margin-bottom: 12px;
+}
+.field-block .block-label {
+  display: block;
+  font-size: 11.5px;
+  color: var(--text-dim);
+  margin-bottom: 5px;
+}
+.btn {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 8px 14px;
+}
+.btn-accent {
+  background: var(--accent);
+  color: #1a1408;
+}
+.btn-ghost {
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
 
-      .field-row {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-      .field-row label {
-        font-size: 11.5px;
-        color: var(--text-dim);
-        width: 84px;
-        flex-shrink: 0;
-      }
-      .field-row input[type="text"] {
-        flex: 1;
-        background: var(--surface-2);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        color: var(--text);
-        padding: 8px 10px;
-        font-size: 13px;
-        font-family: var(--mono);
-        min-width: 0;
-      }
-      .field-row input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
-        accent-color: var(--accent);
-      }
-      .field-block {
-        margin-bottom: 12px;
-      }
-      .field-block .block-label {
-        display: block;
-        font-size: 11.5px;
-        color: var(--text-dim);
-        margin-bottom: 5px;
-      }
-      .save-line {
-        display: flex;
-        justify-content: flex-end;
-        margin-top: 4px;
-        padding-bottom: 14px;
-      }
-      .btn {
-        font-family: var(--sans);
-        font-size: 12.5px;
-        font-weight: 600;
-        border-radius: 8px;
-        padding: 8px 14px;
-      }
-      .btn-accent {
-        background: var(--accent);
-        color: #1a1408;
-      }
-      .btn-ghost {
-        border: 1px solid var(--border);
-        color: var(--text-dim);
-      }
+.section {
+  margin-bottom: 20px;
+}
+.empty-hint {
+  font-size: 12px;
+  color: var(--text-faint);
+  font-style: italic;
+  padding: 4px 2px;
+}
 
-      .section {
-        margin-bottom: 20px;
-      }
-      .trigger-list {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        overflow: hidden;
-      }
-      .trigger-row {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        padding: 12px;
-        border-bottom: 1px solid var(--border-soft);
-      }
-      .trigger-row:last-child {
-        border-bottom: none;
-      }
-      .trigger-row.off {
-        opacity: 0.5;
-      }
-      .trigger-dot {
-        width: 9px;
-        height: 9px;
-        border-radius: 50%;
-        background: var(--ok);
-        margin-top: 5px;
-        flex-shrink: 0;
-        cursor: pointer;
-      }
-      .trigger-row.off .trigger-dot {
-        background: var(--text-faint);
-      }
-      .trigger-info {
-        flex: 1;
-        min-width: 0;
-      }
-      .trigger-top {
-        display: flex;
-        align-items: baseline;
-        gap: 8px;
-      }
-      .trigger-token {
-        font-family: var(--mono);
-        font-size: 13.5px;
-        font-weight: 600;
-      }
-      .trigger-kind {
-        font-family: var(--mono);
-        font-size: 10px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--text-faint);
-        flex-shrink: 0;
-      }
-      .trigger-value {
-        margin-top: 3px;
-        font-size: 12px;
-        color: var(--text-dim);
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        word-break: break-word;
-      }
-      .trigger-actions {
-        display: flex;
-        gap: 5px;
-        flex-shrink: 0;
-      }
-      .icon-btn {
-        width: 28px;
-        height: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--surface-2);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        color: var(--text-dim);
-        flex-shrink: 0;
-      }
-      .icon-btn.danger:active {
-        color: var(--danger);
-        border-color: rgba(226, 88, 74, 0.4);
-      }
+select,
+textarea {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: var(--sans);
+}
+textarea {
+  min-height: 56px;
+  resize: vertical;
+}
+.hint {
+  font-size: 10.5px;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
 
-      .empty-hint {
-        font-size: 12px;
-        color: var(--text-faint);
-        font-style: italic;
-        padding: 4px 2px;
-      }
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.icon-btn.danger:active {
+  color: var(--danger);
+  border-color: rgba(226, 88, 74, 0.4);
+}
+.icon-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
 
-      select,
-      textarea {
-        width: 100%;
-        background: var(--surface-2);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        color: var(--text);
-        padding: 8px 10px;
-        font-size: 13px;
-        font-family: var(--sans);
-      }
-      textarea {
-        min-height: 56px;
-        resize: vertical;
-      }
-      .hint {
-        font-size: 10.5px;
-        color: var(--text-faint);
-        margin-top: 2px;
-      }
+/* ---- Dashboard ---- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 12px;
+}
+.stat-value {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+.stat-label {
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+.flow-diagram {
+  margin-bottom: 18px;
+}
+.flow-track {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 10px;
+  overflow-x: auto;
+}
+.flow-node {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 7px 10px;
+  white-space: nowrap;
+}
+.flow-arrow {
+  flex-shrink: 0;
+  color: var(--text-faint);
+  font-size: 13px;
+}
+.flow-track.live .flow-node {
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  background: var(--accent-soft);
+}
+.flow-track.live .flow-arrow {
+  color: var(--accent);
+}
+.power-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 18px;
+}
+.power-card-label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.power-card-label b {
+  font-size: 14px;
+}
+.power-card-label span {
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+.power-toggle-btn {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: 10px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.power-toggle-btn.on {
+  background: var(--accent);
+  color: #1a1408;
+  border-color: var(--accent);
+}
+.power-toggle-btn.restarting {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent-dim);
+  cursor: not-allowed;
+}
+.power-toggle-btn:disabled {
+  cursor: not-allowed;
+}
 
-      .dialog-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 60;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-        background: rgba(6, 7, 10, 0.6);
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-        animation: overlayIn 0.16s ease-out;
-      }
-      .dialog {
-        width: min(420px, 100%);
-        max-height: 84vh;
-        overflow-y: auto;
-        background: var(--surface-2);
-        border: 1px solid var(--border);
-        border-radius: 16px;
-        padding: 18px;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        animation: dialogIn 0.16s ease-out;
-      }
-      @keyframes overlayIn {
-        from {
-          opacity: 0;
-        }
-        to {
-          opacity: 1;
-        }
-      }
-      @keyframes dialogIn {
-        from {
-          opacity: 0;
-          transform: translateY(8px) scale(0.98);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .led.on,
-        .dialog,
-        .dialog-overlay,
-        #toast .msg {
-          animation: none;
-        }
-      }
-      .dialog-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 14px;
-        gap: 10px;
-      }
-      .dialog-head b {
-        font-family: var(--mono);
-        font-size: 15px;
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      .dialog-close {
-        width: 26px;
-        height: 26px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--text-faint);
-        border-radius: 7px;
-        flex-shrink: 0;
-      }
-      .dialog-close:active {
-        background: var(--surface-3);
-      }
-      .dialog-foot {
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-        margin-top: 16px;
-      }
+/* ---- Regras ---- */
+.rule-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.rule-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.rule-row:last-child {
+  border-bottom: none;
+}
+.rule-row.off {
+  opacity: 0.5;
+}
+.rule-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ok);
+  margin-top: 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.rule-row.off .rule-dot {
+  background: var(--text-faint);
+}
+.rule-info {
+  flex: 1;
+  min-width: 0;
+}
+.rule-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.rule-name {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.provider-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-family: var(--mono);
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2px 8px 2px 6px;
+  flex-shrink: 0;
+}
+.provider-badge svg {
+  width: 11px;
+  height: 11px;
+}
+.rule-flow {
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--text-dim);
+  flex-wrap: wrap;
+}
+.flow-sep {
+  color: var(--text-faint);
+}
+.rule-actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
 
-      #toast {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: max(20px, env(safe-area-inset-bottom, 0px) + 12px);
-        z-index: 70;
-        display: none;
-        justify-content: center;
-        padding: 0 16px;
-        pointer-events: none;
-      }
-      #toast .msg {
-        display: inline-flex;
-        align-items: center;
-        gap: 9px;
-        max-width: 100%;
-        background: var(--surface-3);
-        border: 1px solid var(--border);
-        border-radius: 999px;
-        padding: 10px 16px;
-        font-size: 12.5px;
-        font-weight: 500;
-        color: var(--text);
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
-        pointer-events: auto;
-        animation: toastIn 0.18s ease-out;
-      }
-      #toast .msg .toast-dot {
-        width: 7px;
-        height: 7px;
-        border-radius: 50%;
-        background: var(--text-faint);
-        flex-shrink: 0;
-      }
-      #toast .msg .toast-text {
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      #toast .msg.err .toast-dot {
-        background: var(--danger);
-        box-shadow: 0 0 6px 1px rgba(226, 88, 74, 0.5);
-      }
-      #toast .msg.ok .toast-dot {
-        background: var(--ok);
-        box-shadow: 0 0 6px 1px rgba(79, 191, 130, 0.5);
-      }
-      @keyframes toastIn {
-        from {
-          opacity: 0;
-          transform: translateY(6px);
-        }
-        to {
-          opacity: 1;
-          transform: none;
-        }
-      }
+/* ---- Providers ---- */
+.provider-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.provider-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 12px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.provider-row:last-child {
+  border-bottom: none;
+}
+.provider-row.off {
+  opacity: 0.55;
+}
+.provider-icon {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--accent);
+}
+.provider-row.off .provider-icon {
+  color: var(--text-faint);
+}
+.provider-info {
+  flex: 1;
+  min-width: 0;
+}
+.provider-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.provider-name {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+.provider-desc {
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
 
-      #loading {
-        position: fixed;
-        inset: 0;
-        background: rgba(11, 13, 18, 0.6);
-        z-index: 50;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--mono);
-        font-size: 12px;
-        color: var(--text-dim);
-      }
+/* ---- Editor de Regra ---- */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(6, 7, 10, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  animation: overlayIn 0.16s ease-out;
+}
+.dialog {
+  width: min(420px, 100%);
+  max-height: 84vh;
+  overflow-y: auto;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: dialogIn 0.16s ease-out;
+}
+.dialog.wide {
+  width: min(480px, 100%);
+}
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes dialogIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .led.on,
+  .led.restarting,
+  .dialog,
+  .dialog-overlay,
+  #toast .msg {
+    animation: none;
+  }
+}
+.dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 10px;
+}
+.dialog-head b {
+  font-family: var(--mono);
+  font-size: 15px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dialog-close {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-faint);
+  border-radius: 7px;
+  flex-shrink: 0;
+}
+.dialog-close:active {
+  background: var(--surface-3);
+}
+.dialog-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+.editor-section {
+  margin-bottom: 18px;
+}
+.condition-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.condition-row select {
+  flex: 0 0 112px;
+}
+.condition-row input {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: var(--mono);
+}
+.condition-op-label {
+  flex: 0 0 112px;
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-family: var(--mono);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.action-card {
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 8px;
+}
+.action-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.action-card-head select {
+  flex: 1;
+  min-width: 120px;
+}
+.action-card-move {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.action-card-fields .field-row,
+.action-card-fields .field-block {
+  margin-bottom: 8px;
+}
+.action-card-fields .field-row:last-child,
+.action-card-fields .field-block:last-child {
+  margin-bottom: 0;
+}
+.action-card-fields .field-row label {
+  width: 68px;
+}
+.add-row-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--accent);
+  border: 1px dashed var(--accent-dim);
+  border-radius: 9px;
+  padding: 9px 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* ---- Config ---- */
+.settings-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+}
+.settings-card .field-row:last-child {
+  margin-bottom: 0;
+}
+.backup-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.backup-row .btn {
+  flex: 1;
+  min-width: 132px;
+  text-align: center;
+}
+.about-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-soft);
+  font-size: 12.5px;
+}
+.about-line:last-child {
+  border-bottom: none;
+}
+.about-label {
+  color: var(--text-dim);
+}
+.about-value {
+  font-family: var(--mono);
+  color: var(--text);
+}
+
+#toast {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: max(20px, env(safe-area-inset-bottom, 0px) + 12px);
+  z-index: 70;
+  display: none;
+  justify-content: center;
+  padding: 0 16px;
+  pointer-events: none;
+}
+#toast .msg {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  max-width: 100%;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  animation: toastIn 0.18s ease-out;
+}
+#toast .msg .toast-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex-shrink: 0;
+}
+#toast .msg .toast-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#toast .msg.err .toast-dot {
+  background: var(--danger);
+  box-shadow: 0 0 6px 1px rgba(226, 88, 74, 0.5);
+}
+#toast .msg.ok .toast-dot {
+  background: var(--ok);
+  box-shadow: 0 0 6px 1px rgba(79, 191, 130, 0.5);
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+#loading {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 13, 18, 0.6);
+  z-index: 50;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
     </style>
   </head>
   <body>
@@ -701,45 +1046,15 @@
       <div class="header-inner">
         <div class="brand">
           <span class="brand-mark">
-            <svg
-              viewBox="0 0 24 24"
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-            >
-              <ellipse cx="12" cy="12" rx="10" ry="4.2"></ellipse>
-              <ellipse
-                cx="12"
-                cy="12"
-                rx="10"
-                ry="4.2"
-                transform="rotate(60 12 12)"
-              ></ellipse>
-              <ellipse
-                cx="12"
-                cy="12"
-                rx="10"
-                ry="4.2"
-                transform="rotate(120 12 12)"
-              ></ellipse>
-              <circle
-                cx="12"
-                cy="12"
-                r="1.6"
-                fill="currentColor"
-                stroke="none"
-              ></circle>
-            </svg>
+            <img src="assets/logo.webp" alt="Logo Reactor" class="logo-img" />
           </span>
           <span class="brand-word">REACTOR</span>
         </div>
-        <p class="tagline">Automação por acessibilidade, direto no Tasker.</p>
+        <p class="tagline">Reaja a eventos do android em tempo real.</p>
         <div class="power">
           <div class="led off" id="masterLed"></div>
           <div class="power-info">
-            <b>Monitor de acessibilidade</b>
+            <b>Monitor do Reactor</b>
             <span id="masterState">PARADO</span>
           </div>
           <label class="switch">
@@ -750,14 +1065,6 @@
         </div>
       </div>
     </header>
-
-    <div id="banner">
-      <span
-        >Alguns módulos foram alterados e precisam reiniciar o monitor para
-        valer.</span
-      >
-      <button id="restartBtn">Reiniciar</button>
-    </div>
 
     <nav class="tabs" id="tabBar"></nav>
 
@@ -774,27 +1081,127 @@
     <script>
       "use strict";
 
-      const CONFIG_PATH =
-        "/storage/emulated/0/Tasker/ModuleManager/modules.json";
-      const TASK_NAME = "TK_ModuleManager";
+      const TASK_NAME = "TK_Reactor";
 
-      const TRIGGER_RULES = {
-        expander: {
-          pattern: /^@[a-z0-9_]+$/,
-          hint: "minúsculo, sem espaço, começando com '@'  (ex: @pix)"
+      // ---------------------------------------------------------------
+      // Dados / metadados do domínio (Providers, Events, Conditions, Actions)
+      // ---------------------------------------------------------------
+
+      const PROVIDERS_META = {
+        keyboard: {
+          name: "Keyboard",
+          description: "Eventos relacionados à digitação",
+          icon: "keyboard"
         },
-        command: {
-          pattern: /^[a-z0-9_-]+$/,
-          hint: "minúsculo, sem espaço, sem ':'  (ex: flash)"
+        app: {
+          name: "App",
+          description: "Eventos relacionados aos aplicativos",
+          icon: "app"
+        },
+        clipboard: {
+          name: "Clipboard",
+          description: "Monitoramento da área de transferência",
+          icon: "clipboard"
+        },
+        notification: {
+          name: "Notification",
+          description: "Eventos de notificações",
+          icon: "bell"
+        },
+        screen: {
+          name: "Screen",
+          description: "Monitoramento de texto na tela via Acessibilidade",
+          icon: "eye"
         }
       };
 
-      const KIND_LABEL = {
-        static: "texto",
-        translate: "tradução",
-        ai: "ia",
-        youtube: "youtube"
+      const EVENTS_META = {
+        typed_text: { label: "Texto digitado", provider: "keyboard" },
+        app_opened: { label: "Aplicativo aberto", provider: "app" },
+        clipboard_changed: {
+          label: "Clipboard alterado",
+          provider: "clipboard"
+        },
+        notification_received: {
+          label: "Notificação recebida",
+          provider: "notification"
+        },
+        screen_text_detected: {
+          label: "Texto apareceu na tela",
+          provider: "screen"
+        }
       };
+
+      const PROVIDER_EVENTS = {};
+      Object.keys(EVENTS_META).forEach(type => {
+        const providerId = EVENTS_META[type].provider;
+        if (!PROVIDER_EVENTS[providerId]) PROVIDER_EVENTS[providerId] = [];
+        PROVIDER_EVENTS[providerId].push(type);
+      });
+
+      const CONDITION_OPERATORS = {
+        match: "Igual a",
+        contains: "Contém",
+        starts_with: "Começa com",
+        ends_with: "Termina com",
+        regex: "Regex"
+      };
+
+      // Eventos cuja lista de operadores de condição é restrita.
+      // Texto Digitado só aceita "Termina com": é o único operador que faz
+      // sentido para um gatilho no fim de um campo que está sendo digitado
+      // em tempo real (não dá pra saber se o texto "contém" ou "é igual",
+      // já que ele ainda está sendo digitado).
+      const EVENT_ALLOWED_OPERATORS = {
+        typed_text: ["ends_with"]
+      };
+
+      // Eventos para os quais a regra é travada em exatamente 1 condição
+      // "Termina com" (não dá pra adicionar/remover condições).
+      const SINGLE_ENDS_WITH_EVENTS = ["typed_text"];
+
+      function allowedOperatorsForEvent(eventType) {
+        return (
+          EVENT_ALLOWED_OPERATORS[eventType] || Object.keys(CONDITION_OPERATORS)
+        );
+      }
+
+      function isSingleEndsWithEvent(eventType) {
+        return SINGLE_ENDS_WITH_EVENTS.indexOf(eventType) !== -1;
+      }
+
+      const ACTION_TYPES_META = {
+        text_replacer: { label: "Text Replacer", events: ["typed_text"] },
+        run_task: { label: "Executar Tarefa" },
+        open_app: { label: "Abrir App" },
+        ai: { label: "Processar com IA", events: ["typed_text"] },
+        translate: { label: "Traduzir", events: ["typed_text"] },
+        search: { label: "Pesquisar" },
+        open_url: { label: "Abrir URL" },
+        clipboard: { label: "Definir Clipboard" },
+        notification: { label: "Criar Notificação" },
+        click: { label: "Clicar na Tela" }
+      };
+
+      function allowedActionTypesForEvent(eventType) {
+        return Object.keys(ACTION_TYPES_META).filter(type => {
+          const meta = ACTION_TYPES_META[type];
+          return !meta.events || meta.events.indexOf(eventType) !== -1;
+        });
+      }
+
+      function actionApplicableToEvent(type, eventType) {
+        const meta = ACTION_TYPES_META[type];
+        if (!meta) return false;
+        return !meta.events || meta.events.indexOf(eventType) !== -1;
+      }
+
+      const SEARCH_ENGINES = [
+        ["google", "Google"],
+        ["bing", "Bing"],
+        ["duckduckgo", "DuckDuckGo"],
+        ["youtube", "YouTube"]
+      ];
 
       const LANG_OPTIONS = [
         ["en", "Inglês"],
@@ -804,7 +1211,12 @@
         ["it", "Italiano"],
         ["pt", "Português"]
       ];
-      const LANG_LABELS = Object.fromEntries(LANG_OPTIONS);
+
+      const GEMINI_MODEL_OPTIONS = [
+        ["gemini-2.5-flash", "Gemini 2.5 Flash"],
+        ["gemini-2.5-pro", "Gemini 2.5 Pro"],
+        ["gemini-2.0-flash", "Gemini 2.0 Flash"]
+      ];
 
       const ICONS = {
         edit: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
@@ -813,55 +1225,112 @@
         plus: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
         close:
           '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>',
-        settings:
-          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
+        copy: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>',
+        up: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>',
+        down: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg>',
+        keyboard:
+          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h12"/></svg>',
+        app: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+        clipboard:
+          '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6M9 15h6"/></svg>',
+        bell: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>',
+        eye: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>'
       };
 
       const DEFAULT_CONFIG = {
-        monitorEnabled: false,
-        modules: {
-          expander_default: {
-            displayName: "Expansor de Texto",
-            engine: "expander",
+        providers: {
+          keyboard: { enabled: true },
+          app: { enabled: true },
+          clipboard: { enabled: true },
+          notification: { enabled: false },
+          screen: { enabled: false }
+        },
+        rules: [
+          {
+            id: "rule_seed1",
             enabled: true,
-            config: {
-              apiKey: "",
-              model: "",
-              systemInstructions: ""
-            },
-            triggers: {
-              "pix:": {
-                enabled: true,
-                kind: "static",
-                value: "Chave PIX: 123.456.789-00"
-              },
-              "mail:": {
-                enabled: true,
-                kind: "static",
-                value: "john.smith@email.com"
-              },
-              "en:": { enabled: true, kind: "translate", lang: "en" },
-              "es:": { enabled: true, kind: "translate", lang: "es" },
-              "ia:": { enabled: true, kind: "ai", instruction: "" },
-              "yt:": { enabled: true, kind: "youtube" }
-            }
+            name: "Resposta rápida Pix",
+            provider: "keyboard",
+            event: { type: "typed_text" },
+            conditions: [{ operator: "ends_with", value: "@pix" }],
+            actions: [
+              {
+                type: "text_replacer",
+                config: { text: "Chave PIX: 123.456.789-00" }
+              }
+            ]
           },
-          command_default: {
-            displayName: "Executor de Comandos",
-            engine: "command",
+          {
+            id: "rule_seed2",
             enabled: true,
-            config: {
-              prefix: ">>",
-              taskName: "TK_CommandRouter",
-              restrictToKnown: false
-            },
-            triggers: {
-              flash: { enabled: true, description: "Liga/desliga a lanterna" },
-              wifi: { enabled: true, description: "Alterna o Wi-Fi" }
-            }
+            name: "Abrir link copiado",
+            provider: "clipboard",
+            event: { type: "clipboard_changed" },
+            conditions: [{ operator: "regex", value: "^https?://" }],
+            actions: [
+              { type: "run_task", config: { task: "TK_OpenClipboardLink" } }
+            ]
+          },
+          {
+            id: "rule_seed3",
+            enabled: false,
+            name: "Alerta de promoção",
+            provider: "notification",
+            event: { type: "notification_received" },
+            conditions: [{ operator: "contains", value: "promoção" }],
+            actions: [
+              { type: "run_task", config: { task: "TK_DismissNotification" } }
+            ]
           }
+        ],
+        settings: {
+          theme: "dark",
+          language: "pt",
+          gemini: { model: "gemini-2.5-flash", apiKey: "" }
         }
       };
+
+      // Providers que já existem na interface mas ainda não têm
+      // implementação correspondente no monitor (act4 da TK_Reactor).
+      // Enquanto isso, eles nunca podem ficar habilitados de verdade.
+      const UNIMPLEMENTED_PROVIDERS = ["clipboard", "screen"];
+
+      function isUnimplementedProvider(providerId) {
+        return UNIMPLEMENTED_PROVIDERS.indexOf(providerId) !== -1;
+      }
+
+      // Normaliza qualquer config vinda de fora (arquivo salvo no Tasker,
+      // import de backup, etc.) para o schema atual: garante que todo
+      // provider de PROVIDERS_META exista em `providers`, força os ainda
+      // não implementados para enabled:false e preenche rules/settings
+      // ausentes. Evita o crash de "Cannot set properties of undefined"
+      // quando o config salvo é mais antigo/incompleto que o app atual.
+      function normalizeConfig(config) {
+        const normalized = deepClone(config || {});
+        if (!normalized.providers || typeof normalized.providers !== "object") {
+          normalized.providers = {};
+        }
+        Object.keys(PROVIDERS_META).forEach(id => {
+          if (
+            !normalized.providers[id] ||
+            typeof normalized.providers[id] !== "object"
+          ) {
+            normalized.providers[id] = { enabled: false };
+          }
+          if (isUnimplementedProvider(id)) {
+            normalized.providers[id].enabled = false;
+          }
+        });
+        if (!Array.isArray(normalized.rules)) normalized.rules = [];
+        if (!normalized.settings || typeof normalized.settings !== "object") {
+          normalized.settings = deepClone(DEFAULT_CONFIG.settings);
+        }
+        return normalized;
+      }
+
+      // ---------------------------------------------------------------
+      // Helpers genéricos
+      // ---------------------------------------------------------------
 
       function safeParseJSON(text) {
         try {
@@ -894,28 +1363,91 @@
         return btn;
       }
 
+      function countLabel(count, singular, plural) {
+        return `${count} ${count === 1 ? singular : plural}`;
+      }
+
+      function defaultActionConfig(type) {
+        switch (type) {
+          case "text_replacer":
+            return { text: "" };
+          case "run_task":
+            return { task: "", par1: "", par2: "" };
+          case "open_app":
+            return { package: "" };
+          case "ai":
+            return { systemInstructions: "" };
+          case "translate":
+            return { language: "en" };
+          case "search":
+            return { engine: "google" };
+          case "open_url":
+            return { url: "" };
+          case "clipboard":
+            return { text: "" };
+          case "notification":
+            return { title: "", body: "" };
+          case "click":
+            return { x: 0, y: 0 };
+          default:
+            return {};
+        }
+      }
+
+      function emptyRule() {
+        return {
+          id: null,
+          enabled: true,
+          name: "",
+          provider: "keyboard",
+          event: { type: "typed_text" },
+          conditions: [],
+          actions: []
+        };
+      }
+
+      // ---------------------------------------------------------------
+      // Ambientes de execução (Tasker real / simulação no navegador)
+      // ---------------------------------------------------------------
+
       function createTaskerEnvironment() {
         function isAvailable() {
           return typeof Tasker !== "undefined";
         }
 
-        async function readFileText(path) {
+        // Export não depende mais da task: usa a ponte nativa do Scenes V2
+        // (Tasker.createDirectory / Tasker.writeFile) direto no JS, sem
+        // round-trip pra TK_Reactor. As outras ações (get_status,
+        // toggle_monitor, save_config) continuam indo pela task porque
+        // dependem de estado Java (reactorConfig / stopReactorMonitor) que
+        // só existe no lado do monitor, sem equivalente na ponte genérica.
+        async function exportConfigDirect(config) {
           try {
-            const result = await Tasker.runShell({ cmd: `cat "${path}"` });
-            const text =
-              result && result.stdout ? String(result.stdout).trim() : "";
-            return text.length > 0 ? text : null;
+            const dir = "/storage/emulated/0/Download";
+            await Tasker.createDirectory({ dir, createParents: true });
+            const fileName = `reactor-backup-${Date.now()}.json`;
+            await Tasker.writeFile({
+              path: `${dir}/${fileName}`,
+              text: JSON.stringify(config, null, 2),
+              append: false
+            });
+            return {
+              ok: true,
+              message: `Exportado para Download/${fileName}`
+            };
           } catch (error) {
-            return null;
+            return {
+              ok: false,
+              error: `Falha ao exportar: ${error.message}`
+            };
           }
         }
 
-        async function readConfig() {
-          const raw = await readFileText(CONFIG_PATH);
-          return raw ? safeParseJSON(raw) : null;
-        }
-
         async function runAction(action, payload) {
+          if (action === "export_config") {
+            return exportConfigDirect((payload || {}).config);
+          }
+
           const variables = {
             par1: action,
             par2: JSON.stringify(payload || {})
@@ -948,182 +1480,228 @@
           );
         }
 
-        return { isAvailable, readConfig, runAction };
+        return { isAvailable, runAction };
       }
 
-      function createWebEnvironment(defaultConfig) {
+      function createWebEnvironment() {
+        // Simulação mínima do "backend" Tasker: só persiste o que o app
+        // (fonte única da lógica de CRUD) manda salvar. Não conhece regras
+        // de negócio — só guarda/retorna config e alterna o monitor.
         let store = null;
         let monitorActive = false;
 
-        function ensureStore() {
-          if (!store) store = deepClone(defaultConfig);
-          return store;
-        }
-
-        function handleGetStatus(config) {
-          const activeModuleIds = Object.keys(config.modules).filter(
-            id => config.modules[id].enabled
-          );
-          return { ok: true, monitorActive, activeModuleIds, config };
-        }
-
-        function handleToggleMonitor() {
-          monitorActive = !monitorActive;
-          return {
-            ok: true,
-            monitorActive,
-            message: monitorActive ? "Monitor iniciado" : "Monitor parado"
-          };
-        }
-
-        function handleToggleModule(config, payload) {
-          config.modules[payload.id].enabled = payload.enabled;
-          return {
-            ok: true,
-            needsRestart: monitorActive,
-            message: "Módulo atualizado"
-          };
-        }
-
-        function handleUpdateModuleConfig(config, payload) {
-          const module = config.modules[payload.moduleId];
-          if (payload.displayName) module.displayName = payload.displayName;
-          if (payload.config) module.config = payload.config;
-          return {
-            ok: true,
-            needsRestart: false,
-            message: "Configuração atualizada"
-          };
-        }
-
-        function buildTriggerEntry(module, payload, previousEnabled) {
-          const entry = {
-            enabled: previousEnabled !== undefined ? previousEnabled : true
-          };
-          if (module.engine === "expander") {
-            entry.kind = payload.kind;
-            if (payload.kind === "static") entry.value = payload.value;
-            if (payload.kind === "translate") entry.lang = payload.lang;
-            if (payload.kind === "ai") entry.instruction = payload.instruction;
-          } else {
-            entry.description = payload.description;
-          }
-          return entry;
-        }
-
-        function handleAddTrigger(config, payload) {
-          const module = config.modules[payload.moduleId];
-          module.triggers[payload.trigger] = buildTriggerEntry(module, payload);
-          return {
-            ok: true,
-            needsRestart: false,
-            message: "Gatilho adicionado"
-          };
-        }
-
-        function handleUpdateTrigger(config, payload) {
-          const module = config.modules[payload.moduleId];
-          const previous = module.triggers[payload.originalTrigger];
-          const entry = buildTriggerEntry(
-            module,
-            payload,
-            previous ? previous.enabled : undefined
-          );
-          if (payload.originalTrigger !== payload.trigger) {
-            delete module.triggers[payload.originalTrigger];
-          }
-          module.triggers[payload.trigger] = entry;
-          return {
-            ok: true,
-            needsRestart: false,
-            message: "Gatilho atualizado"
-          };
-        }
-
-        function handleRemoveTrigger(config, payload) {
-          delete config.modules[payload.moduleId].triggers[payload.trigger];
-          return { ok: true, needsRestart: false, message: "Gatilho removido" };
-        }
-
-        function handleToggleTrigger(config, payload) {
-          config.modules[payload.moduleId].triggers[payload.trigger].enabled =
-            payload.enabled;
-          return {
-            ok: true,
-            needsRestart: false,
-            message: "Gatilho atualizado"
-          };
-        }
-
-        const handlers = {
-          get_status: (config, payload) => handleGetStatus(config, payload),
-          toggle_monitor: () => handleToggleMonitor(),
-          toggle_module: handleToggleModule,
-          update_module_config: handleUpdateModuleConfig,
-          add_trigger: handleAddTrigger,
-          update_trigger: handleUpdateTrigger,
-          remove_trigger: handleRemoveTrigger,
-          toggle_trigger: handleToggleTrigger
-        };
-
-        async function readConfig() {
-          return deepClone(ensureStore());
-        }
-
         async function runAction(action, payload) {
-          const config = ensureStore();
-          const handler = handlers[action];
-          if (!handler)
-            return { ok: false, error: `Ação desconhecida: ${action}` };
-          return handler(config, payload || {});
+          payload = payload || {};
+          switch (action) {
+            case "get_status":
+              return {
+                ok: true,
+                monitorActive,
+                config: store ? deepClone(store) : null
+              };
+
+            case "toggle_monitor":
+              monitorActive = !monitorActive;
+              return {
+                ok: true,
+                monitorActive,
+                message: monitorActive ? "Monitor iniciado" : "Monitor parado"
+              };
+
+            case "save_config":
+              store = deepClone(payload.config);
+              return {
+                ok: true,
+                monitorActive,
+                needsRestart: !!payload.providersChanged && monitorActive,
+                message: "Configuração salva"
+              };
+
+            case "export_config":
+              try {
+                const blob = new Blob(
+                  [JSON.stringify(payload.config, null, 2)],
+                  { type: "application/json" }
+                );
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "reactor.json";
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                setTimeout(() => URL.revokeObjectURL(url), 1000);
+                return {
+                  ok: true,
+                  monitorActive,
+                  message: "Configuração exportada"
+                };
+              } catch (error) {
+                return {
+                  ok: false,
+                  error: `Falha ao exportar: ${error.message}`
+                };
+              }
+
+            default:
+              return { ok: false, error: `Ação desconhecida: ${action}` };
+          }
         }
 
-        return { isAvailable: () => true, readConfig, runAction };
+        return { isAvailable: () => true, runAction };
       }
 
       function selectEnvironment() {
         const taskerEnvironment = createTaskerEnvironment();
         return taskerEnvironment.isAvailable()
           ? taskerEnvironment
-          : createWebEnvironment(DEFAULT_CONFIG);
+          : createWebEnvironment();
       }
 
       const environment = selectEnvironment();
 
+      // ---------------------------------------------------------------
+      // Estado da aplicação / ponte com o ambiente
+      // ---------------------------------------------------------------
+
       const appState = {
         monitorActive: false,
-        activeModuleIds: [],
-        config: { monitorEnabled: false, modules: {} },
+        restarting: false,
+        config: {
+          providers: {},
+          rules: [],
+          settings: {
+            theme: "dark",
+            language: "pt",
+            gemini: { model: "gemini-2.5-flash", apiKey: "" }
+          }
+        },
         activeTab: null
       };
 
-      async function refreshConfig() {
-        const config = await environment.readConfig();
-        if (config) appState.config = config;
+      // Geração de ID e comparação de providers: usadas por qualquer
+      // mutação de config, em qualquer ambiente (Tasker ou navegador).
+      function genId() {
+        return `rule_${Date.now().toString(36)}${Math.random()
+          .toString(36)
+          .slice(2, 6)}`;
       }
 
-      function applyResponseToState(response) {
-        if (typeof response.monitorActive === "boolean") {
-          appState.monitorActive = response.monitorActive;
-        }
-        if (Array.isArray(response.activeModuleIds)) {
-          appState.activeModuleIds = response.activeModuleIds;
-        }
+      function cloneProviders(providers) {
+        return deepClone(providers || {});
       }
 
+      function providersEqual(a, b) {
+        return JSON.stringify(a) === JSON.stringify(b);
+      }
+
+      // Para ações que não mexem na config (ligar/desligar monitor, ler
+      // status, exportar).
       async function performAction(action, payload) {
         setLoadingVisible(true);
         const response = await environment.runAction(action, payload || {});
-        applyResponseToState(response);
-        await refreshConfig();
+        if (typeof response.monitorActive === "boolean") {
+          appState.monitorActive = response.monitorActive;
+        }
         renderApp();
         setLoadingVisible(false);
 
         const feedback = response.error || response.message;
         if (feedback) showToast(feedback, response.ok === false);
-        if (response.needsRestart) showRestartBanner(true);
 
-        return response.ok !== false;
+        return response;
+      }
+
+      // Desliga e liga o monitor em sequência. Usado automaticamente pela
+      // performConfigMutation quando salvar muda o conjunto de providers
+      // ativos com o monitor já rodando (ver needsRestart) — antes disso
+      // pedia confirmação num banner; agora reinicia sozinho, na hora.
+      //
+      // Enquanto a sequência roda, appState.restarting fica true e
+      // renderMasterPower/renderDashboardPage mostram "Reiniciando..." fixo
+      // — sem isso, os dois toggle_monitor internos fariam o estado piscar
+      // PARADO → ATIVO no meio do processo, antes de estabilizar.
+      async function restartMonitor() {
+        appState.restarting = true;
+        renderApp();
+        setLoadingVisible(true);
+
+        await toggleMonitorQuiet();
+        await sleep(400);
+        await toggleMonitorQuiet();
+
+        setLoadingVisible(false);
+        appState.restarting = false;
+        renderApp();
+        showToast("Monitor reiniciado", false);
+      }
+
+      // Liga/desliga o monitor sem os efeitos colaterais de performAction
+      // (loading individual + toast por chamada). Usado só internamente
+      // por restartMonitor, que já cuida de loading/feedback para a
+      // sequência inteira em vez de por toggle.
+      async function toggleMonitorQuiet() {
+        const response = await environment.runAction("toggle_monitor", {});
+        if (typeof response.monitorActive === "boolean") {
+          appState.monitorActive = response.monitorActive;
+        }
+        if (response.error) {
+          showToast(response.error, true);
+        }
+        return response;
+      }
+
+      // Única porta de entrada para qualquer alteração de regras,
+      // providers ou configurações. `mutateFn` mexe diretamente em
+      // `appState.config` (toda a lógica de criar/editar/excluir/duplicar
+      // fica aqui no JS); depois disso, o resultado inteiro é enviado de
+      // uma vez para o ambiente persistir (arquivo + variável do monitor,
+      // no Tasker; memória, no navegador). Se `mutateFn` lançar um erro
+      // (validação), nada é enviado ao ambiente.
+      async function performConfigMutation(mutateFn, successMessage) {
+        const beforeProviders = cloneProviders(appState.config.providers);
+        const backup = deepClone(appState.config);
+
+        try {
+          mutateFn();
+        } catch (error) {
+          showToast(error.message, true);
+          // Sem isso, o app não re-renderiza após uma mutação que falhou,
+          // e controles nativos (como o <input type="checkbox">) podem
+          // ficar com o estado visual dessincronizado do appState real.
+          renderApp();
+          return { ok: false, error: error.message };
+        }
+
+        setLoadingVisible(true);
+        const providersChanged = !providersEqual(
+          beforeProviders,
+          appState.config.providers
+        );
+        const response = await environment.runAction("save_config", {
+          config: appState.config,
+          providersChanged
+        });
+
+        if (response.ok === false) {
+          appState.config = backup;
+        }
+        if (typeof response.monitorActive === "boolean") {
+          appState.monitorActive = response.monitorActive;
+        }
+        renderApp();
+        setLoadingVisible(false);
+
+        const feedback =
+          response.error ||
+          response.message ||
+          (response.ok !== false ? successMessage : null);
+        if (feedback) showToast(feedback, response.ok === false);
+        if (response.needsRestart) {
+          await restartMonitor();
+        }
+
+        return response;
       }
 
       let toastTimer = null;
@@ -1140,53 +1718,72 @@
         }, 3200);
       }
 
-      function showRestartBanner(show) {
-        document.getElementById("banner").style.display = show
-          ? "flex"
-          : "none";
-      }
-
       function setLoadingVisible(visible) {
         document.getElementById("loading").style.display = visible
           ? "flex"
           : "none";
       }
 
+      function applyTheme(theme) {
+        const value = theme === "light" ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", value);
+        document.documentElement.style.colorScheme = value;
+      }
+
+      // ---------------------------------------------------------------
+      // Navegação / renderização geral
+      // ---------------------------------------------------------------
+
+      const PAGES = [
+        { id: "dashboard", label: "Painel", render: renderDashboardPage },
+        { id: "rules", label: "Regras", render: renderRulesPage },
+        { id: "providers", label: "Providers", render: renderProvidersPage },
+        { id: "settings", label: "Config", render: renderSettingsPage }
+      ];
+
       function ensureActiveTab() {
-        const ids = Object.keys(appState.config.modules || {});
-        if (!appState.activeTab || ids.indexOf(appState.activeTab) === -1) {
-          appState.activeTab = ids[0] || null;
-        }
+        if (!appState.activeTab) appState.activeTab = "dashboard";
       }
 
       function renderApp() {
         ensureActiveTab();
+        applyTheme(
+          (appState.config.settings && appState.config.settings.theme) || "dark"
+        );
         renderMasterPower();
         renderTabs();
         renderPage();
       }
 
       function renderMasterPower() {
-        document.getElementById("masterSwitch").checked =
-          appState.monitorActive;
-        document.getElementById("masterLed").className =
-          `led ${appState.monitorActive ? "on" : "off"}`;
-        document.getElementById("masterState").textContent =
-          appState.monitorActive ? "ATIVO" : "PARADO";
+        const switchInput = document.getElementById("masterSwitch");
+        const led = document.getElementById("masterLed");
+        const stateLabel = document.getElementById("masterState");
+
+        switchInput.disabled = appState.restarting;
+
+        if (appState.restarting) {
+          led.className = "led restarting";
+          stateLabel.textContent = "REINICIANDO...";
+          return;
+        }
+
+        switchInput.checked = appState.monitorActive;
+        led.className = `led ${appState.monitorActive ? "on" : "off"}`;
+        stateLabel.textContent = appState.monitorActive ? "ATIVO" : "PARADO";
       }
 
       function renderTabs() {
         const bar = document.getElementById("tabBar");
         bar.innerHTML = "";
-        const modules = appState.config.modules || {};
-        Object.keys(modules).forEach(id => {
+        PAGES.forEach(page => {
           const tab = el(
             "button",
-            `tab${id === appState.activeTab ? " active" : ""}`,
-            modules[id].displayName
+            `tab${page.id === appState.activeTab ? " active" : ""}`,
+            page.label
           );
           tab.addEventListener("click", () => {
-            appState.activeTab = id;
+            appState.activeTab = page.id;
             renderApp();
           });
           bar.appendChild(tab);
@@ -1194,189 +1791,270 @@
       }
 
       function renderPage() {
+        const current =
+          PAGES.find(p => p.id === appState.activeTab) || PAGES[0];
+        current.render();
+      }
+
+      function sectionLabel(number, text) {
+        const label = el("div", "editor-section-label");
+        if (number != null) label.appendChild(el("span", "n", `${number}·`));
+        label.appendChild(document.createTextNode(text));
+        return label;
+      }
+
+      // ---------------------------------------------------------------
+      // Página: Painel (Dashboard)
+      // ---------------------------------------------------------------
+
+      function statCard(value, label) {
+        const card = el("div", "stat-card");
+        card.appendChild(el("div", "stat-value", value));
+        card.appendChild(el("div", "stat-label", label));
+        return card;
+      }
+
+      function renderFlowDiagram() {
+        const wrap = el("div", "flow-diagram");
+        wrap.appendChild(el("div", "section-label", "Fluxo de execução"));
+        const track = el(
+          "div",
+          `flow-track${
+            appState.restarting || appState.monitorActive ? " live" : ""
+          }`
+        );
+        const steps = ["Provider", "Evento", "Condições", "Ações"];
+        steps.forEach((label, index) => {
+          track.appendChild(el("div", "flow-node", label));
+          if (index < steps.length - 1) {
+            track.appendChild(el("div", "flow-arrow", "›"));
+          }
+        });
+        wrap.appendChild(track);
+        return wrap;
+      }
+
+      function renderDashboardPage() {
         const page = document.getElementById("page");
         page.innerHTML = "";
-        const id = appState.activeTab;
-        if (!id) return;
-        const module = appState.config.modules[id];
-        page.appendChild(renderPageHead(id, module));
-        page.appendChild(renderTriggerSection(id, module));
-      }
 
-      function renderModuleSwitchSm(id, module) {
-        const wrapper = el("label", "switch sm");
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.checked = !!module.enabled;
-        input.addEventListener("change", () => {
-          performAction("toggle_module", { id, enabled: input.checked });
-        });
-        wrapper.appendChild(input);
-        wrapper.appendChild(el("span", "track"));
-        wrapper.appendChild(el("span", "knob"));
-        return wrapper;
-      }
+        const rules = appState.config.rules || [];
+        const activeRules = rules.filter(r => r.enabled).length;
+        const providers = appState.config.providers || {};
+        const providerIds = Object.keys(PROVIDERS_META);
+        const activeProviders = providerIds.filter(
+          id => providers[id] && providers[id].enabled
+        ).length;
 
-      function renderPageHead(id, module) {
         const head = el("div", "page-head");
+        head.appendChild(el("h2", null, "Painel"));
+        page.appendChild(head);
 
+        const grid = el("div", "stat-grid");
+        grid.appendChild(statCard(String(rules.length), "Regras cadastradas"));
+        grid.appendChild(statCard(String(activeRules), "Regras ativas"));
+        grid.appendChild(
+          statCard(
+            `${activeProviders}/${providerIds.length}`,
+            "Providers ativos"
+          )
+        );
+        grid.appendChild(
+          statCard(
+            appState.restarting
+              ? "Reiniciando"
+              : appState.monitorActive
+              ? "Ligado"
+              : "Desligado",
+            "Monitor"
+          )
+        );
+        page.appendChild(grid);
+
+        page.appendChild(renderFlowDiagram());
+
+        const powerCard = el("div", "power-card");
+        const label = el("div", "power-card-label");
+        label.appendChild(
+          el(
+            "b",
+            null,
+            appState.restarting
+              ? "Reiniciando monitor"
+              : appState.monitorActive
+              ? "Monitor ativo"
+              : "Monitor parado"
+          )
+        );
+        label.appendChild(
+          el(
+            "span",
+            null,
+            appState.restarting
+              ? "Aplicando mudança de providers…"
+              : appState.monitorActive
+              ? "Reagindo a eventos em tempo real."
+              : "Nenhum evento está sendo observado."
+          )
+        );
+        powerCard.appendChild(label);
+        const bigBtn = el(
+          "button",
+          `power-toggle-btn${
+            !appState.restarting && appState.monitorActive ? " on" : ""
+          }${appState.restarting ? " restarting" : ""}`,
+          appState.restarting
+            ? "Reiniciando..."
+            : appState.monitorActive
+            ? "Parar"
+            : "Iniciar"
+        );
+        bigBtn.disabled = appState.restarting;
+        bigBtn.addEventListener("click", () => {
+          if (appState.restarting) return;
+          performAction("toggle_monitor", {});
+        });
+        powerCard.appendChild(bigBtn);
+        page.appendChild(powerCard);
+      }
+
+      // ---------------------------------------------------------------
+      // Página: Regras
+      // ---------------------------------------------------------------
+
+      function providerBadge(providerId) {
+        const meta = PROVIDERS_META[providerId];
+        const badge = el("span", "provider-badge");
+        badge.innerHTML = ICONS[meta.icon] || "";
+        badge.appendChild(document.createTextNode(meta.name));
+        return badge;
+      }
+
+      function renderRuleRow(rule) {
+        const row = el("div", `rule-row${rule.enabled ? "" : " off"}`);
+
+        const dot = el("span", "rule-dot");
+        dot.title = "Ativar/Desativar";
+        dot.addEventListener("click", () => {
+          performConfigMutation(() => {
+            const target = appState.config.rules.find(r => r.id === rule.id);
+            if (!target) throw new Error("Regra não encontrada");
+            target.enabled = !target.enabled;
+          }, "Regra atualizada");
+        });
+        row.appendChild(dot);
+
+        const info = el("div", "rule-info");
+        const top = el("div", "rule-top");
+        top.appendChild(el("span", "rule-name", rule.name));
+        top.appendChild(providerBadge(rule.provider));
+        info.appendChild(top);
+
+        const eventMeta = EVENTS_META[rule.event.type];
+        const flow = el("div", "rule-flow");
+        flow.appendChild(
+          el("span", "flow-part", eventMeta ? eventMeta.label : rule.event.type)
+        );
+        flow.appendChild(el("span", "flow-sep", "›"));
+        flow.appendChild(
+          el(
+            "span",
+            "flow-part",
+            countLabel(rule.conditions.length, "condição", "condições")
+          )
+        );
+        flow.appendChild(el("span", "flow-sep", "›"));
+        flow.appendChild(
+          el(
+            "span",
+            "flow-part",
+            countLabel(rule.actions.length, "ação", "ações")
+          )
+        );
+        info.appendChild(flow);
+        row.appendChild(info);
+
+        const actions = el("div", "rule-actions");
+        const editBtn = iconButton("icon-btn", "edit", "Editar");
+        editBtn.addEventListener("click", () => openRuleDialog(rule));
+        const dupBtn = iconButton("icon-btn", "copy", "Duplicar");
+        dupBtn.addEventListener("click", () =>
+          performConfigMutation(() => {
+            const idx = appState.config.rules.findIndex(r => r.id === rule.id);
+            if (idx === -1) throw new Error("Regra não encontrada");
+            const clone = deepClone(appState.config.rules[idx]);
+            clone.id = genId();
+            clone.name = `${clone.name} (cópia)`;
+            appState.config.rules.splice(idx + 1, 0, clone);
+          }, "Regra duplicada")
+        );
+        const delBtn = iconButton("icon-btn danger", "trash", "Excluir");
+        delBtn.addEventListener("click", () =>
+          performConfigMutation(() => {
+            appState.config.rules = appState.config.rules.filter(
+              r => r.id !== rule.id
+            );
+          }, "Regra excluída")
+        );
+        actions.appendChild(editBtn);
+        actions.appendChild(dupBtn);
+        actions.appendChild(delBtn);
+        row.appendChild(actions);
+
+        return row;
+      }
+
+      function renderRulesPage() {
+        const page = document.getElementById("page");
+        page.innerHTML = "";
+        const rules = appState.config.rules || [];
+        const activeCount = rules.filter(r => r.enabled).length;
+
+        const head = el("div", "page-head");
         const top = el("div", "page-head-top");
-        top.appendChild(el("h2", null, module.displayName));
-
-        const actions = el("div", "page-head-actions");
-
-        const settingsBtn = iconButton(
-          "icon-btn",
-          "settings",
-          "Configurações do módulo"
-        );
-        settingsBtn.addEventListener("click", () =>
-          openModuleSettingsDialog(id, module)
-        );
-        actions.appendChild(settingsBtn);
-
-        actions.appendChild(renderModuleSwitchSm(id, module));
-        top.appendChild(actions);
+        top.appendChild(el("h2", null, "Regras"));
+        const headActions = el("div", "page-head-actions");
+        const addBtn = document.createElement("button");
+        addBtn.className = "btn-header-add";
+        addBtn.innerHTML = `${ICONS.plus}<span>Nova Regra</span>`;
+        addBtn.addEventListener("click", () => openRuleDialog(null));
+        headActions.appendChild(addBtn);
+        top.appendChild(headActions);
         head.appendChild(top);
 
-        const tokens = Object.keys(module.triggers || {});
-        const activeCount = tokens.filter(
-          t => module.triggers[t].enabled
-        ).length;
         const stats = el("div", "page-stats");
-
         const statsInfo = el("div", "page-stats-info");
         statsInfo.appendChild(
           el(
             "span",
             "count",
-            `${tokens.length} gatilho(s) · ${activeCount} ativo(s)`
+            `${countLabel(rules.length, "regra", "regras")} · ${countLabel(
+              activeCount,
+              "ativa",
+              "ativas"
+            )}`
           )
         );
-        if (appState.activeModuleIds.indexOf(id) >= 0) {
-          statsInfo.appendChild(el("span", "chip ok", "registrado"));
-        }
         stats.appendChild(statsInfo);
-
-        const addBtn = document.createElement("button");
-        addBtn.className = "btn-header-add";
-        addBtn.innerHTML = `${ICONS.plus}<span>Adicionar</span>`;
-        addBtn.addEventListener("click", () =>
-          openTriggerDialog(id, module, null)
-        );
-        stats.appendChild(addBtn);
-
         head.appendChild(stats);
+        page.appendChild(head);
 
-        return head;
+        const section = el("div", "section");
+        if (rules.length === 0) {
+          section.appendChild(
+            el("div", "empty-hint", "Nenhuma regra cadastrada ainda.")
+          );
+        } else {
+          const list = el("div", "rule-list");
+          rules.forEach(rule => list.appendChild(renderRuleRow(rule)));
+          section.appendChild(list);
+        }
+        page.appendChild(section);
       }
 
-      function createLabeledTextRow(parent, labelText, value) {
-        const row = el("div", "field-row");
-        row.appendChild(el("label", null, labelText));
-        const input = document.createElement("input");
-        input.type = "text";
-        input.value = value || "";
-        row.appendChild(input);
-        parent.appendChild(row);
-        return input;
-      }
-
-      function createLabeledCheckboxRow(parent, labelText, checked) {
-        const row = el("div", "field-row");
-        row.appendChild(el("label", null, labelText));
-        const input = document.createElement("input");
-        input.type = "checkbox";
-        input.checked = !!checked;
-        row.appendChild(input);
-        parent.appendChild(row);
-        return input;
-      }
-
-      function createLabeledTextareaBlock(
-        parent,
-        labelText,
-        value,
-        placeholder
-      ) {
-        const block = el("div", "field-block");
-        block.appendChild(el("label", "block-label", labelText));
-        const textarea = document.createElement("textarea");
-        textarea.value = value || "";
-        if (placeholder) textarea.placeholder = placeholder;
-        block.appendChild(textarea);
-        parent.appendChild(block);
-        return textarea;
-      }
-
-      function buildCommandSettingsFields(body, module) {
-        const config = module.config || {
-          prefix: ">>",
-          taskName: "",
-          restrictToKnown: false
-        };
-        const prefixInput = createLabeledTextRow(
-          body,
-          "Prefixo",
-          config.prefix
-        );
-        const taskInput = createLabeledTextRow(body, "Tarefa", config.taskName);
-        const restrictInput = createLabeledCheckboxRow(
-          body,
-          "Somente listados",
-          config.restrictToKnown
-        );
-        body.appendChild(
-          el(
-            "div",
-            "hint",
-            "Tarefa do Tasker chamada quando um comando reconhecido é digitado."
-          )
-        );
-        return {
-          collect: () => ({
-            prefix: prefixInput.value.trim() || ">>",
-            taskName: taskInput.value.trim(),
-            restrictToKnown: restrictInput.checked
-          })
-        };
-      }
-
-      function buildExpanderSettingsFields(body, module) {
-        const config = module.config || {
-          apiKey: "",
-          model: "",
-          systemInstructions: ""
-        };
-        const apiKeyInput = createLabeledTextRow(
-          body,
-          "Chave API",
-          config.apiKey
-        );
-        apiKeyInput.placeholder = "Chave da API Gemini";
-        const modelInput = createLabeledTextRow(body, "Modelo", config.model);
-        modelInput.placeholder = "ex: gemini-2.5-flash";
-        const sysTextarea = createLabeledTextareaBlock(
-          body,
-          "Instruções do sistema",
-          config.systemInstructions,
-          "Opcional — aplica-se a todos os gatilhos do tipo IA"
-        );
-        body.appendChild(
-          el(
-            "div",
-            "hint",
-            "Usadas pelo gatilho do tipo IA para gerar respostas via Gemini."
-          )
-        );
-        return {
-          collect: () => ({
-            apiKey: apiKeyInput.value.trim(),
-            model: modelInput.value.trim(),
-            systemInstructions: sysTextarea.value.trim()
-          })
-        };
-      }
+      // ---------------------------------------------------------------
+      // Editor de Regra (dialog)
+      // ---------------------------------------------------------------
 
       let dialogKeyHandler = null;
 
@@ -1389,16 +2067,290 @@
         }
       }
 
-      function openModuleSettingsDialog(moduleId, module) {
+      function createBoundTextRow(label, obj, key, placeholder) {
+        const row = el("div", "field-row");
+        row.appendChild(el("label", null, label));
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = obj[key] != null ? obj[key] : "";
+        if (placeholder) input.placeholder = placeholder;
+        input.addEventListener("input", () => {
+          obj[key] = input.value;
+        });
+        row.appendChild(input);
+        return row;
+      }
+
+      function createBoundNumberRow(label, obj, key) {
+        const row = el("div", "field-row");
+        row.appendChild(el("label", null, label));
+        const input = document.createElement("input");
+        input.type = "number";
+        input.value = obj[key] != null ? obj[key] : 0;
+        input.addEventListener("input", () => {
+          obj[key] = Number(input.value) || 0;
+        });
+        row.appendChild(input);
+        return row;
+      }
+
+      function createBoundSelectRow(label, obj, key, options) {
+        const row = el("div", "field-row");
+        row.appendChild(el("label", null, label));
+        const select = document.createElement("select");
+        options.forEach(([value, text]) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = text;
+          select.appendChild(option);
+        });
+        select.value = obj[key] || options[0][0];
+        select.addEventListener("change", () => {
+          obj[key] = select.value;
+        });
+        row.appendChild(select);
+        return row;
+      }
+
+      function createBoundTextareaBlock(label, obj, key) {
+        const block = el("div", "field-block");
+        block.appendChild(el("label", "block-label", label));
+        const textarea = document.createElement("textarea");
+        textarea.value = obj[key] != null ? obj[key] : "";
+        textarea.addEventListener("input", () => {
+          obj[key] = textarea.value;
+        });
+        block.appendChild(textarea);
+        return block;
+      }
+
+      function buildActionConfigFields(container, action) {
+        container.innerHTML = "";
+        const type = action.type;
+        const config = action.config;
+        if (type === "text_replacer" || type === "clipboard") {
+          container.appendChild(
+            createBoundTextareaBlock("Texto", config, "text")
+          );
+          if (type === "text_replacer") {
+            container.appendChild(
+              el(
+                "div",
+                "hint",
+                "Use {value} para inserir o texto do gatilho. O que foi digitado antes do gatilho é mantido."
+              )
+            );
+          }
+        } else if (type === "run_task") {
+          container.appendChild(
+            createBoundTextRow(
+              "Tarefa",
+              config,
+              "task",
+              "Nome da task no Tasker"
+            )
+          );
+          container.appendChild(
+            createBoundTextRow("%par1", config, "par1", "{value}")
+          );
+          container.appendChild(
+            createBoundTextRow("%par2", config, "par2", "{value}")
+          );
+        } else if (type === "open_app") {
+          container.appendChild(
+            createBoundTextRow("Pacote", config, "package", "com.exemplo.app")
+          );
+        } else if (type === "ai") {
+          container.appendChild(
+            createBoundTextareaBlock(
+              "Instruções do sistema",
+              config,
+              "systemInstructions"
+            )
+          );
+          container.appendChild(
+            el(
+              "div",
+              "hint",
+              "O texto digitado antes do gatilho é enviado à IA; a resposta substitui todo o campo."
+            )
+          );
+        } else if (type === "translate") {
+          container.appendChild(
+            createBoundSelectRow("Idioma", config, "language", LANG_OPTIONS)
+          );
+          container.appendChild(
+            el(
+              "div",
+              "hint",
+              "O texto digitado antes do gatilho é traduzido e substitui todo o campo."
+            )
+          );
+        } else if (type === "search") {
+          container.appendChild(
+            createBoundSelectRow("Mecanismo", config, "engine", SEARCH_ENGINES)
+          );
+        } else if (type === "open_url") {
+          container.appendChild(
+            createBoundTextRow("URL", config, "url", "https://...")
+          );
+        } else if (type === "notification") {
+          container.appendChild(createBoundTextRow("Título", config, "title"));
+          container.appendChild(
+            createBoundTextareaBlock("Mensagem", config, "body")
+          );
+        } else if (type === "click") {
+          container.appendChild(createBoundNumberRow("X", config, "x"));
+          container.appendChild(createBoundNumberRow("Y", config, "y"));
+        }
+      }
+
+      function renderConditionsList(container, draft) {
+        container.innerHTML = "";
+        const locked = isSingleEndsWithEvent(draft.event.type);
+
+        if (locked && draft.conditions.length === 0) {
+          draft.conditions.push({ operator: "ends_with", value: "" });
+        }
+
+        if (draft.conditions.length === 0) {
+          container.appendChild(
+            el(
+              "div",
+              "empty-hint",
+              "Nenhuma condição — a regra sempre será executada."
+            )
+          );
+        }
+        draft.conditions.forEach((cond, index) => {
+          const row = el("div", "condition-row");
+
+          if (locked) {
+            cond.operator = "ends_with";
+            row.appendChild(
+              el("span", "condition-op-label", CONDITION_OPERATORS.ends_with)
+            );
+          } else {
+            const opSelect = document.createElement("select");
+            allowedOperatorsForEvent(draft.event.type).forEach(op => {
+              const option = document.createElement("option");
+              option.value = op;
+              option.textContent = CONDITION_OPERATORS[op];
+              opSelect.appendChild(option);
+            });
+            opSelect.value = cond.operator;
+            opSelect.addEventListener("change", () => {
+              cond.operator = opSelect.value;
+            });
+            row.appendChild(opSelect);
+          }
+
+          const valInput = document.createElement("input");
+          valInput.type = "text";
+          valInput.value = cond.value;
+          valInput.placeholder = locked ? "texto do gatilho" : "valor";
+          valInput.addEventListener("input", () => {
+            cond.value = valInput.value;
+          });
+          row.appendChild(valInput);
+
+          if (!locked) {
+            const delBtn = iconButton(
+              "icon-btn danger",
+              "trash",
+              "Remover condição"
+            );
+            delBtn.addEventListener("click", () => {
+              draft.conditions.splice(index, 1);
+              renderConditionsList(container, draft);
+            });
+            row.appendChild(delBtn);
+          }
+
+          container.appendChild(row);
+        });
+      }
+
+      function renderActionsList(container, draft) {
+        container.innerHTML = "";
+        const allowedTypes = allowedActionTypesForEvent(draft.event.type);
+
+        if (draft.actions.length === 0) {
+          container.appendChild(
+            el(
+              "div",
+              "empty-hint",
+              "Nenhuma ação — adicione ao menos uma para que a regra tenha efeito."
+            )
+          );
+        }
+        draft.actions.forEach((action, index) => {
+          const card = el("div", "action-card");
+          const head = el("div", "action-card-head");
+
+          const typeSelect = document.createElement("select");
+          allowedTypes.forEach(type => {
+            const option = document.createElement("option");
+            option.value = type;
+            option.textContent = ACTION_TYPES_META[type].label;
+            typeSelect.appendChild(option);
+          });
+          typeSelect.value = action.type;
+          typeSelect.addEventListener("change", () => {
+            action.type = typeSelect.value;
+            action.config = defaultActionConfig(action.type);
+            renderActionsList(container, draft);
+          });
+          head.appendChild(typeSelect);
+
+          const move = el("div", "action-card-move");
+          const upBtn = iconButton("icon-btn", "up", "Mover para cima");
+          upBtn.disabled = index === 0;
+          upBtn.addEventListener("click", () => {
+            if (index === 0) return;
+            const tmp = draft.actions[index - 1];
+            draft.actions[index - 1] = draft.actions[index];
+            draft.actions[index] = tmp;
+            renderActionsList(container, draft);
+          });
+          const downBtn = iconButton("icon-btn", "down", "Mover para baixo");
+          downBtn.disabled = index === draft.actions.length - 1;
+          downBtn.addEventListener("click", () => {
+            if (index === draft.actions.length - 1) return;
+            const tmp = draft.actions[index + 1];
+            draft.actions[index + 1] = draft.actions[index];
+            draft.actions[index] = tmp;
+            renderActionsList(container, draft);
+          });
+          const delBtn = iconButton("icon-btn danger", "trash", "Remover ação");
+          delBtn.addEventListener("click", () => {
+            draft.actions.splice(index, 1);
+            renderActionsList(container, draft);
+          });
+          move.appendChild(upBtn);
+          move.appendChild(downBtn);
+          move.appendChild(delBtn);
+          head.appendChild(move);
+          card.appendChild(head);
+
+          const fields = el("div", "action-card-fields");
+          buildActionConfigFields(fields, action);
+          card.appendChild(fields);
+
+          container.appendChild(card);
+        });
+      }
+
+      function openRuleDialog(existingRule) {
         closeDialog();
+        const isEdit = !!existingRule;
+        const draft = deepClone(existingRule || emptyRule());
 
         const overlay = el("div", "dialog-overlay");
-        const dialog = el("div", "dialog");
+        const dialog = el("div", "dialog wide");
 
         const head = el("div", "dialog-head");
-        head.appendChild(
-          el("b", null, `Configurações · ${module.displayName}`)
-        );
+        head.appendChild(el("b", null, isEdit ? "Editar Regra" : "Nova Regra"));
         const closeBtn = iconButton("dialog-close", "close", "Fechar");
         closeBtn.addEventListener("click", closeDialog);
         head.appendChild(closeBtn);
@@ -1407,21 +2359,209 @@
         const body = el("div", "dialog-body");
         dialog.appendChild(body);
 
-        const fields =
-          module.engine === "command"
-            ? buildCommandSettingsFields(body, module)
-            : buildExpanderSettingsFields(body, module);
+        // Informações
+        const infoSection = el("div", "editor-section");
+        infoSection.appendChild(sectionLabel(null, "Informações"));
+        const nameRow = el("div", "field-row");
+        nameRow.appendChild(el("label", null, "Nome"));
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.value = draft.name;
+        nameInput.placeholder = "Nome da regra";
+        nameRow.appendChild(nameInput);
+        infoSection.appendChild(nameRow);
+        const enabledRow = el("div", "field-row");
+        enabledRow.appendChild(el("label", null, "Ativada"));
+        const enabledInput = document.createElement("input");
+        enabledInput.type = "checkbox";
+        enabledInput.checked = draft.enabled;
+        enabledInput.addEventListener("change", () => {
+          draft.enabled = enabledInput.checked;
+        });
+        enabledRow.appendChild(enabledInput);
+        infoSection.appendChild(enabledRow);
+        body.appendChild(infoSection);
+
+        // Evento
+        const eventSection = el("div", "editor-section");
+        eventSection.appendChild(sectionLabel(1, "Evento"));
+        const providerRow = el("div", "field-row");
+        providerRow.appendChild(el("label", null, "Provider"));
+        const providerSelect = document.createElement("select");
+        Object.keys(PROVIDERS_META).forEach(id => {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = PROVIDERS_META[id].name;
+          providerSelect.appendChild(option);
+        });
+        providerSelect.value = draft.provider;
+        providerRow.appendChild(providerSelect);
+        eventSection.appendChild(providerRow);
+
+        const eventRow = el("div", "field-row");
+        eventRow.appendChild(el("label", null, "Evento"));
+        const eventSelect = document.createElement("select");
+        eventRow.appendChild(eventSelect);
+        eventSection.appendChild(eventRow);
+
+        function refreshEventOptions() {
+          eventSelect.innerHTML = "";
+          (PROVIDER_EVENTS[providerSelect.value] || []).forEach(type => {
+            const option = document.createElement("option");
+            option.value = type;
+            option.textContent = EVENTS_META[type].label;
+            eventSelect.appendChild(option);
+          });
+          const stillValid =
+            draft.event.type &&
+            EVENTS_META[draft.event.type] &&
+            EVENTS_META[draft.event.type].provider === providerSelect.value;
+          eventSelect.value = stillValid
+            ? draft.event.type
+            : (PROVIDER_EVENTS[providerSelect.value] || [])[0];
+          draft.event.type = eventSelect.value;
+        }
+        refreshEventOptions();
+        body.appendChild(eventSection);
+
+        // Condições
+        const condSection = el("div", "editor-section");
+        condSection.appendChild(sectionLabel(2, "Condições"));
+        const condList = el("div");
+        condSection.appendChild(condList);
+        const addCondBtn = el("button", "add-row-btn");
+        addCondBtn.innerHTML = `${ICONS.plus}<span>Adicionar condição</span>`;
+        addCondBtn.addEventListener("click", () => {
+          draft.conditions.push({ operator: "contains", value: "" });
+          renderConditionsList(condList, draft);
+        });
+        condSection.appendChild(addCondBtn);
+        body.appendChild(condSection);
+
+        // Ações
+        const actSection = el("div", "editor-section");
+        actSection.appendChild(sectionLabel(3, "Ações"));
+        const actList = el("div");
+        actSection.appendChild(actList);
+        const addActBtn = el("button", "add-row-btn");
+        addActBtn.innerHTML = `${ICONS.plus}<span>Adicionar ação</span>`;
+        addActBtn.addEventListener("click", () => {
+          const allowedTypes = allowedActionTypesForEvent(draft.event.type);
+          const defaultType =
+            allowedTypes.indexOf("text_replacer") !== -1
+              ? "text_replacer"
+              : allowedTypes[0];
+          draft.actions.push({
+            type: defaultType,
+            config: defaultActionConfig(defaultType)
+          });
+          renderActionsList(actList, draft);
+        });
+        actSection.appendChild(addActBtn);
+        body.appendChild(actSection);
+
+        // Reage a trocas de provider/evento: recalcula quais operadores de
+        // condição e quais tipos de ação continuam válidos, removendo (com
+        // aviso) o que deixou de fazer sentido para o novo evento.
+        function refreshEventDependents() {
+          const locked = isSingleEndsWithEvent(draft.event.type);
+
+          if (locked) {
+            const preservedValue =
+              draft.conditions.length === 1 ? draft.conditions[0].value : "";
+            if (
+              draft.conditions.length !== 1 ||
+              draft.conditions[0].operator !== "ends_with"
+            ) {
+              draft.conditions = [
+                { operator: "ends_with", value: preservedValue }
+              ];
+            }
+          }
+          renderConditionsList(condList, draft);
+          addCondBtn.style.display = locked ? "none" : "flex";
+
+          const allowedTypes = allowedActionTypesForEvent(draft.event.type);
+          const beforeCount = draft.actions.length;
+          draft.actions = draft.actions.filter(
+            action => allowedTypes.indexOf(action.type) !== -1
+          );
+          const removedCount = beforeCount - draft.actions.length;
+          renderActionsList(actList, draft);
+          if (removedCount > 0) {
+            showToast(
+              `${removedCount} ${
+                removedCount === 1 ? "ação removida" : "ações removidas"
+              } por não serem compatíveis com este evento`,
+              true
+            );
+          }
+        }
+
+        providerSelect.addEventListener("change", () => {
+          draft.provider = providerSelect.value;
+          refreshEventOptions();
+          refreshEventDependents();
+        });
+        eventSelect.addEventListener("change", () => {
+          draft.event.type = eventSelect.value;
+          refreshEventDependents();
+        });
+
+        refreshEventDependents();
 
         const foot = el("div", "dialog-foot");
         const cancelBtn = el("button", "btn btn-ghost", "Cancelar");
         cancelBtn.addEventListener("click", closeDialog);
         const saveBtn = el("button", "btn btn-accent", "Salvar");
         saveBtn.addEventListener("click", async () => {
-          const success = await performAction("update_module_config", {
-            moduleId,
-            config: fields.collect()
-          });
-          if (success) closeDialog();
+          const name = nameInput.value.trim();
+          if (!name) {
+            showToast("Informe um nome para a regra", true);
+            return;
+          }
+          if (draft.actions.length === 0) {
+            showToast("Adicione ao menos uma ação", true);
+            return;
+          }
+          if (isSingleEndsWithEvent(draft.event.type)) {
+            const cond = draft.conditions[0];
+            if (!cond || !cond.value || !cond.value.trim()) {
+              showToast(
+                "Informe o texto do gatilho (condição 'Termina com')",
+                true
+              );
+              return;
+            }
+          }
+          const response = await performConfigMutation(
+            () => {
+              if (isEdit) {
+                const target = appState.config.rules.find(
+                  r => r.id === existingRule.id
+                );
+                if (!target) throw new Error("Regra não encontrada");
+                target.name = name;
+                target.enabled = draft.enabled;
+                target.provider = draft.provider;
+                target.event = draft.event;
+                target.conditions = draft.conditions;
+                target.actions = draft.actions;
+              } else {
+                appState.config.rules.push({
+                  id: genId(),
+                  enabled: draft.enabled,
+                  name,
+                  provider: draft.provider,
+                  event: draft.event,
+                  conditions: draft.conditions,
+                  actions: draft.actions
+                });
+              }
+            },
+            isEdit ? "Regra atualizada" : "Regra criada"
+          );
+          if (response.ok !== false) closeDialog();
         });
         foot.appendChild(cancelBtn);
         foot.appendChild(saveBtn);
@@ -1437,308 +2577,340 @@
         document.addEventListener("keydown", dialogKeyHandler);
 
         document.body.appendChild(overlay);
+        nameInput.focus();
       }
 
-      function describeTrigger(module, trigger) {
-        if (module.engine === "command") {
-          return trigger.description ? trigger.description : "Sem descrição";
-        }
-        if (trigger.kind === "static") return trigger.value || "";
-        if (trigger.kind === "translate")
-          return `Traduz para ${LANG_LABELS[trigger.lang] || trigger.lang}`;
-        if (trigger.kind === "ai")
-          return trigger.instruction ? trigger.instruction : "Pergunta livre";
-        if (trigger.kind === "youtube") return "Busca no YouTube";
-        return "";
-      }
+      // ---------------------------------------------------------------
+      // Página: Providers
+      // ---------------------------------------------------------------
 
-      function renderTriggerRow(moduleId, module, token, trigger) {
-        const row = el("div", `trigger-row${trigger.enabled ? "" : " off"}`);
+      function renderProvidersPage() {
+        const page = document.getElementById("page");
+        page.innerHTML = "";
+        const providers = appState.config.providers || {};
+        const ids = Object.keys(PROVIDERS_META);
+        const activeCount = ids.filter(
+          id => providers[id] && providers[id].enabled
+        ).length;
 
-        const dot = el("span", "trigger-dot");
-        dot.title = "Habilitar/desabilitar";
-        dot.addEventListener("click", () => {
-          performAction("toggle_trigger", {
-            moduleId,
-            trigger: token,
-            enabled: !trigger.enabled
-          });
-        });
-        row.appendChild(dot);
-
-        const info = el("div", "trigger-info");
-        const top = el("div", "trigger-top");
-        top.appendChild(el("span", "trigger-token", token));
-        top.appendChild(
+        const head = el("div", "page-head");
+        const top = el("div", "page-head-top");
+        top.appendChild(el("h2", null, "Providers"));
+        head.appendChild(top);
+        const stats = el("div", "page-stats");
+        const statsInfo = el("div", "page-stats-info");
+        statsInfo.appendChild(
           el(
             "span",
-            "trigger-kind",
-            module.engine === "expander" ? KIND_LABEL[trigger.kind] : "comando"
+            "count",
+            `${activeCount} de ${ids.length} ${
+              activeCount === 1 ? "ativo" : "ativos"
+            }`
           )
         );
-        info.appendChild(top);
-        info.appendChild(
-          el("div", "trigger-value", describeTrigger(module, trigger))
-        );
-        row.appendChild(info);
+        stats.appendChild(statsInfo);
+        head.appendChild(stats);
+        page.appendChild(head);
 
-        const actions = el("div", "trigger-actions");
-        const editBtn = iconButton("icon-btn", "edit", "Editar");
-        editBtn.addEventListener("click", () =>
-          openTriggerDialog(moduleId, module, token)
-        );
-        const delBtn = iconButton("icon-btn danger", "trash", "Remover");
-        delBtn.addEventListener("click", () =>
-          performAction("remove_trigger", { moduleId, trigger: token })
-        );
-        actions.appendChild(editBtn);
-        actions.appendChild(delBtn);
-        row.appendChild(actions);
+        const section = el("div", "section");
+        const list = el("div", "provider-list");
+        ids.forEach(id => {
+          const meta = PROVIDERS_META[id];
+          const enabled = !!(providers[id] && providers[id].enabled);
+          const live = enabled && appState.monitorActive;
+          const row = el("div", `provider-row${enabled ? "" : " off"}`);
 
+          const iconWrap = el("span", "provider-icon");
+          iconWrap.innerHTML = ICONS[meta.icon] || "";
+          row.appendChild(iconWrap);
+
+          const info = el("div", "provider-info");
+          const nameRow = el("div", "provider-name-row");
+          nameRow.appendChild(el("span", "provider-name", meta.name));
+          if (live) nameRow.appendChild(el("span", "chip ok", "monitorando"));
+          info.appendChild(nameRow);
+          info.appendChild(el("div", "provider-desc", meta.description));
+          row.appendChild(info);
+
+          const sw = el("label", "switch sm");
+          const input = document.createElement("input");
+          input.type = "checkbox";
+          input.checked = enabled;
+          input.addEventListener("change", () => {
+            if (isUnimplementedProvider(id)) {
+              // Ainda não existe implementação no monitor (act4) para este
+              // provider: o switch continua clicável, mas nunca fica
+              // realmente ligado — sempre salva enabled:false e avisa.
+              const triedToEnable = input.checked;
+              input.checked = false;
+              performConfigMutation(() => {
+                appState.config.providers[id].enabled = false;
+              }, "Provider atualizado").then(() => {
+                if (triedToEnable) {
+                  showToast(`${meta.name} ainda não foi implementado`, true);
+                }
+              });
+              return;
+            }
+            performConfigMutation(() => {
+              appState.config.providers[id].enabled = input.checked;
+            }, "Provider atualizado");
+          });
+          sw.appendChild(input);
+          sw.appendChild(el("span", "track"));
+          sw.appendChild(el("span", "knob"));
+          row.appendChild(sw);
+
+          list.appendChild(row);
+        });
+        section.appendChild(list);
+        page.appendChild(section);
+      }
+
+      // ---------------------------------------------------------------
+      // Página: Configurações
+      // ---------------------------------------------------------------
+
+      function aboutLine(label, value) {
+        const row = el("div", "about-line");
+        row.appendChild(el("span", "about-label", label));
+        row.appendChild(el("span", "about-value", value));
         return row;
       }
 
-      function renderTriggerSection(id, module) {
-        const section = el("div", "section");
-        section.appendChild(
-          el(
-            "div",
-            "section-label",
-            module.engine === "command" ? "Comandos" : "Gatilhos"
-          )
-        );
-
-        const triggers = module.triggers || {};
-        const tokens = Object.keys(triggers);
-        if (tokens.length > 0) {
-          const list = el("div", "trigger-list");
-          tokens.forEach(token =>
-            list.appendChild(
-              renderTriggerRow(id, module, token, triggers[token])
-            )
-          );
-          section.appendChild(list);
-        } else {
-          section.appendChild(
-            el("div", "empty-hint", "Nenhum gatilho cadastrado ainda.")
-          );
-        }
-
-        return section;
-      }
-
-      function createKindSelect() {
-        const select = document.createElement("select");
-        ["static", "translate", "ai", "youtube"].forEach(kind => {
-          const option = document.createElement("option");
-          option.value = kind;
-          option.textContent = KIND_LABEL[kind];
-          select.appendChild(option);
-        });
-        return select;
-      }
-
-      function buildExpanderExtraField(kind) {
-        if (kind === "static") {
-          const textarea = document.createElement("textarea");
-          textarea.placeholder = "Texto a inserir";
-          return { element: textarea, input: textarea, name: "value" };
-        }
-        if (kind === "translate") {
-          const select = document.createElement("select");
-          LANG_OPTIONS.forEach(([value, label]) => {
-            const option = document.createElement("option");
-            option.value = value;
-            option.textContent = label;
-            select.appendChild(option);
-          });
-          return { element: select, input: select, name: "lang" };
-        }
-        if (kind === "ai") {
-          const textarea = document.createElement("textarea");
-          textarea.placeholder = "Instrução para a IA (vazio = pergunta livre)";
-          return { element: textarea, input: textarea, name: "instruction" };
-        }
-        return { element: el("div"), input: null, name: "none" };
-      }
-
-      async function submitTriggerDialog(
-        moduleId,
-        module,
-        rules,
-        originalToken,
-        tokenInput,
-        kindSelect,
-        extraFields,
-        descriptionInput
-      ) {
-        const token = tokenInput.value.trim().toLowerCase();
-        if (!rules.pattern.test(token)) {
-          showToast(`Gatilho inválido: ${rules.hint}`, true);
-          return;
-        }
-
-        const payload = { moduleId, trigger: token };
-        if (module.engine === "expander") {
-          payload.kind = kindSelect.value;
-          if (payload.kind === "static")
-            payload.value = extraFields.value ? extraFields.value.value : "";
-          if (payload.kind === "translate")
-            payload.lang = extraFields.lang ? extraFields.lang.value : "en";
-          if (payload.kind === "ai")
-            payload.instruction = extraFields.instruction
-              ? extraFields.instruction.value
-              : "";
-        } else {
-          payload.description = descriptionInput ? descriptionInput.value : "";
-        }
-
-        const action = originalToken ? "update_trigger" : "add_trigger";
-        if (originalToken) payload.originalTrigger = originalToken;
-
-        const success = await performAction(action, payload);
-        if (success) closeDialog();
-      }
-
-      function openTriggerDialog(moduleId, module, existingToken) {
-        closeDialog();
-        const isEdit = existingToken != null;
-        const isCommand = module.engine === "command";
-        const existingTrigger = isEdit ? module.triggers[existingToken] : null;
-        const rules = TRIGGER_RULES[module.engine];
-
-        const overlay = el("div", "dialog-overlay");
-        const dialog = el("div", "dialog");
-
-        const head = el("div", "dialog-head");
-        const title = isEdit
-          ? isCommand
-            ? "Editar comando"
-            : "Editar gatilho"
-          : isCommand
-            ? "Novo comando"
-            : "Novo gatilho";
-        head.appendChild(el("b", null, title));
-        const closeBtn = iconButton("dialog-close", "close", "Fechar");
-        closeBtn.addEventListener("click", closeDialog);
-        head.appendChild(closeBtn);
-        dialog.appendChild(head);
-
-        const body = el("div", "dialog-body");
-        dialog.appendChild(body);
-
-        const tokenRow = el("div", "field-row");
-        tokenRow.appendChild(
-          el("label", null, isCommand ? "Comando" : "Gatilho")
-        );
-        const tokenInput = document.createElement("input");
-        tokenInput.type = "text";
-        tokenInput.value = existingToken || "";
-        tokenInput.placeholder = isCommand ? "comando" : "novo:";
-        tokenRow.appendChild(tokenInput);
-        body.appendChild(tokenRow);
-
-        let kindSelect = null;
-        const extraWrap = el("div");
-        const extraFields = { value: null, lang: null, instruction: null };
-
-        function refreshExtraFields(prefill) {
-          extraWrap.innerHTML = "";
-          extraFields.value = null;
-          extraFields.lang = null;
-          extraFields.instruction = null;
-          const built = buildExpanderExtraField(kindSelect.value);
-          extraWrap.appendChild(built.element);
-          extraFields[built.name] = built.input;
-          if (prefill && built.input) {
-            if (built.name === "value") built.input.value = prefill.value || "";
-            if (built.name === "lang") built.input.value = prefill.lang || "en";
-            if (built.name === "instruction")
-              built.input.value = prefill.instruction || "";
-          }
-        }
-
-        if (!isCommand) {
-          const kindRow = el("div", "field-row");
-          kindRow.appendChild(el("label", null, "Tipo"));
-          kindSelect = createKindSelect();
-          if (existingTrigger) kindSelect.value = existingTrigger.kind;
-          kindRow.appendChild(kindSelect);
-          body.appendChild(kindRow);
-          body.appendChild(extraWrap);
-          kindSelect.addEventListener("change", () => refreshExtraFields(null));
-          refreshExtraFields(existingTrigger);
-        }
-
-        let descriptionInput = null;
-        if (isCommand) {
-          const descRow = el("div", "field-row");
-          descRow.appendChild(el("label", null, "Descrição"));
-          descriptionInput = document.createElement("input");
-          descriptionInput.type = "text";
-          descriptionInput.value = existingTrigger
-            ? existingTrigger.description || ""
-            : "";
-          descriptionInput.placeholder = "opcional";
-          descRow.appendChild(descriptionInput);
-          body.appendChild(descRow);
-        }
-
-        body.appendChild(el("div", "hint", rules.hint));
-
-        const foot = el("div", "dialog-foot");
-        const cancelBtn = el("button", "btn btn-ghost", "Cancelar");
-        cancelBtn.addEventListener("click", closeDialog);
-        const saveBtn = el("button", "btn btn-accent", "Salvar");
-        saveBtn.addEventListener("click", () => {
-          submitTriggerDialog(
-            moduleId,
-            module,
-            rules,
-            isEdit ? existingToken : null,
-            tokenInput,
-            kindSelect,
-            extraFields,
-            descriptionInput
-          );
-        });
-        foot.appendChild(cancelBtn);
-        foot.appendChild(saveBtn);
-        dialog.appendChild(foot);
-
-        overlay.appendChild(dialog);
-        overlay.addEventListener("click", event => {
-          if (event.target === overlay) closeDialog();
-        });
-        dialogKeyHandler = event => {
-          if (event.key === "Escape") closeDialog();
+      function renderSettingsPage() {
+        const page = document.getElementById("page");
+        page.innerHTML = "";
+        const settings = appState.config.settings || {
+          theme: "dark",
+          language: "pt",
+          gemini: { model: "gemini-2.5-flash", apiKey: "" }
         };
-        document.addEventListener("keydown", dialogKeyHandler);
+        const gemini = settings.gemini || {
+          model: "gemini-2.5-flash",
+          apiKey: ""
+        };
 
-        document.body.appendChild(overlay);
-        tokenInput.focus();
+        const head = el("div", "page-head");
+        head.appendChild(el("h2", null, "Configurações"));
+        page.appendChild(head);
+
+        // Geral
+        const geral = el("div", "section");
+        geral.appendChild(el("div", "section-label", "Geral"));
+        const geralCard = el("div", "settings-card");
+
+        const themeRow = el("div", "field-row");
+        themeRow.appendChild(el("label", null, "Tema"));
+        const themeSelect = document.createElement("select");
+        [
+          ["dark", "Escuro"],
+          ["light", "Claro"]
+        ].forEach(([value, text]) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = text;
+          themeSelect.appendChild(option);
+        });
+        themeSelect.value = settings.theme || "dark";
+        themeSelect.addEventListener("change", () => {
+          applyTheme(themeSelect.value);
+          performConfigMutation(() => {
+            appState.config.settings.theme = themeSelect.value;
+          }, "Preferências salvas");
+        });
+        themeRow.appendChild(themeSelect);
+        geralCard.appendChild(themeRow);
+
+        const langRow = el("div", "field-row");
+        langRow.appendChild(el("label", null, "Idioma"));
+        const langSelect = document.createElement("select");
+        [
+          ["pt", "Português"],
+          ["en", "English"]
+        ].forEach(([value, text]) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = text;
+          langSelect.appendChild(option);
+        });
+        langSelect.value = settings.language || "pt";
+        langSelect.addEventListener("change", () => {
+          performConfigMutation(() => {
+            appState.config.settings.language = langSelect.value;
+          }, "Preferências salvas");
+        });
+        langRow.appendChild(langSelect);
+        geralCard.appendChild(langRow);
+        geral.appendChild(geralCard);
+        page.appendChild(geral);
+
+        // IA (Gemini)
+        const ia = el("div", "section");
+        ia.appendChild(el("div", "section-label", "IA · Gemini"));
+        const iaCard = el("div", "settings-card");
+
+        const modelRow = el("div", "field-row");
+        modelRow.appendChild(el("label", null, "Modelo"));
+        const modelSelect = document.createElement("select");
+        GEMINI_MODEL_OPTIONS.forEach(([value, text]) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = text;
+          modelSelect.appendChild(option);
+        });
+        modelSelect.value = gemini.model || "gemini-2.5-flash";
+        modelRow.appendChild(modelSelect);
+        iaCard.appendChild(modelRow);
+
+        const apiKeyRow = el("div", "field-row");
+        apiKeyRow.appendChild(el("label", null, "Chave API"));
+        const apiKeyInput = document.createElement("input");
+        apiKeyInput.type = "text";
+        apiKeyInput.value = gemini.apiKey || "";
+        apiKeyInput.placeholder = "AIza...";
+        apiKeyRow.appendChild(apiKeyInput);
+        iaCard.appendChild(apiKeyRow);
+
+        function saveGeminiSettings() {
+          performConfigMutation(() => {
+            appState.config.settings.gemini = {
+              model: modelSelect.value,
+              apiKey: apiKeyInput.value
+            };
+          }, "Preferências salvas");
+        }
+        modelSelect.addEventListener("change", saveGeminiSettings);
+        apiKeyInput.addEventListener("change", saveGeminiSettings);
+
+        ia.appendChild(iaCard);
+        page.appendChild(ia);
+
+        // Backup
+        const backup = el("div", "section");
+        backup.appendChild(el("div", "section-label", "Backup"));
+        const backupCard = el("div", "settings-card");
+        const backupRow = el("div", "backup-row");
+        const exportBtn = el(
+          "button",
+          "btn btn-ghost",
+          "Exportar configuração"
+        );
+        exportBtn.addEventListener("click", () =>
+          performAction("export_config", { config: appState.config })
+        );
+        const importBtn = el(
+          "button",
+          "btn btn-ghost",
+          "Importar configuração"
+        );
+        const fileInput = document.createElement("input");
+        fileInput.type = "file";
+        fileInput.accept = "application/json";
+        fileInput.style.display = "none";
+        fileInput.addEventListener("change", async () => {
+          const file = fileInput.files[0];
+          if (!file) return;
+          const text = await file.text();
+          const parsed = safeParseJSON(text);
+          if (
+            !parsed ||
+            typeof parsed !== "object" ||
+            !parsed.providers ||
+            !Array.isArray(parsed.rules)
+          ) {
+            showToast("Arquivo de configuração inválido", true);
+            fileInput.value = "";
+            return;
+          }
+          await performConfigMutation(() => {
+            appState.config = normalizeConfig({
+              providers: parsed.providers,
+              rules: parsed.rules,
+              settings: parsed.settings || deepClone(DEFAULT_CONFIG.settings)
+            });
+          }, "Configuração importada");
+          fileInput.value = "";
+        });
+        importBtn.addEventListener("click", () => fileInput.click());
+        backupRow.appendChild(exportBtn);
+        backupRow.appendChild(importBtn);
+        backupRow.appendChild(fileInput);
+        backupCard.appendChild(backupRow);
+        backup.appendChild(backupCard);
+        page.appendChild(backup);
+
+        // Sobre
+        const sobre = el("div", "section");
+        sobre.appendChild(el("div", "section-label", "Sobre"));
+        const sobreCard = el("div", "settings-card");
+        sobreCard.appendChild(aboutLine("Versão", "1.0.0"));
+        sobreCard.appendChild(aboutLine("Créditos", "Desenvolvido por Itachi"));
+        sobreCard.appendChild(aboutLine("Licença", "Uso pessoal"));
+        sobre.appendChild(sobreCard);
+        page.appendChild(sobre);
       }
+
+      // ---------------------------------------------------------------
+      // Boot
+      // ---------------------------------------------------------------
 
       function bindGlobalEvents() {
         document
           .getElementById("masterSwitch")
           .addEventListener("change", () => {
+            if (appState.restarting) return;
             performAction("toggle_monitor", {});
-          });
-
-        document
-          .getElementById("restartBtn")
-          .addEventListener("click", async () => {
-            showRestartBanner(false);
-            await performAction("toggle_monitor", {});
-            await sleep(400);
-            await performAction("toggle_monitor", {});
           });
       }
 
       async function boot() {
         bindGlobalEvents();
-        await performAction("get_status", {});
+        // Renderiza a shell (abas + cards do Painel) já com o appState
+        // padrão, antes de esperar o get_status. No navegador isso é
+        // imperceptível, mas no webview do Tasker o get_status é um
+        // round-trip real até a TK_Reactor — sem isso, tabBar/page ficam
+        // vazios (nunca renderizados) até a resposta voltar, e a pessoa vê
+        // a página em branco por baixo do "executando...". Assim, os cards
+        // já aparecem (com dados zerados) e só são atualizados depois.
+        renderApp();
+        setLoadingVisible(true);
+
+        const status = await environment.runAction("get_status", {});
+        if (status.ok === false) {
+          setLoadingVisible(false);
+          showToast(status.error || "Falha ao carregar status", true);
+          return;
+        }
+        appState.monitorActive = !!status.monitorActive;
+
+        if (status.config) {
+          // normalizeConfig garante que providers ausentes/incompletos no
+          // arquivo salvo (schema antigo, campo faltando, etc.) não
+          // quebrem os handlers da UI, e trava clipboard/screen em false.
+          appState.config = normalizeConfig(status.config);
+          renderApp();
+          setLoadingVisible(false);
+          return;
+        }
+
+        // Nenhuma config persistida ainda (primeira inicialização, tanto no
+        // navegador quanto no webview do Tasker): a única fonte dos dados
+        // default é o DEFAULT_CONFIG aqui do JS. Semeia localmente e manda
+        // persistir de uma vez (arquivo + variável do monitor, no Tasker).
+        appState.config = normalizeConfig(DEFAULT_CONFIG);
+        renderApp();
+        const saveResponse = await environment.runAction("save_config", {
+          config: appState.config,
+          providersChanged: true
+        });
+        setLoadingVisible(false);
+        if (saveResponse.ok === false) {
+          showToast(
+            saveResponse.error || "Falha ao salvar configuração padrão",
+            true
+          );
+        }
       }
 
       boot();
