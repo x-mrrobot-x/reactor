@@ -1,64 +1,12 @@
 "use strict";
 
 const TASK_NAME = "TK_Reactor";
+const TASK_TIMEOUT_MS = 12000;
 
-const PROVIDERS_META = {
-  keyboard: {
-    name: "Keyboard",
-    description: "Eventos relacionados à digitação",
-    icon: "keyboard"
-  },
-  app: {
-    name: "App",
-    description: "Eventos relacionados aos aplicativos",
-    icon: "app"
-  },
-  clipboard: {
-    name: "Clipboard",
-    description: "Monitoramento da área de transferência",
-    icon: "clipboard"
-  },
-  notification: {
-    name: "Notification",
-    description: "Eventos de notificações",
-    icon: "bell"
-  },
-  screen: {
-    name: "Screen",
-    description: "Monitoramento de texto na tela via Acessibilidade",
-    icon: "eye"
-  }
-};
-
-const EVENTS_META = {
-  typed_text: {
-    label: "Texto digitado",
-    provider: "keyboard"
-  },
-  app_opened: {
-    label: "Aplicativo aberto",
-    provider: "app"
-  },
-  clipboard_changed: {
-    label: "Clipboard alterado",
-    provider: "clipboard"
-  },
-  notification_received: {
-    label: "Notificação recebida",
-    provider: "notification"
-  },
-  screen_text_detected: {
-    label: "Texto apareceu na tela",
-    provider: "screen"
-  }
-};
-
-const PROVIDER_EVENTS = {};
-Object.keys(EVENTS_META).forEach(type => {
-  const providerId = EVENTS_META[type].provider;
-  if (!PROVIDER_EVENTS[providerId]) PROVIDER_EVENTS[providerId] = [];
-  PROVIDER_EVENTS[providerId].push(type);
-});
+/* =========================================================================
+ * PROVIDER_REGISTRY — substitui PROVIDERS_META + EVENTS_META + PROVIDER_EVENTS
+ * + CONDITION_OPERATORS(allowlist) + EVENT_ALLOWED_OPERATORS + SINGLE_ENDS_WITH_EVENTS
+ * ========================================================================= */
 
 const CONDITION_OPERATORS = {
   match: "Igual a",
@@ -68,58 +16,308 @@ const CONDITION_OPERATORS = {
   regex: "Regex"
 };
 
-const EVENT_ALLOWED_OPERATORS = {
-  typed_text: ["ends_with"]
-};
-
-const SINGLE_ENDS_WITH_EVENTS = ["typed_text"];
-
-function allowedOperatorsForEvent(eventType) {
-  return EVENT_ALLOWED_OPERATORS[eventType] || Object.keys(CONDITION_OPERATORS);
-}
-
-function isSingleEndsWithEvent(eventType) {
-  return SINGLE_ENDS_WITH_EVENTS.indexOf(eventType) !== -1;
-}
-
-const ACTION_TYPES_META = {
-  text_replacer: {
-    label: "Text Replacer",
-    events: ["typed_text"]
+const PROVIDER_REGISTRY = {
+  keyboard: {
+    name: "Keyboard",
+    description: "Eventos relacionados à digitação",
+    icon: "keyboard",
+    implemented: true,
+    events: {
+      typed_text: {
+        label: "Texto digitado",
+        matchField: null,
+        matchFieldOptions: null,
+        allowedOperators: ["ends_with"],
+        lockedCondition: true,
+        variables: [
+          { key: "trigger", label: "Gatilho reconhecido", example: "@pix" },
+          {
+            key: "input",
+            label: "Texto digitado antes do gatilho",
+            example: "Pode me mandar a chave "
+          },
+          {
+            key: "app_package",
+            label: "Pacote do app onde o campo está",
+            example: "com.whatsapp"
+          },
+          { key: "app_name", label: "Nome amigável do app", example: "WhatsApp" }
+        ]
+      }
+    }
   },
-  run_task: {
-    label: "Executar Tarefa"
-  },
-  open_app: {
-    label: "Abrir App"
-  },
-  ai: { label: "Processar com IA", events: ["typed_text"] },
-  translate: {
-    label: "Traduzir",
-    events: ["typed_text"]
-  },
-  search: {
-    label: "Pesquisar"
-  },
-  open_url: {
-    label: "Abrir URL"
-  },
-  clipboard: {
-    label: "Definir Clipboard"
+  app: {
+    name: "App",
+    description: "Eventos relacionados aos aplicativos",
+    icon: "app",
+    implemented: true,
+    events: {
+      app_opened: {
+        label: "Aplicativo aberto",
+        matchField: null,
+        matchFieldOptions: null,
+        allowedOperators: [
+          "match",
+          "contains",
+          "starts_with",
+          "ends_with",
+          "regex"
+        ],
+        lockedCondition: false,
+        variables: [
+          {
+            key: "app_package",
+            label: "Pacote do app aberto",
+            example: "com.whatsapp"
+          },
+          { key: "app_name", label: "Nome amigável do app", example: "WhatsApp" }
+        ]
+      }
+    }
   },
   notification: {
-    label: "Criar Notificação"
+    name: "Notification",
+    description: "Eventos de notificações",
+    icon: "bell",
+    implemented: true,
+    events: {
+      notification_received: {
+        label: "Notificação recebida",
+        matchField: "body",
+        matchFieldOptions: ["title", "body", "full_text", "app_package"],
+        allowedOperators: [
+          "match",
+          "contains",
+          "starts_with",
+          "ends_with",
+          "regex"
+        ],
+        lockedCondition: false,
+        variables: [
+          {
+            key: "app_package",
+            label: "Pacote do app que notificou",
+            example: "com.whatsapp"
+          },
+          { key: "app_name", label: "Nome amigável do app", example: "WhatsApp" },
+          { key: "title", label: "Título da notificação", example: "João Silva" },
+          { key: "body", label: "Corpo da notificação", example: "Chegou o Pix?" },
+          {
+            key: "full_text",
+            label: "Título + corpo concatenados",
+            example: "João Silva Chegou o Pix?"
+          }
+        ]
+      }
+    }
+  },
+  clipboard: {
+    name: "Clipboard",
+    description: "Monitoramento da área de transferência",
+    icon: "clipboard",
+    implemented: false,
+    events: {
+      clipboard_changed: {
+        label: "Clipboard alterado",
+        matchField: null,
+        matchFieldOptions: null,
+        allowedOperators: [
+          "match",
+          "contains",
+          "starts_with",
+          "ends_with",
+          "regex"
+        ],
+        lockedCondition: false,
+        variables: [{ key: "text", label: "Conteúdo copiado", example: "https://..." }]
+      }
+    }
+  },
+  screen: {
+    name: "Screen",
+    description: "Monitoramento de texto na tela via Acessibilidade",
+    icon: "eye",
+    implemented: false,
+    events: {
+      screen_text_detected: {
+        label: "Texto apareceu na tela",
+        matchField: null,
+        matchFieldOptions: null,
+        allowedOperators: [
+          "match",
+          "contains",
+          "starts_with",
+          "ends_with",
+          "regex"
+        ],
+        lockedCondition: false,
+        variables: [
+          { key: "text", label: "Texto detectado na tela", example: "..." },
+          {
+            key: "app_package",
+            label: "Pacote do app em primeiro plano",
+            example: "..."
+          }
+        ]
+      }
+    }
+  }
+};
+
+function eventsOfProvider(providerId) {
+  return Object.keys(PROVIDER_REGISTRY[providerId].events);
+}
+
+function eventDef(eventType) {
+  for (const p of Object.keys(PROVIDER_REGISTRY)) {
+    if (PROVIDER_REGISTRY[p].events[eventType]) return PROVIDER_REGISTRY[p].events[eventType];
+  }
+  return null;
+}
+
+function allowedOperatorsForEvent(eventType) {
+  return eventDef(eventType).allowedOperators;
+}
+
+function isLockedConditionEvent(eventType) {
+  return !!eventDef(eventType).lockedCondition;
+}
+
+function variablesOfEvent(eventType) {
+  return eventDef(eventType).variables || [];
+}
+
+function hasMatchFieldChoice(eventType) {
+  return !!eventDef(eventType).matchFieldOptions;
+}
+
+function isUnimplementedProvider(providerId) {
+  return !PROVIDER_REGISTRY[providerId].implemented;
+}
+
+/* =========================================================================
+ * ACTION_REGISTRY — substitui ACTION_TYPES_META + defaultActionConfig(switch)
+ * ========================================================================= */
+
+const ACTION_REGISTRY = {
+  text_replacer: {
+    label: "Text Replacer",
+    archetype: "template",
+    templateFields: ["text"],
+    defaultConfig: () => ({ text: "" }),
+    compatibleWith: evt => eventDef(evt).lockedCondition === true
+  },
+  clipboard: {
+    label: "Definir Clipboard",
+    archetype: "template",
+    templateFields: ["text"],
+    defaultConfig: () => ({ text: "" })
+  },
+  run_task: {
+    label: "Executar Tarefa",
+    archetype: "template",
+    templateFields: ["par1", "par2"],
+    defaultConfig: () => ({ task: "", par1: "", par2: "" })
+  },
+  open_url: {
+    label: "Abrir URL",
+    archetype: "template",
+    templateFields: ["url"],
+    defaultConfig: () => ({ url: "" })
+  },
+  notification: {
+    label: "Criar Notificação",
+    archetype: "template",
+    templateFields: ["title", "body"],
+    defaultConfig: () => ({ title: "", body: "" })
+  },
+  search: {
+    label: "Pesquisar",
+    archetype: "template",
+    templateFields: ["query"],
+    defaultConfig: () => ({ engine: "google", query: "{input}" })
+  },
+  open_app: {
+    label: "Abrir App",
+    archetype: "selector",
+    defaultConfig: () => ({ package: "" })
   },
   click: {
-    label: "Clicar na Tela"
+    label: "Clicar na Tela",
+    archetype: "selector",
+    defaultConfig: () => ({ x: 0, y: 0 })
+  },
+  ai: {
+    label: "Processar com IA",
+    archetype: "processor",
+    producesVariable: "ai_result",
+    defaultConfig: evt => ({
+      inputVariable: eventDef(evt).lockedCondition
+        ? "input"
+        : eventDef(evt).matchField || (variablesOfEvent(evt)[0] || {}).key || "",
+      systemInstructions: "",
+      outputMode: eventDef(evt).lockedCondition ? "replace_field" : "expose_variable"
+    })
+  },
+  translate: {
+    label: "Traduzir",
+    archetype: "processor",
+    producesVariable: "translate_result",
+    defaultConfig: evt => ({
+      inputVariable: eventDef(evt).lockedCondition
+        ? "input"
+        : eventDef(evt).matchField || (variablesOfEvent(evt)[0] || {}).key || "",
+      language: "en",
+      outputMode: eventDef(evt).lockedCondition ? "replace_field" : "expose_variable"
+    })
   }
 };
 
 function allowedActionTypesForEvent(eventType) {
-  return Object.keys(ACTION_TYPES_META).filter(type => {
-    const meta = ACTION_TYPES_META[type];
-    return !meta.events || meta.events.indexOf(eventType) !== -1;
+  return Object.keys(ACTION_REGISTRY).filter(type => {
+    const meta = ACTION_REGISTRY[type];
+    return meta.compatibleWith ? meta.compatibleWith(eventType) : true;
   });
+}
+
+function defaultActionConfig(type, eventType) {
+  const meta = ACTION_REGISTRY[type];
+  if (!meta) return {};
+  return meta.defaultConfig(eventType);
+}
+
+function outputModeOptions(eventType) {
+  const opts = [];
+  if (isLockedConditionEvent(eventType)) opts.push(["replace_field", "Substituir campo"]);
+  opts.push(["expose_variable", "Expor variável"]);
+  return opts;
+}
+
+function outputModeHint(actionType, mode) {
+  if (mode === "replace_field") {
+    return "O resultado substitui todo o campo digitado.";
+  }
+  const varName = actionType === "translate" ? "translate_result" : "ai_result";
+  return `O resultado fica disponível para a próxima ação da regra através de {${varName}}.`;
+}
+
+/* Variáveis disponíveis num ponto da regra: as do evento + ai_result/translate_result
+ * de qualquer ação "processor" anterior na mesma regra (seção 7 do plano). */
+function availableVariablesAt(draft, actionIndex) {
+  const vars = variablesOfEvent(draft.event.type).slice();
+  const limit = Math.min(actionIndex, draft.actions.length);
+  for (let i = 0; i < limit; i++) {
+    const prevAction = draft.actions[i];
+    const meta = ACTION_REGISTRY[prevAction.type];
+    if (meta && meta.archetype === "processor") {
+      vars.push({
+        key: meta.producesVariable,
+        label: prevAction.type === "translate" ? "Resultado da tradução (ação anterior)" : "Resultado da IA (ação anterior)",
+        example: prevAction.type === "translate" ? "Hello, how are you?" : "Resposta gerada pela IA"
+      });
+    }
+  }
+  return vars;
 }
 
 const SEARCH_ENGINES = [
@@ -163,47 +361,47 @@ const ICONS = {
   eye: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>'
 };
 
+/* =========================================================================
+ * Configuração padrão — regras agrupadas por provider (seção 11 do plano)
+ * ========================================================================= */
+
 const DEFAULT_CONFIG = {
   providers: {
     keyboard: { enabled: true },
     app: { enabled: true },
-    clipboard: { enabled: true },
+    clipboard: { enabled: false },
     notification: { enabled: false },
     screen: { enabled: false }
   },
-  rules: [
-    {
-      id: "rule_seed1",
-      enabled: true,
-      name: "Resposta rápida Pix",
-      provider: "keyboard",
-      event: { type: "typed_text" },
-      conditions: [{ operator: "ends_with", value: "@pix" }],
-      actions: [
-        { type: "text_replacer", config: { text: "Chave PIX: 123.456.789-00" } }
-      ]
-    },
-    {
-      id: "rule_seed2",
-      enabled: true,
-      name: "Abrir link copiado",
-      provider: "clipboard",
-      event: { type: "clipboard_changed" },
-      conditions: [{ operator: "regex", value: "^https?://" }],
-      actions: [{ type: "run_task", config: { task: "TK_OpenClipboardLink" } }]
-    },
-    {
-      id: "rule_seed3",
-      enabled: false,
-      name: "Alerta de promoção",
-      provider: "notification",
-      event: { type: "notification_received" },
-      conditions: [{ operator: "contains", value: "promoção" }],
-      actions: [
-        { type: "run_task", config: { task: "TK_DismissNotification" } }
-      ]
-    }
-  ],
+  rules_by_provider: {
+    keyboard: [
+      {
+        id: "rule_seed1",
+        enabled: true,
+        name: "Resposta rápida Pix",
+        event: { type: "typed_text" },
+        conditions: [{ operator: "ends_with", value: "@pix" }],
+        actions: [
+          { type: "text_replacer", config: { text: "Chave PIX: 123.456.789-00" } }
+        ]
+      }
+    ],
+    app: [],
+    notification: [
+      {
+        id: "rule_seed3",
+        enabled: false,
+        name: "Alerta de promoção",
+        event: { type: "notification_received", matchField: "body" },
+        conditions: [{ operator: "contains", value: "promoção" }],
+        actions: [
+          { type: "run_task", config: { task: "TK_DismissNotification" } }
+        ]
+      }
+    ],
+    clipboard: [],
+    screen: []
+  },
   settings: {
     theme: "dark",
     language: "pt",
@@ -211,18 +409,12 @@ const DEFAULT_CONFIG = {
   }
 };
 
-const UNIMPLEMENTED_PROVIDERS = ["clipboard", "screen"];
-
-function isUnimplementedProvider(providerId) {
-  return UNIMPLEMENTED_PROVIDERS.indexOf(providerId) !== -1;
-}
-
 function normalizeConfig(config) {
   const normalized = deepClone(config || {});
   if (!normalized.providers || typeof normalized.providers !== "object") {
     normalized.providers = {};
   }
-  Object.keys(PROVIDERS_META).forEach(id => {
+  Object.keys(PROVIDER_REGISTRY).forEach(id => {
     if (
       !normalized.providers[id] ||
       typeof normalized.providers[id] !== "object"
@@ -233,11 +425,47 @@ function normalizeConfig(config) {
       normalized.providers[id].enabled = false;
     }
   });
-  if (!Array.isArray(normalized.rules)) normalized.rules = [];
+  if (
+    !normalized.rules_by_provider ||
+    typeof normalized.rules_by_provider !== "object"
+  ) {
+    normalized.rules_by_provider = {};
+  }
+  Object.keys(PROVIDER_REGISTRY).forEach(id => {
+    if (!Array.isArray(normalized.rules_by_provider[id])) {
+      normalized.rules_by_provider[id] = [];
+    }
+  });
   if (!normalized.settings || typeof normalized.settings !== "object") {
     normalized.settings = deepClone(DEFAULT_CONFIG.settings);
   }
   return normalized;
+}
+
+/* Achata rules_by_provider numa lista única (tela de Regras continua igual
+ * visualmente); cada item leva um providerId atribuído na leitura, não
+ * persistido (seção 11 do plano). */
+function allRules() {
+  const grouped = (appState.config && appState.config.rules_by_provider) || {};
+  const result = [];
+  Object.keys(PROVIDER_REGISTRY).forEach(providerId => {
+    (grouped[providerId] || []).forEach(rule => {
+      result.push(Object.assign({}, rule, { providerId }));
+    });
+  });
+  return result;
+}
+
+/* Localiza em qual array/posição uma regra está, pelo id — usado por
+ * toggle/duplicate/delete/edit para operar direto em rules_by_provider. */
+function findRuleLocation(id) {
+  const grouped = (appState.config && appState.config.rules_by_provider) || {};
+  for (const providerId of Object.keys(PROVIDER_REGISTRY)) {
+    const arr = grouped[providerId] || [];
+    const index = arr.findIndex(r => r.id === id);
+    if (index !== -1) return { providerId, index, arr, rule: arr[index] };
+  }
+  return null;
 }
 
 function safeParseJSON(text) {
@@ -254,6 +482,22 @@ function deepClone(value) {
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function withTimeout(promise, ms, timeoutMessage) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(timeoutMessage)), ms);
+    promise.then(
+      value => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      error => {
+        clearTimeout(timer);
+        reject(error);
+      }
+    );
+  });
 }
 
 function el(tag, className, text) {
@@ -285,33 +529,6 @@ function renderCollection(container, items, emptyMessage, renderItem) {
   items.forEach((item, index) =>
     container.appendChild(renderItem(item, index))
   );
-}
-
-function defaultActionConfig(type) {
-  switch (type) {
-    case "text_replacer":
-      return { text: "" };
-    case "run_task":
-      return { task: "", par1: "", par2: "" };
-    case "open_app":
-      return { package: "" };
-    case "ai":
-      return { systemInstructions: "" };
-    case "translate":
-      return { language: "en" };
-    case "search":
-      return { engine: "google" };
-    case "open_url":
-      return { url: "" };
-    case "clipboard":
-      return { text: "" };
-    case "notification":
-      return { title: "", body: "" };
-    case "click":
-      return { x: 0, y: 0 };
-    default:
-      return {};
-  }
 }
 
 function emptyRule() {
@@ -370,10 +587,11 @@ function createTaskerEnvironment() {
     };
     let raw = null;
     try {
-      const result = await Tasker.runTaskForResult({
-        name: TASK_NAME,
-        variables
-      });
+      const result = await withTimeout(
+        Tasker.runTaskForResult({ name: TASK_NAME, variables }),
+        TASK_TIMEOUT_MS,
+        `Tempo esgotado aguardando resposta da tarefa ${TASK_NAME}`
+      );
       raw = result ? result.returnValue : null;
     } catch (error) {
       return {
@@ -470,7 +688,7 @@ const appState = {
   restarting: false,
   config: {
     providers: {},
-    rules: [],
+    rules_by_provider: {},
     settings: {
       theme: "dark",
       language: "pt",
@@ -517,7 +735,6 @@ function cacheDom() {
   dom.toast = document.getElementById("toast");
   dom.toastMsg = document.getElementById("toastMsg");
   dom.toastText = document.getElementById("toastText");
-  dom.loading = document.getElementById("loading");
   dom.dialogRoot = document.getElementById("dialogRoot");
 }
 
@@ -532,10 +749,6 @@ function showToast(message, isError) {
   }, 3200);
 }
 
-function setLoadingVisible(visible) {
-  dom.loading.style.display = visible ? "flex" : "none";
-}
-
 function applyTheme(theme) {
   const value = theme === "light" ? "light" : "dark";
   document.documentElement.setAttribute("data-theme", value);
@@ -543,13 +756,11 @@ function applyTheme(theme) {
 }
 
 async function performAction(action, payload) {
-  setLoadingVisible(true);
   const response = await environment.runAction(action, payload || {});
   if (typeof response.monitorActive === "boolean") {
     appState.monitorActive = response.monitorActive;
   }
   syncUI();
-  setLoadingVisible(false);
 
   const feedback = response.error || response.message;
   if (feedback) showToast(feedback, response.ok === false);
@@ -569,16 +780,21 @@ async function toggleMonitorQuiet() {
 async function restartMonitor() {
   appState.restarting = true;
   syncUI();
-  setLoadingVisible(true);
 
-  await toggleMonitorQuiet();
-  await sleep(400);
-  await toggleMonitorQuiet();
-
-  setLoadingVisible(false);
-  appState.restarting = false;
-  syncUI();
-  showToast("Monitor reiniciado", false);
+  try {
+    await toggleMonitorQuiet();
+    // Dá tempo da assinatura RxJava antiga (debounce/takeUntil cruzam thread)
+    // realmente se desinscrever antes de reabrir — sem isso, um evento de
+    // acessibilidade em trânsito pode ser processado por ambas as assinaturas
+    // e disparar uma regra em duplicidade.
+    await sleep(400);
+    await toggleMonitorQuiet();
+  } finally {
+    // Garante que o card nunca fique preso em "Reiniciando..." mesmo se a
+    // tarefa do Tasker travar/estourar o timeout ou lançar um erro inesperado.
+    appState.restarting = false;
+    syncUI();
+  }
 }
 
 async function performConfigMutation(mutateFn, successMessage) {
@@ -593,7 +809,6 @@ async function performConfigMutation(mutateFn, successMessage) {
     return { ok: false, error: error.message };
   }
 
-  setLoadingVisible(true);
   const providersChanged = !providersEqual(
     beforeProviders,
     appState.config.providers
@@ -610,7 +825,6 @@ async function performConfigMutation(mutateFn, successMessage) {
     appState.monitorActive = response.monitorActive;
   }
   syncUI();
-  setLoadingVisible(false);
 
   const feedback =
     response.error ||
@@ -688,9 +902,9 @@ function updatePowerCard() {
 }
 
 function updateDashboardCards() {
-  const rules = appState.config.rules || [];
+  const rules = allRules();
   const providers = appState.config.providers || {};
-  const providerIds = Object.keys(PROVIDERS_META);
+  const providerIds = Object.keys(PROVIDER_REGISTRY);
   const activeRules = rules.filter(r => r.enabled).length;
   const activeProviders = providerIds.filter(
     id => providers[id] && providers[id].enabled
@@ -714,7 +928,7 @@ function updateDashboardCards() {
 }
 
 function providerBadge(providerId) {
-  const meta = PROVIDERS_META[providerId];
+  const meta = PROVIDER_REGISTRY[providerId];
   const badge = el("span", "provider-badge");
   badge.innerHTML = ICONS[meta.icon] || "";
   badge.appendChild(document.createTextNode(meta.name));
@@ -733,13 +947,13 @@ function buildRuleRow(rule) {
   const info = el("div", "rule-info");
   const top = el("div", "rule-top");
   top.appendChild(el("span", "rule-name", rule.name));
-  top.appendChild(providerBadge(rule.provider));
+  top.appendChild(providerBadge(rule.providerId));
   info.appendChild(top);
 
-  const eventMeta = EVENTS_META[rule.event.type];
+  const def = eventDef(rule.event.type);
   const flow = el("div", "rule-flow");
   flow.appendChild(
-    el("span", "flow-part", eventMeta ? eventMeta.label : rule.event.type)
+    el("span", "flow-part", def ? def.label : rule.event.type)
   );
   flow.appendChild(el("span", "flow-sep", "›"));
   flow.appendChild(
@@ -774,14 +988,14 @@ function buildRuleRow(rule) {
 function renderRuleList() {
   renderCollection(
     dom.ruleList,
-    appState.config.rules || [],
+    allRules(),
     "Nenhuma regra cadastrada ainda.",
     buildRuleRow
   );
 }
 
 function updateRulesPageStats() {
-  const rules = appState.config.rules || [];
+  const rules = allRules();
   const activeCount = rules.filter(r => r.enabled).length;
   dom.rulesCountLabel.textContent = `${countLabel(rules.length, "regra", "regras")} · ${countLabel(
     activeCount,
@@ -792,26 +1006,28 @@ function updateRulesPageStats() {
 
 function toggleRule(rule) {
   return performConfigMutation(() => {
-    const target = appState.config.rules.find(r => r.id === rule.id);
-    if (!target) throw new Error("Regra não encontrada");
-    target.enabled = !target.enabled;
+    const loc = findRuleLocation(rule.id);
+    if (!loc) throw new Error("Regra não encontrada");
+    loc.rule.enabled = !loc.rule.enabled;
   }, "Regra atualizada");
 }
 
 function duplicateRule(rule) {
   return performConfigMutation(() => {
-    const idx = appState.config.rules.findIndex(r => r.id === rule.id);
-    if (idx === -1) throw new Error("Regra não encontrada");
-    const clone = deepClone(appState.config.rules[idx]);
+    const loc = findRuleLocation(rule.id);
+    if (!loc) throw new Error("Regra não encontrada");
+    const clone = deepClone(loc.rule);
     clone.id = genId();
     clone.name = `${clone.name} (cópia)`;
-    appState.config.rules.splice(idx + 1, 0, clone);
+    loc.arr.splice(loc.index + 1, 0, clone);
   }, "Regra duplicada");
 }
 
 function deleteRule(rule) {
   return performConfigMutation(() => {
-    appState.config.rules = appState.config.rules.filter(r => r.id !== rule.id);
+    const loc = findRuleLocation(rule.id);
+    if (!loc) throw new Error("Regra não encontrada");
+    loc.arr.splice(loc.index, 1);
   }, "Regra excluída");
 }
 
@@ -819,7 +1035,7 @@ function handleRuleListClick(event) {
   const target = event.target.closest("[data-action]");
   const row = event.target.closest("[data-rule-id]");
   if (!target || !row) return;
-  const rule = appState.config.rules.find(r => r.id === row.dataset.ruleId);
+  const rule = allRules().find(r => r.id === row.dataset.ruleId);
   if (!rule) return;
 
   switch (target.dataset.action) {
@@ -844,7 +1060,7 @@ function bindRulesPage() {
 }
 
 function buildProviderRow(id) {
-  const meta = PROVIDERS_META[id];
+  const meta = PROVIDER_REGISTRY[id];
   const providers = appState.config.providers || {};
   const enabled = !!(providers[id] && providers[id].enabled);
   const live = enabled && appState.monitorActive;
@@ -876,18 +1092,54 @@ function buildProviderRow(id) {
   return row;
 }
 
+function updateProviderRow(row, id) {
+  const providers = appState.config.providers || {};
+  const enabled = !!(providers[id] && providers[id].enabled);
+  const live = enabled && appState.monitorActive;
+
+  row.classList.toggle("off", !enabled);
+
+  const nameRow = row.querySelector(".provider-name-row");
+  const chip = nameRow.querySelector(".chip.ok");
+  if (live && !chip) {
+    nameRow.appendChild(el("span", "chip ok", "monitorando"));
+  } else if (!live && chip) {
+    chip.remove();
+  }
+
+  const input = row.querySelector('input[type="checkbox"]');
+  if (input.checked !== enabled) input.checked = enabled;
+}
+
 function renderProviderList() {
-  renderCollection(
-    dom.providerList,
-    Object.keys(PROVIDERS_META),
-    "Nenhum provider disponível.",
-    buildProviderRow
+  const ids = Object.keys(PROVIDER_REGISTRY);
+  const existingRows = new Map(
+    Array.from(dom.providerList.children).map(row => [
+      row.dataset.providerId,
+      row
+    ])
   );
+  const sameStructure =
+    existingRows.size === ids.length && ids.every(id => existingRows.has(id));
+
+  if (!sameStructure) {
+    renderCollection(
+      dom.providerList,
+      ids,
+      "Nenhum provider disponível.",
+      buildProviderRow
+    );
+    return;
+  }
+
+  // Atualiza as rows existentes em vez de recriá-las, preservando o nó do
+  // input/knob para que a transição CSS do toggle seja exibida corretamente.
+  ids.forEach(id => updateProviderRow(existingRows.get(id), id));
 }
 
 function updateProvidersPageStats() {
   const providers = appState.config.providers || {};
-  const ids = Object.keys(PROVIDERS_META);
+  const ids = Object.keys(PROVIDER_REGISTRY);
   const activeCount = ids.filter(
     id => providers[id] && providers[id].enabled
   ).length;
@@ -908,7 +1160,7 @@ function handleProviderListChange(event) {
   if (!input || !row) return;
 
   const id = row.dataset.providerId;
-  const meta = PROVIDERS_META[id];
+  const meta = PROVIDER_REGISTRY[id];
 
   if (isUnimplementedProvider(id)) {
     const triedToEnable = input.checked;
@@ -967,7 +1219,8 @@ async function handleImportFile() {
     !parsed ||
     typeof parsed !== "object" ||
     !parsed.providers ||
-    !Array.isArray(parsed.rules)
+    !parsed.rules_by_provider ||
+    typeof parsed.rules_by_provider !== "object"
   ) {
     showToast("Arquivo de configuração inválido", true);
     dom.importFileInput.value = "";
@@ -976,7 +1229,7 @@ async function handleImportFile() {
   await performConfigMutation(() => {
     appState.config = normalizeConfig({
       providers: parsed.providers,
-      rules: parsed.rules,
+      rules_by_provider: parsed.rules_by_provider,
       settings: parsed.settings || deepClone(DEFAULT_CONFIG.settings)
     });
   }, "Configuração importada");
@@ -1011,6 +1264,7 @@ let dialogKeyHandler = null;
 
 function closeDialog() {
   dom.dialogRoot.innerHTML = "";
+  activeVarDropdown = null;
   if (dialogKeyHandler) {
     document.removeEventListener("keydown", dialogKeyHandler);
     dialogKeyHandler = null;
@@ -1069,6 +1323,39 @@ function createBoundSelectRow(label, obj, key, options) {
   return row;
 }
 
+/* Select vinculado a uma variável disponível naquele ponto da regra
+ * (usado por inputVariable de ai/translate — seção 7 do plano). */
+function createBoundVariableSelectRow(label, obj, key, vars) {
+  const row = el("div", "field-row");
+  row.appendChild(el("label", null, label));
+  const select = document.createElement("select");
+  const validKeys = vars.map(v => v.key);
+
+  if (vars.length === 0) {
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Nenhuma variável disponível";
+    select.appendChild(option);
+  } else {
+    vars.forEach(v => {
+      const option = document.createElement("option");
+      option.value = v.key;
+      option.textContent = `{${v.key}} — ${v.label}`;
+      select.appendChild(option);
+    });
+  }
+
+  if (validKeys.indexOf(obj[key]) === -1) {
+    obj[key] = validKeys[0] || "";
+  }
+  select.value = obj[key];
+  select.addEventListener("change", () => {
+    obj[key] = select.value;
+  });
+  row.appendChild(select);
+  return row;
+}
+
 function createBoundTextareaBlock(label, obj, key) {
   const block = el("div", "field-block");
   block.appendChild(el("label", "block-label", label));
@@ -1081,19 +1368,140 @@ function createBoundTextareaBlock(label, obj, key) {
   return block;
 }
 
-function buildActionConfigFields(container, action) {
+/* Dropdown de variáveis disponíveis: uma por linha, com a explicação (label)
+ * e o exemplo, para o usuário selecionar. Só aparece ao focar/clicar no
+ * campo, e fecha ao clicar fora — ver attachVariableDropdown abaixo. */
+function buildVariableDropdown(vars) {
+  const dropdown = el("div", "var-dropdown");
+  (vars || []).forEach(v => {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "var-dd-item";
+    item.dataset.varKey = v.key;
+
+    const line1 = el("span", "var-dd-line1");
+    line1.appendChild(el("span", "var-dd-key", `{${v.key}}`));
+    if (v.label) line1.appendChild(el("span", "var-dd-label", v.label));
+    item.appendChild(line1);
+
+    if (v.example) {
+      item.appendChild(el("span", "var-dd-example", `Ex: ${v.example}`));
+    }
+    dropdown.appendChild(item);
+  });
+  return dropdown;
+}
+
+/* Só um dropdown de variáveis fica aberto por vez em toda a página; um único
+ * listener global cuida de fechar ao clicar fora, em vez de um listener novo
+ * por campo (o que vazaria a cada re-render da lista de ações). */
+let activeVarDropdown = null;
+
+function closeActiveVarDropdown() {
+  if (activeVarDropdown) activeVarDropdown.closeFn();
+}
+
+document.addEventListener("pointerdown", event => {
+  if (activeVarDropdown && !activeVarDropdown.wrap.contains(event.target)) {
+    closeActiveVarDropdown();
+  }
+});
+
+/* Substitui o campo (input/textarea) já inserido em rowEl por uma versão
+ * envolvida num wrapper posicionado, com o dropdown de variáveis anexado
+ * logo abaixo — abre no foco do campo, insere {chave} no cursor ao clicar
+ * numa linha, e fecha ao selecionar ou ao clicar fora. */
+function attachVariableDropdown(rowEl, vars) {
+  const fieldEl = rowEl.querySelector("input, textarea");
+  if (!fieldEl || !vars || !vars.length) return;
+
+  const wrap = el("div", "var-field-wrap");
+  fieldEl.parentNode.insertBefore(wrap, fieldEl);
+  wrap.appendChild(fieldEl);
+
+  const dropdown = buildVariableDropdown(vars);
+  wrap.appendChild(dropdown);
+
+  function closeThisDropdown() {
+    dropdown.classList.remove("open");
+    if (activeVarDropdown && activeVarDropdown.wrap === wrap) {
+      activeVarDropdown = null;
+    }
+  }
+  function openThisDropdown() {
+    closeActiveVarDropdown();
+    dropdown.classList.add("open");
+    activeVarDropdown = { wrap, closeFn: closeThisDropdown };
+  }
+
+  fieldEl.addEventListener("focus", openThisDropdown);
+  // blur cobre navegação por teclado (Tab); selecionar um item não dispara
+  // blur porque o pointerdown do dropdown já chama preventDefault().
+  fieldEl.addEventListener("blur", closeThisDropdown);
+
+  function selectItem(item) {
+    const insertText = `{${item.dataset.varKey}}`;
+    const start =
+      fieldEl.selectionStart != null ? fieldEl.selectionStart : fieldEl.value.length;
+    const end =
+      fieldEl.selectionEnd != null ? fieldEl.selectionEnd : fieldEl.value.length;
+    const current = fieldEl.value || "";
+    fieldEl.value = current.slice(0, start) + insertText + current.slice(end);
+    fieldEl.dispatchEvent(new Event("input"));
+
+    closeThisDropdown();
+    fieldEl.focus();
+    const cursor = start + insertText.length;
+    fieldEl.setSelectionRange(cursor, cursor);
+  }
+
+  // pointerdown (não click) para rodar antes do blur do campo, preservando
+  // selectionStart/selectionEnd — é o evento nativo em qualquer input
+  // (touch/mouse/caneta) no WebView do Tasker, sem depender da camada de
+  // emulação mouse-a-partir-de-touch. preventDefault() aqui já suprime o
+  // click sintetizado que viria em seguida no toque/clique normal.
+  dropdown.addEventListener("pointerdown", event => {
+    const item = event.target.closest(".var-dd-item");
+    if (!item) return;
+    event.preventDefault();
+    selectItem(item);
+  });
+
+  // click como reforço só para ativação via teclado (Tab + Enter/Espaço),
+  // que nunca passa por pointerdown — não duplica a inserção no toque/clique
+  // porque o preventDefault() acima já impede esse click sintetizado.
+  dropdown.addEventListener("click", event => {
+    const item = event.target.closest(".var-dd-item");
+    if (!item) return;
+    selectItem(item);
+  });
+}
+
+/* Anexa um campo templável ao container, com o dropdown de variáveis
+ * disponíveis (se houver alguma) já vinculado ao campo. */
+function appendTemplateFieldWithVariables(container, rowEl, vars) {
+  container.appendChild(rowEl);
+  attachVariableDropdown(rowEl, vars);
+}
+
+function buildActionConfigFields(container, action, draft, actionIndex) {
   container.innerHTML = "";
   const type = action.type;
   const config = action.config;
+  const vars = availableVariablesAt(draft, actionIndex);
 
   if (type === "text_replacer" || type === "clipboard") {
-    container.appendChild(createBoundTextareaBlock("Texto", config, "text"));
+    appendTemplateFieldWithVariables(
+      container,
+      createBoundTextareaBlock("Texto", config, "text"),
+      vars
+    );
     if (type === "text_replacer") {
       container.appendChild(
         el(
           "div",
           "hint",
-          "Use {value} para inserir o texto do gatilho. O que foi digitado antes do gatilho é mantido."
+          "Use {trigger} para inserir o texto do gatilho reconhecido. O texto digitado antes do gatilho (input) é mantido automaticamente antes do texto de substituição."
         )
       );
     }
@@ -1101,17 +1509,24 @@ function buildActionConfigFields(container, action) {
     container.appendChild(
       createBoundTextRow("Tarefa", config, "task", "Nome da task no Tasker")
     );
-    container.appendChild(
-      createBoundTextRow("%par1", config, "par1", "{value}")
+    appendTemplateFieldWithVariables(
+      container,
+      createBoundTextRow("%par1", config, "par1"),
+      vars
     );
-    container.appendChild(
-      createBoundTextRow("%par2", config, "par2", "{value}")
+    appendTemplateFieldWithVariables(
+      container,
+      createBoundTextRow("%par2", config, "par2"),
+      vars
     );
   } else if (type === "open_app") {
     container.appendChild(
       createBoundTextRow("Pacote", config, "package", "com.exemplo.app")
     );
   } else if (type === "ai") {
+    container.appendChild(
+      createBoundVariableSelectRow("Variável de entrada", config, "inputVariable", vars)
+    );
     container.appendChild(
       createBoundTextareaBlock(
         "Instruções do sistema",
@@ -1120,34 +1535,60 @@ function buildActionConfigFields(container, action) {
       )
     );
     container.appendChild(
-      el(
-        "div",
-        "hint",
-        "O texto digitado antes do gatilho é enviado à IA; a resposta substitui todo o campo."
+      createBoundSelectRow(
+        "Modo de saída",
+        config,
+        "outputMode",
+        outputModeOptions(draft.event.type)
       )
     );
+    container.appendChild(
+      el("div", "hint", outputModeHint("ai", config.outputMode))
+    );
   } else if (type === "translate") {
+    container.appendChild(
+      createBoundVariableSelectRow("Variável de entrada", config, "inputVariable", vars)
+    );
     container.appendChild(
       createBoundSelectRow("Idioma", config, "language", LANG_OPTIONS)
     );
     container.appendChild(
-      el(
-        "div",
-        "hint",
-        "O texto digitado antes do gatilho é traduzido e substitui todo o campo."
+      createBoundSelectRow(
+        "Modo de saída",
+        config,
+        "outputMode",
+        outputModeOptions(draft.event.type)
       )
+    );
+    container.appendChild(
+      el("div", "hint", outputModeHint("translate", config.outputMode))
     );
   } else if (type === "search") {
     container.appendChild(
       createBoundSelectRow("Mecanismo", config, "engine", SEARCH_ENGINES)
     );
+    appendTemplateFieldWithVariables(
+      container,
+      createBoundTextRow("Consulta", config, "query", "{input}"),
+      vars
+    );
   } else if (type === "open_url") {
-    container.appendChild(
-      createBoundTextRow("URL", config, "url", "https://...")
+    appendTemplateFieldWithVariables(
+      container,
+      createBoundTextRow("URL", config, "url", "https://..."),
+      vars
     );
   } else if (type === "notification") {
-    container.appendChild(createBoundTextRow("Título", config, "title"));
-    container.appendChild(createBoundTextareaBlock("Mensagem", config, "body"));
+    appendTemplateFieldWithVariables(
+      container,
+      createBoundTextRow("Título", config, "title"),
+      vars
+    );
+    appendTemplateFieldWithVariables(
+      container,
+      createBoundTextareaBlock("Mensagem", config, "body"),
+      vars
+    );
   } else if (type === "click") {
     container.appendChild(createBoundNumberRow("X", config, "x"));
     container.appendChild(createBoundNumberRow("Y", config, "y"));
@@ -1156,7 +1597,7 @@ function buildActionConfigFields(container, action) {
 
 function renderConditionsList(container, draft) {
   container.innerHTML = "";
-  const locked = isSingleEndsWithEvent(draft.event.type);
+  const locked = isLockedConditionEvent(draft.event.type);
 
   if (locked && draft.conditions.length === 0) {
     draft.conditions.push({ operator: "ends_with", value: "" });
@@ -1219,6 +1660,7 @@ function renderConditionsList(container, draft) {
 
 function renderActionsList(container, draft) {
   container.innerHTML = "";
+  activeVarDropdown = null;
   const allowedTypes = allowedActionTypesForEvent(draft.event.type);
 
   if (draft.actions.length === 0) {
@@ -1239,13 +1681,13 @@ function renderActionsList(container, draft) {
     allowedTypes.forEach(type => {
       const option = document.createElement("option");
       option.value = type;
-      option.textContent = ACTION_TYPES_META[type].label;
+      option.textContent = ACTION_REGISTRY[type].label;
       typeSelect.appendChild(option);
     });
     typeSelect.value = action.type;
     typeSelect.addEventListener("change", () => {
       action.type = typeSelect.value;
-      action.config = defaultActionConfig(action.type);
+      action.config = defaultActionConfig(action.type, draft.event.type);
       renderActionsList(container, draft);
     });
     head.appendChild(typeSelect);
@@ -1281,7 +1723,7 @@ function renderActionsList(container, draft) {
     card.appendChild(head);
 
     const fields = el("div", "action-card-fields");
-    buildActionConfigFields(fields, action);
+    buildActionConfigFields(fields, action, draft, index);
     card.appendChild(fields);
 
     container.appendChild(card);
@@ -1292,6 +1734,7 @@ function openRuleDialog(existingRule) {
   closeDialog();
   const isEdit = !!existingRule;
   const draft = deepClone(existingRule || emptyRule());
+  if (isEdit) draft.provider = existingRule.providerId;
 
   const overlay = el("div", "dialog-overlay");
   const dialog = el("div", "dialog wide");
@@ -1333,10 +1776,10 @@ function openRuleDialog(existingRule) {
   const providerRow = el("div", "field-row");
   providerRow.appendChild(el("label", null, "Provider"));
   const providerSelect = document.createElement("select");
-  Object.keys(PROVIDERS_META).forEach(id => {
+  Object.keys(PROVIDER_REGISTRY).forEach(id => {
     const option = document.createElement("option");
     option.value = id;
-    option.textContent = PROVIDERS_META[id].name;
+    option.textContent = PROVIDER_REGISTRY[id].name;
     providerSelect.appendChild(option);
   });
   providerSelect.value = draft.provider;
@@ -1349,28 +1792,83 @@ function openRuleDialog(existingRule) {
   eventRow.appendChild(eventSelect);
   eventSection.appendChild(eventRow);
 
+  // Seletor "Campo de correspondência" — visível só quando o evento tem
+  // matchFieldOptions (hoje, só notification_received) — seção 5 do plano.
+  const matchFieldRow = el("div", "field-row");
+  matchFieldRow.appendChild(el("label", null, "Campo"));
+  const matchFieldSelect = document.createElement("select");
+  matchFieldRow.appendChild(matchFieldSelect);
+  eventSection.appendChild(matchFieldRow);
+  matchFieldSelect.addEventListener("change", () => {
+    draft.event.matchField = matchFieldSelect.value;
+    updateCondHint();
+  });
+
+  const condHint = el("div", "hint");
+  body.appendChild(eventSection);
+
+  function refreshMatchFieldRow() {
+    const hasChoice = hasMatchFieldChoice(draft.event.type);
+    matchFieldRow.style.display = hasChoice ? "" : "none";
+    if (!hasChoice) {
+      delete draft.event.matchField;
+      return;
+    }
+    const def = eventDef(draft.event.type);
+    matchFieldSelect.innerHTML = "";
+    def.matchFieldOptions.forEach(key => {
+      const option = document.createElement("option");
+      option.value = key;
+      const varMeta = def.variables.find(v => v.key === key);
+      option.textContent = varMeta ? `${varMeta.label} (${key})` : key;
+      matchFieldSelect.appendChild(option);
+    });
+    if (
+      !draft.event.matchField ||
+      def.matchFieldOptions.indexOf(draft.event.matchField) === -1
+    ) {
+      draft.event.matchField = def.matchField || def.matchFieldOptions[0];
+    }
+    matchFieldSelect.value = draft.event.matchField;
+  }
+
+  function updateCondHint() {
+    const def = eventDef(draft.event.type);
+    if (def.lockedCondition) {
+      condHint.textContent =
+        "Condição fixa: a regra dispara quando o texto digitado termina com o valor abaixo.";
+    } else if (hasMatchFieldChoice(draft.event.type)) {
+      const fieldKey = draft.event.matchField || def.matchField;
+      const varMeta = def.variables.find(v => v.key === fieldKey);
+      condHint.textContent = `As condições abaixo são testadas contra: ${
+        varMeta ? varMeta.label : fieldKey
+      }.`;
+    } else {
+      condHint.textContent = "";
+    }
+  }
+
   function refreshEventOptions() {
     eventSelect.innerHTML = "";
-    (PROVIDER_EVENTS[providerSelect.value] || []).forEach(type => {
+    eventsOfProvider(providerSelect.value).forEach(type => {
       const option = document.createElement("option");
       option.value = type;
-      option.textContent = EVENTS_META[type].label;
+      option.textContent = eventDef(type).label;
       eventSelect.appendChild(option);
     });
     const stillValid =
       draft.event.type &&
-      EVENTS_META[draft.event.type] &&
-      EVENTS_META[draft.event.type].provider === providerSelect.value;
+      PROVIDER_REGISTRY[providerSelect.value].events[draft.event.type];
     eventSelect.value = stillValid
       ? draft.event.type
-      : (PROVIDER_EVENTS[providerSelect.value] || [])[0];
+      : eventsOfProvider(providerSelect.value)[0];
     draft.event.type = eventSelect.value;
   }
   refreshEventOptions();
-  body.appendChild(eventSection);
 
   const condSection = el("div", "editor-section");
   condSection.appendChild(sectionLabel(2, "Condições"));
+  condSection.appendChild(condHint);
   const condList = el("div");
   condSection.appendChild(condList);
   const addCondBtn = el("button", "add-row-btn");
@@ -1398,7 +1896,7 @@ function openRuleDialog(existingRule) {
         : allowedTypes[0];
     draft.actions.push({
       type: defaultType,
-      config: defaultActionConfig(defaultType)
+      config: defaultActionConfig(defaultType, draft.event.type)
     });
     renderActionsList(actList, draft);
   });
@@ -1406,7 +1904,7 @@ function openRuleDialog(existingRule) {
   body.appendChild(actSection);
 
   function refreshEventDependents() {
-    const locked = isSingleEndsWithEvent(draft.event.type);
+    const locked = isLockedConditionEvent(draft.event.type);
 
     if (locked) {
       const preservedValue =
@@ -1418,6 +1916,8 @@ function openRuleDialog(existingRule) {
         draft.conditions = [{ operator: "ends_with", value: preservedValue }];
       }
     }
+    refreshMatchFieldRow();
+    updateCondHint();
     renderConditionsList(condList, draft);
     addCondBtn.style.display = locked ? "none" : "flex";
 
@@ -1426,6 +1926,22 @@ function openRuleDialog(existingRule) {
     draft.actions = draft.actions.filter(
       action => allowedTypes.indexOf(action.type) !== -1
     );
+
+    // Normaliza configs de ai/translate que ficaram inválidas após a troca
+    // de evento (outputMode "replace_field" só vale para evento locked;
+    // inputVariable precisa apontar para uma variável ainda disponível).
+    draft.actions.forEach((action, idx) => {
+      if (action.type === "ai" || action.type === "translate") {
+        if (!locked && action.config.outputMode === "replace_field") {
+          action.config.outputMode = "expose_variable";
+        }
+        const availableKeys = availableVariablesAt(draft, idx).map(v => v.key);
+        if (availableKeys.indexOf(action.config.inputVariable) === -1) {
+          action.config.inputVariable = availableKeys[0] || "";
+        }
+      }
+    });
+
     const removedCount = beforeCount - draft.actions.length;
     renderActionsList(actList, draft);
     if (removedCount > 0) {
@@ -1466,7 +1982,7 @@ function openRuleDialog(existingRule) {
       showToast("Adicione ao menos uma ação", true);
       return;
     }
-    if (isSingleEndsWithEvent(draft.event.type)) {
+    if (isLockedConditionEvent(draft.event.type)) {
       const cond = draft.conditions[0];
       if (!cond || !cond.value || !cond.value.trim()) {
         showToast("Informe o texto do gatilho (condição 'Termina com')", true);
@@ -1475,27 +1991,32 @@ function openRuleDialog(existingRule) {
     }
     const response = await performConfigMutation(
       () => {
+        const persistedRule = {
+          id: isEdit ? existingRule.id : genId(),
+          enabled: draft.enabled,
+          name,
+          event: deepClone(draft.event),
+          conditions: deepClone(draft.conditions),
+          actions: deepClone(draft.actions)
+        };
+
         if (isEdit) {
-          const target = appState.config.rules.find(
-            r => r.id === existingRule.id
-          );
-          if (!target) throw new Error("Regra não encontrada");
-          target.name = name;
-          target.enabled = draft.enabled;
-          target.provider = draft.provider;
-          target.event = draft.event;
-          target.conditions = draft.conditions;
-          target.actions = draft.actions;
+          const loc = findRuleLocation(existingRule.id);
+          if (!loc) throw new Error("Regra não encontrada");
+          if (loc.providerId === draft.provider) {
+            loc.arr[loc.index] = persistedRule;
+          } else {
+            loc.arr.splice(loc.index, 1);
+            if (!Array.isArray(appState.config.rules_by_provider[draft.provider])) {
+              appState.config.rules_by_provider[draft.provider] = [];
+            }
+            appState.config.rules_by_provider[draft.provider].push(persistedRule);
+          }
         } else {
-          appState.config.rules.push({
-            id: genId(),
-            enabled: draft.enabled,
-            name,
-            provider: draft.provider,
-            event: draft.event,
-            conditions: draft.conditions,
-            actions: draft.actions
-          });
+          if (!Array.isArray(appState.config.rules_by_provider[draft.provider])) {
+            appState.config.rules_by_provider[draft.provider] = [];
+          }
+          appState.config.rules_by_provider[draft.provider].push(persistedRule);
         }
       },
       isEdit ? "Regra atualizada" : "Regra criada"
@@ -1535,11 +2056,9 @@ async function boot() {
   applyTheme(appState.config.settings.theme);
   syncUI();
   applySettingsToForm();
-  setLoadingVisible(true);
 
   const status = await environment.runAction("get_status", {});
   if (status.ok === false) {
-    setLoadingVisible(false);
     showToast(status.error || "Falha ao carregar status", true);
     return;
   }
@@ -1550,7 +2069,6 @@ async function boot() {
     applyTheme(appState.config.settings.theme);
     syncUI();
     applySettingsToForm();
-    setLoadingVisible(false);
     return;
   }
 
@@ -1562,7 +2080,6 @@ async function boot() {
     config: appState.config,
     providersChanged: true
   });
-  setLoadingVisible(false);
   if (saveResponse.ok === false) {
     showToast(
       saveResponse.error || "Falha ao salvar configuração padrão",

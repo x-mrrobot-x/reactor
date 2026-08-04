@@ -225,7 +225,7 @@ header::before {
 }
 .switch .knob {
   position: absolute;
-  top: 2px;
+  top: 3px;
   left: 2px;
   width: 20px;
   height: 20px;
@@ -243,11 +243,11 @@ header::before {
   background: var(--accent-dim);
 }
 .switch input:checked + .track + .knob {
-  transform: translateX(20px);
+  transform: translateX(22px);
   background: var(--accent);
 }
 .switch.sm input:checked + .track + .knob {
-  transform: translateX(16px);
+  transform: translateX(18px);
 }
 
 .tabs {
@@ -918,6 +918,86 @@ textarea {
   justify-content: center;
 }
 
+/* ---- Variáveis disponíveis (dropdown) ----
+   Usado nos campos de template (text_replacer/clipboard/run_task/open_url/
+   notification/search). O wrapper toma o lugar do input/textarea original
+   dentro do .field-row flex, então herda flex:1 dele; o dropdown fica
+   posicionado (absolute) preso ao wrapper, aberto só no foco do campo. */
+.var-field-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.var-field-wrap input,
+.var-field-wrap textarea {
+  width: 100%;
+}
+.var-dropdown {
+  display: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 20;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 5px;
+  max-height: 216px;
+  overflow-y: auto;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
+}
+.var-dropdown.open {
+  display: block;
+}
+.var-dd-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  padding: 7px 9px;
+  border-radius: 7px;
+}
+.var-dd-item:hover,
+.var-dd-item:active {
+  background: var(--accent-soft);
+}
+.var-dd-item + .var-dd-item {
+  margin-top: 1px;
+}
+.var-dd-line1 {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+.var-dd-key {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.var-dd-label {
+  font-size: 11.5px;
+  color: var(--text);
+}
+.var-dd-example {
+  font-size: 10px;
+  color: var(--text-faint);
+}
+
+/* Hint de seção (ex: contra qual campo as condições são testadas), distinto
+   do .hint de ação por ficar logo abaixo do rótulo da seção. */
+.editor-section .hint {
+  margin: -4px 0 10px;
+}
+.editor-section .hint:empty {
+  display: none;
+}
+
 /* ---- Config ---- */
 .settings-card {
   background: var(--surface);
@@ -1013,17 +1093,4 @@ textarea {
     opacity: 1;
     transform: none;
   }
-}
-
-#loading {
-  position: fixed;
-  inset: 0;
-  background: rgba(11, 13, 18, 0.6);
-  z-index: 50;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  font-size: 12px;
-  color: var(--text-dim);
 }
