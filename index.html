@@ -7,240 +7,478 @@
       content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
     />
     <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Reactor — automações que reagem a eventos do Android em tempo real."
+    />
+    <meta name="theme-color" content="#050810" />
     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
     <script src="js/index.js" defer></script>
     <script>
       eruda.init();
     </script>
-    <title>Reactor</title>
+    <title>Reactor · Automação de eventos Android</title>
     <link rel="stylesheet" href="css/index.css" />
   </head>
   <body>
-    <header>
-      <div class="header-inner">
-        <div class="brand">
-          <span class="brand-mark">
-            <img src="assets/logo.webp" alt="Logo Reactor" class="logo-img" />
-          </span>
-          <span class="brand-word">REACTOR</span>
-        </div>
-        <p class="tagline">Reaja a eventos do android em tempo real.</p>
-        <div class="power">
-          <div class="led off" id="masterLed"></div>
-          <div class="power-info">
-            <b>Monitor do Reactor</b>
-            <span id="masterState">PARADO</span>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="masterSwitch" />
-            <span class="track"></span>
-            <span class="knob"></span>
-          </label>
-        </div>
+    <div class="app">
+      <div class="bg-fx" aria-hidden="true">
+        <span></span><span></span><span></span><span></span>
       </div>
-    </header>
-
-    <nav class="tabs" id="tabBar">
-      <button class="tab active" type="button" data-page="dashboard">
-        Painel
-      </button>
-      <button class="tab" type="button" data-page="rules">Regras</button>
-      <button class="tab" type="button" data-page="providers">Providers</button>
-      <button class="tab" type="button" data-page="settings">Config</button>
-    </nav>
-
-    <main id="page">
-      <section class="page" id="page-dashboard" data-page="dashboard">
-        <div class="page-head">
-          <div class="page-head-top">
-            <h2>Painel</h2>
+      <header>
+        <div class="header-inner">
+          <div class="brand">
+            <span class="brand-mark">
+              <img
+                src="assets/logo.webp"
+                alt="Logo Reactor"
+                class="logo-img"
+                onerror="
+                  this.outerHTML =
+                    '&lt;svg viewBox=\'0 0 24 24\' width=\'26\' height=\'26\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'&gt;&lt;path d=\'M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z\'/&gt;&lt;/svg&gt;'
+                "
+              />
+            </span>
+            <span class="brand-text">
+              <span class="brand-word">REACTOR</span>
+              <p class="tagline">
+                Reaja a eventos do Android em tempo real.
+              </p>
+            </span>
+          </div>
+          <div class="card power">
+            <div class="led off" id="masterLed"></div>
+            <div class="power-info">
+              <b>Monitor do Reactor</b>
+              <span id="masterState">PARADO</span>
+            </div>
+            <label class="switch">
+              <input type="checkbox" id="masterSwitch" />
+              <span class="track"></span>
+              <span class="knob"></span>
+            </label>
           </div>
         </div>
-
-        <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-value" id="statRulesTotal">0</div>
-            <div class="stat-label">Regras cadastradas</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="statRulesActive">0</div>
-            <div class="stat-label">Regras ativas</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="statProvidersActive">0/0</div>
-            <div class="stat-label">Providers ativos</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-value" id="statMonitorState">Desligado</div>
-            <div class="stat-label">Monitor</div>
-          </div>
-        </div>
-
-        <div class="flow-diagram">
-          <div class="section-label">Fluxo de execução</div>
-          <div class="flow-track" id="flowTrack">
-            <div class="flow-node">Provider</div>
-            <div class="flow-arrow">›</div>
-            <div class="flow-node">Evento</div>
-            <div class="flow-arrow">›</div>
-            <div class="flow-node">Condições</div>
-            <div class="flow-arrow">›</div>
-            <div class="flow-node">Ações</div>
-          </div>
-        </div>
-
-        <div class="power-card">
-          <div class="power-card-label">
-            <b id="powerCardTitle">Monitor parado</b>
-            <span id="powerCardSubtitle"
-              >Nenhum evento está sendo observado.</span
+        <nav class="card tabs" id="tabBar">
+          <button class="tab active" type="button" data-page="dashboard">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-layout-dashboard-icon lucide-layout-dashboard"
             >
-          </div>
-          <button
-            class="power-toggle-btn"
-            type="button"
-            id="powerToggleBtn"
-            data-action="toggle-monitor"
-          >
-            Iniciar
+              <rect width="7" height="9" x="3" y="3" rx="1" />
+              <rect width="7" height="5" x="14" y="3" rx="1" />
+              <rect width="7" height="9" x="14" y="12" rx="1" />
+              <rect width="7" height="5" x="3" y="16" rx="1" />
+            </svg>
+            <span>Painel</span>
           </button>
-        </div>
-      </section>
+          <button class="tab" type="button" data-page="rules">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap-icon lucide-zap"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg>
+            <span>Regras</span>
+          </button>
+          <button class="tab" type="button" data-page="providers">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="lucide lucide-cpu-icon lucide-cpu"
+            >
+              <path d="M12 20v2" />
+              <path d="M12 2v2" />
+              <path d="M17 20v2" />
+              <path d="M17 2v2" />
+              <path d="M2 12h2" />
+              <path d="M2 17h2" />
+              <path d="M2 7h2" />
+              <path d="M20 12h2" />
+              <path d="M20 17h2" />
+              <path d="M20 7h2" />
+              <path d="M7 20v2" />
+              <path d="M7 2v2" />
+              <rect x="4" y="4" width="16" height="16" rx="2" />
+              <rect x="8" y="8" width="8" height="8" rx="1" />
+            </svg>
+            <span>Providers</span>
+          </button>
+          <button class="tab" type="button" data-page="settings">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Config</span>
+          </button>
+        </nav>
+      </header>
 
-      <section class="page" id="page-rules" data-page="rules" hidden>
-        <div class="page-head">
-          <div class="page-head-top">
-            <h2>Regras</h2>
-            <div class="page-head-actions">
-              <button class="btn-header-add" type="button" id="addRuleBtn">
+      <main id="page">
+        <section class="page" id="page-dashboard" data-page="dashboard">
+          <div class="page-head">
+            <div class="page-head-top">
+              <h2>Painel</h2>
+            </div>
+            <p class="page-sub">
+              Visão geral das suas automações e do estado do monitor.
+            </p>
+          </div>
+
+          <div class="card hero-card">
+            <div class="hero-top">
+              <div class="hero-icon">
                 <svg
                   viewBox="0 0 24 24"
-                  width="14"
-                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z" />
+                </svg>
+              </div>
+              <div class="hero-body">
+                <b>Automação sempre pronta</b>
+                <span
+                  >Escute o teclado, apps e notificações e responda na hora.</span
+                >
+              </div>
+            </div>
+            <div class="hero-bar"><i></i></div>
+          </div>
+
+          <div class="stat-grid">
+            <div class="card stat-card">
+              <div class="stat-card-top">
+                <svg
+                  viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   stroke-width="1.8"
                   stroke-linecap="round"
                 >
-                  <path d="M12 5v14M5 12h14" />
+                  <path d="M4 6h16M4 12h16M4 18h10" />
                 </svg>
-                <span>Nova Regra</span>
-              </button>
+                <span>Regras</span>
+              </div>
+              <div class="stat-value" id="statRulesTotal">0</div>
+              <div class="stat-label">Regras cadastradas</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-card-top">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="m5 13 4 4L19 7" />
+                </svg>
+                <span>Ativas</span>
+              </div>
+              <div class="stat-value" id="statRulesActive">0</div>
+              <div class="stat-label">Regras em execução</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-card-top">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 20v-6M6 20v-3M18 20v-9" />
+                  <circle cx="12" cy="6" r="2" />
+                </svg>
+                <span>Providers</span>
+              </div>
+              <div class="stat-value" id="statProvidersActive">0/0</div>
+              <div class="stat-label">Fontes de evento ativas</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-card-top">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                >
+                  <circle cx="12" cy="12" r="8" />
+                  <path d="M12 8v4l3 2" />
+                </svg>
+                <span>Monitor</span>
+              </div>
+              <div class="stat-value" id="statMonitorState">Desligado</div>
+              <div class="stat-label">Estado do serviço</div>
             </div>
           </div>
-          <div class="page-stats">
-            <div class="page-stats-info">
-              <span class="count" id="rulesCountLabel"
-                >0 regras · 0 ativas</span
+
+          <div class="card power-card">
+            <div class="power-card-label">
+              <b id="powerCardTitle">Monitor parado</b>
+              <span id="powerCardSubtitle"
+                >Nenhum evento está sendo observado.</span
               >
             </div>
+            <button
+              class="power-toggle-btn"
+              type="button"
+              id="powerToggleBtn"
+              data-action="toggle-monitor"
+            >
+              Iniciar
+            </button>
           </div>
-        </div>
 
-        <div class="section">
-          <div class="rule-list" id="ruleList"></div>
-        </div>
-      </section>
-
-      <section class="page" id="page-providers" data-page="providers" hidden>
-        <div class="page-head">
-          <div class="page-head-top">
-            <h2>Providers</h2>
-          </div>
-          <div class="page-stats">
-            <div class="page-stats-info">
-              <span class="count" id="providersCountLabel">0 de 0 ativos</span>
+          <div class="flow-diagram">
+            <div class="section-label">Fluxo de execução</div>
+            <div class="flow-track" id="flowTrack">
+              <div class="flow-node">Provider</div>
+              <div class="flow-arrow">›</div>
+              <div class="flow-node">Evento</div>
+              <div class="flow-arrow">›</div>
+              <div class="flow-node">Condições</div>
+              <div class="flow-arrow">›</div>
+              <div class="flow-node">Ações</div>
             </div>
           </div>
-        </div>
 
-        <div class="section">
-          <div class="provider-list" id="providerList"></div>
-        </div>
-      </section>
-
-      <section class="page" id="page-settings" data-page="settings" hidden>
-        <div class="page-head">
-          <h2>Configurações</h2>
-        </div>
-
-        <div class="section">
-          <div class="section-label">Geral</div>
-          <div class="settings-card">
-            <div class="field-row">
-              <label for="themeSelect">Tema</label>
-              <select id="themeSelect">
-                <option value="dark">Escuro</option>
-                <option value="light">Claro</option>
-              </select>
-            </div>
-            <div class="field-row">
-              <label for="langSelect">Idioma</label>
-              <select id="langSelect">
-                <option value="pt">Português</option>
-                <option value="en">English</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="section">
-          <div class="section-label">IA · Gemini</div>
-          <div class="settings-card">
-            <div class="field-row">
-              <label for="geminiModelSelect">Modelo</label>
-              <select id="geminiModelSelect">
-                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
-                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
-                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
-              </select>
-            </div>
-            <div class="field-row">
-              <label for="geminiApiKeyInput">Chave API</label>
-              <input type="text" id="geminiApiKeyInput" placeholder="AIza..." />
+          <div class="section">
+            <div class="section-label">Como começar</div>
+            <div class="steps">
+              <div class="step">
+                <span class="step-n">1</span>
+                <div class="step-body">
+                  <b>Ative um provider</b>
+                  <span
+                    >Escolha as fontes de evento que o Reactor deve
+                    observar.</span
+                  >
+                </div>
+              </div>
+              <div class="step">
+                <span class="step-n">2</span>
+                <div class="step-body">
+                  <b>Crie uma regra</b>
+                  <span
+                    >Defina o evento, as condições e as ações que serão
+                    executadas.</span
+                  >
+                </div>
+              </div>
+              <div class="step">
+                <span class="step-n">3</span>
+                <div class="step-body">
+                  <b>Ligue o monitor</b>
+                  <span
+                    >Com o monitor ativo suas regras reagem
+                    instantaneamente.</span
+                  >
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        <div class="section">
-          <div class="section-label">Backup</div>
-          <div class="settings-card">
-            <div class="backup-row">
-              <button class="btn btn-ghost" type="button" id="exportConfigBtn">
-                Exportar configuração
-              </button>
-              <button class="btn btn-ghost" type="button" id="importConfigBtn">
-                Importar configuração
-              </button>
+        <section class="page" id="page-rules" data-page="rules" hidden>
+          <div class="page-head">
+            <div class="page-head-top">
+              <h2>Regras</h2>
+              <div class="page-head-actions">
+                <button class="btn-header-add" type="button" id="addRuleBtn">
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="14"
+                    height="14"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                  >
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                  <span>Nova Regra</span>
+                </button>
+              </div>
+            </div>
+            <p class="page-sub">
+              Evento, condições e ações — tudo em um lugar.
+            </p>
+            <div class="page-stats">
+              <div class="page-stats-info">
+                <span class="count" id="rulesCountLabel"
+                  >0 regras · 0 ativas</span
+                >
+              </div>
+            </div>
+            <div class="card search-field">
+              <svg
+                viewBox="0 0 24 24"
+                width="15"
+                height="15"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.9"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <path d="m20 20-3.2-3.2" />
+              </svg>
               <input
-                type="file"
-                id="importFileInput"
-                accept="application/json"
-                style="display: none"
+                type="text"
+                id="ruleSearchInput"
+                placeholder="Buscar regras…"
+                autocomplete="off"
               />
             </div>
           </div>
-        </div>
 
-        <div class="section">
-          <div class="section-label">Sobre</div>
-          <div class="settings-card">
-            <div class="about-line">
-              <span class="about-label">Versão</span>
-              <span class="about-value">1.0.0</span>
+          <div class="section">
+            <div class="rule-list" id="ruleList"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-providers" data-page="providers" hidden>
+          <div class="page-head">
+            <div class="page-head-top">
+              <h2>Providers</h2>
             </div>
-            <div class="about-line">
-              <span class="about-label">Créditos</span>
-              <span class="about-value">Desenvolvido por x-mrrobot-x</span>
-            </div>
-            <div class="about-line">
-              <span class="about-label">Licença</span>
-              <span class="about-value">Uso pessoal</span>
+            <p class="page-sub">
+              Fontes de evento do sistema que alimentam suas regras.
+            </p>
+            <div class="page-stats">
+              <div class="page-stats-info">
+                <span class="count" id="providersCountLabel"
+                  >0 de 0 ativos</span
+                >
+              </div>
             </div>
           </div>
-        </div>
-      </section>
-    </main>
+
+          <div class="section">
+            <div class="provider-list" id="providerList"></div>
+          </div>
+        </section>
+
+        <section class="page" id="page-settings" data-page="settings" hidden>
+          <div class="page-head">
+            <div class="page-head-top">
+              <h2>Configurações</h2>
+            </div>
+            <p class="page-sub">
+              Preferências, IA, backup e informações do app.
+            </p>
+          </div>
+
+          <div class="section">
+            <div class="section-label">Geral</div>
+            <div class="card settings-card">
+              <div class="field-row">
+                <label for="themeSelect">Tema</label>
+                <select id="themeSelect">
+                  <option value="dark">Escuro</option>
+                  <option value="light">Claro</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <label for="langSelect">Idioma</label>
+                <select id="langSelect">
+                  <option value="pt">Português</option>
+                  <option value="en">English</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-label">IA · Gemini</div>
+            <div class="card settings-card">
+              <div class="field-row">
+                <label for="geminiModelSelect">Modelo</label>
+                <select id="geminiModelSelect">
+                  <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                  <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+                  <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                </select>
+              </div>
+              <div class="field-row">
+                <label for="geminiApiKeyInput">Chave API</label>
+                <input
+                  type="text"
+                  id="geminiApiKeyInput"
+                  placeholder="AIza..."
+                />
+              </div>
+              <p class="hint">
+                A chave fica salva apenas neste dispositivo, no armazenamento
+                local.
+              </p>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-label">Backup</div>
+            <div class="card settings-card">
+              <div class="backup-row">
+                <button
+                  class="btn btn-ghost"
+                  type="button"
+                  id="exportConfigBtn"
+                >
+                  Exportar configuração
+                </button>
+                <button
+                  class="btn btn-ghost"
+                  type="button"
+                  id="importConfigBtn"
+                >
+                  Importar configuração
+                </button>
+                <input
+                  type="file"
+                  id="importFileInput"
+                  accept="application/json"
+                  style="display: none"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-label">Sobre</div>
+            <div class="card settings-card">
+              <div class="about-line">
+                <span class="about-label">Versão</span>
+                <span class="about-value">1.0.0</span>
+              </div>
+              <div class="about-line">
+                <span class="about-label">Créditos</span>
+                <span class="about-value">x-mrrobot-x</span>
+              </div>
+              <div class="about-line">
+                <span class="about-label">Licença</span>
+                <span class="about-value">Uso pessoal</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
 
     <div id="toast">
       <div class="msg" id="toastMsg">

@@ -41,7 +41,11 @@ const PROVIDER_REGISTRY = {
             label: "Pacote do app onde o campo está",
             example: "com.whatsapp"
           },
-          { key: "app_name", label: "Nome amigável do app", example: "WhatsApp" }
+          {
+            key: "app_name",
+            label: "Nome amigável do app",
+            example: "WhatsApp"
+          }
         ]
       }
     }
@@ -70,7 +74,11 @@ const PROVIDER_REGISTRY = {
             label: "Pacote do app aberto",
             example: "com.whatsapp"
           },
-          { key: "app_name", label: "Nome amigável do app", example: "WhatsApp" }
+          {
+            key: "app_name",
+            label: "Nome amigável do app",
+            example: "WhatsApp"
+          }
         ]
       }
     }
@@ -99,9 +107,21 @@ const PROVIDER_REGISTRY = {
             label: "Pacote do app que notificou",
             example: "com.whatsapp"
           },
-          { key: "app_name", label: "Nome amigável do app", example: "WhatsApp" },
-          { key: "title", label: "Título da notificação", example: "João Silva" },
-          { key: "body", label: "Corpo da notificação", example: "Chegou o Pix?" },
+          {
+            key: "app_name",
+            label: "Nome amigável do app",
+            example: "WhatsApp"
+          },
+          {
+            key: "title",
+            label: "Título da notificação",
+            example: "João Silva"
+          },
+          {
+            key: "body",
+            label: "Corpo da notificação",
+            example: "Chegou o Pix?"
+          },
           {
             key: "full_text",
             label: "Título + corpo concatenados",
@@ -129,7 +149,9 @@ const PROVIDER_REGISTRY = {
           "regex"
         ],
         lockedCondition: false,
-        variables: [{ key: "text", label: "Conteúdo copiado", example: "https://..." }]
+        variables: [
+          { key: "text", label: "Conteúdo copiado", example: "https://..." }
+        ]
       }
     }
   },
@@ -170,7 +192,8 @@ function eventsOfProvider(providerId) {
 
 function eventDef(eventType) {
   for (const p of Object.keys(PROVIDER_REGISTRY)) {
-    if (PROVIDER_REGISTRY[p].events[eventType]) return PROVIDER_REGISTRY[p].events[eventType];
+    if (PROVIDER_REGISTRY[p].events[eventType])
+      return PROVIDER_REGISTRY[p].events[eventType];
   }
   return null;
 }
@@ -254,9 +277,13 @@ const ACTION_REGISTRY = {
     defaultConfig: evt => ({
       inputVariable: eventDef(evt).lockedCondition
         ? "input"
-        : eventDef(evt).matchField || (variablesOfEvent(evt)[0] || {}).key || "",
+        : eventDef(evt).matchField ||
+          (variablesOfEvent(evt)[0] || {}).key ||
+          "",
       systemInstructions: "",
-      outputMode: eventDef(evt).lockedCondition ? "replace_field" : "expose_variable"
+      outputMode: eventDef(evt).lockedCondition
+        ? "replace_field"
+        : "expose_variable"
     })
   },
   translate: {
@@ -266,9 +293,13 @@ const ACTION_REGISTRY = {
     defaultConfig: evt => ({
       inputVariable: eventDef(evt).lockedCondition
         ? "input"
-        : eventDef(evt).matchField || (variablesOfEvent(evt)[0] || {}).key || "",
+        : eventDef(evt).matchField ||
+          (variablesOfEvent(evt)[0] || {}).key ||
+          "",
       language: "en",
-      outputMode: eventDef(evt).lockedCondition ? "replace_field" : "expose_variable"
+      outputMode: eventDef(evt).lockedCondition
+        ? "replace_field"
+        : "expose_variable"
     })
   }
 };
@@ -288,7 +319,8 @@ function defaultActionConfig(type, eventType) {
 
 function outputModeOptions(eventType) {
   const opts = [];
-  if (isLockedConditionEvent(eventType)) opts.push(["replace_field", "Substituir campo"]);
+  if (isLockedConditionEvent(eventType))
+    opts.push(["replace_field", "Substituir campo"]);
   opts.push(["expose_variable", "Expor variável"]);
   return opts;
 }
@@ -312,8 +344,14 @@ function availableVariablesAt(draft, actionIndex) {
     if (meta && meta.archetype === "processor") {
       vars.push({
         key: meta.producesVariable,
-        label: prevAction.type === "translate" ? "Resultado da tradução (ação anterior)" : "Resultado da IA (ação anterior)",
-        example: prevAction.type === "translate" ? "Hello, how are you?" : "Resposta gerada pela IA"
+        label:
+          prevAction.type === "translate"
+            ? "Resultado da tradução (ação anterior)"
+            : "Resultado da IA (ação anterior)",
+        example:
+          prevAction.type === "translate"
+            ? "Hello, how are you?"
+            : "Resposta gerada pela IA"
       });
     }
   }
@@ -358,6 +396,10 @@ const ICONS = {
   clipboard:
     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 11h6M9 15h6"/></svg>',
   bell: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></svg>',
+  chevron:
+    '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+  alert:
+    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>',
   eye: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>'
 };
 
@@ -382,7 +424,10 @@ const DEFAULT_CONFIG = {
         event: { type: "typed_text" },
         conditions: [{ operator: "ends_with", value: "@pix" }],
         actions: [
-          { type: "text_replacer", config: { text: "Chave PIX: 123.456.789-00" } }
+          {
+            type: "text_replacer",
+            config: { text: "Chave PIX: 123.456.789-00" }
+          }
         ]
       }
     ],
@@ -576,42 +621,56 @@ function createTaskerEnvironment() {
     }
   }
 
-  async function runAction(action, payload) {
-    if (action === "export_config") {
-      return exportConfigDirect((payload || {}).config);
-    }
+  // Fila: TK_Reactor não roda em paralelo consigo mesma. Se duas chamadas
+  // (ex.: dois toggles de provider em sequência) saírem juntas, a 2ª runTaskForResult
+  // fica pendurada esperando a task liberar e só cai depois do TASK_TIMEOUT_MS,
+  // gerando o "Falha ao chamar ... Tempo esgotado". Serializando aqui, a 2ª
+  // chamada só é disparada depois que a 1ª já respondeu (sucesso ou erro).
+  let taskQueue = Promise.resolve();
 
+  function callTask(action, payload) {
     const variables = {
       par1: action,
       par2: JSON.stringify(payload || {})
     };
-    let raw = null;
-    try {
-      const result = await withTimeout(
-        Tasker.runTaskForResult({ name: TASK_NAME, variables }),
-        TASK_TIMEOUT_MS,
-        `Tempo esgotado aguardando resposta da tarefa ${TASK_NAME}`
-      );
-      raw = result ? result.returnValue : null;
-    } catch (error) {
-      return {
-        ok: false,
-        error: `Falha ao chamar ${TASK_NAME}: ${error.message}`
-      };
-    }
-    if (!raw) {
-      return {
-        ok: false,
-        error: `Sem resposta da tarefa ${TASK_NAME}. Verifique se ela existe no Tasker.`
-      };
-    }
-    const parsed = safeParseJSON(raw);
-    return (
-      parsed || {
-        ok: false,
-        error: "Resposta inválida da tarefa (JSON malformado)."
+    return (async () => {
+      let raw = null;
+      try {
+        const result = await withTimeout(
+          Tasker.runTaskForResult({ name: TASK_NAME, variables }),
+          TASK_TIMEOUT_MS,
+          `Tempo esgotado aguardando resposta da tarefa ${TASK_NAME}`
+        );
+        raw = result ? result.returnValue : null;
+      } catch (error) {
+        return {
+          ok: false,
+          error: `Falha ao chamar ${TASK_NAME}: ${error.message}`
+        };
       }
-    );
+      if (!raw) {
+        return {
+          ok: false,
+          error: `Sem resposta da tarefa ${TASK_NAME}. Verifique se ela existe no Tasker.`
+        };
+      }
+      const parsed = safeParseJSON(raw);
+      return (
+        parsed || {
+          ok: false,
+          error: "Resposta inválida da tarefa (JSON malformado)."
+        }
+      );
+    })();
+  }
+
+  function runAction(action, payload) {
+    if (action === "export_config") {
+      return exportConfigDirect((payload || {}).config);
+    }
+    const queued = taskQueue.then(() => callTask(action, payload));
+    taskQueue = queued.catch(() => {});
+    return queued;
   }
 
   return { isAvailable, runAction };
@@ -686,6 +745,7 @@ const environment = selectEnvironment();
 const appState = {
   monitorActive: false,
   restarting: false,
+  providersBusy: false,
   config: {
     providers: {},
     rules_by_provider: {},
@@ -720,6 +780,7 @@ function cacheDom() {
   dom.addRuleBtn = document.getElementById("addRuleBtn");
   dom.rulesCountLabel = document.getElementById("rulesCountLabel");
   dom.ruleList = document.getElementById("ruleList");
+  dom.ruleSearchInput = document.getElementById("ruleSearchInput");
 
   dom.providersCountLabel = document.getElementById("providersCountLabel");
   dom.providerList = document.getElementById("providerList");
@@ -935,14 +996,141 @@ function providerBadge(providerId) {
   return badge;
 }
 
+const expandedRules = new Set();
+
+function actionSummary(action) {
+  const meta = ACTION_REGISTRY[action.type];
+  const label = meta ? meta.label : action.type;
+  const cfg = action.config || {};
+  let detail = "";
+  if (cfg.text) detail = cfg.text;
+  else if (cfg.url) detail = cfg.url;
+  else if (cfg.query) detail = cfg.query;
+  else if (cfg.title) detail = cfg.title;
+  else if (cfg.task) detail = cfg.task;
+  else if (cfg.package) detail = cfg.package;
+  else if (cfg.language) detail = `para ${cfg.language}`;
+  else if (cfg.systemInstructions) detail = cfg.systemInstructions;
+  else if (cfg.x != null && cfg.y != null && action.type === "click")
+    detail = `${cfg.x}, ${cfg.y}`;
+  if (detail.length > 60) detail = `${detail.slice(0, 60)}…`;
+  return { label, detail };
+}
+
+function conditionSummary(cond) {
+  const op = CONDITION_OPERATORS[cond.operator] || cond.operator;
+  const field = cond.field ? `${cond.field} ` : "";
+  return `${field}${op} “${cond.value || ""}”`;
+}
+
+function ruleSearchText(rule) {
+  const def = eventDef(rule.event.type);
+  const meta = PROVIDER_REGISTRY[rule.providerId];
+  const parts = [
+    rule.name,
+    def ? def.label : rule.event.type,
+    meta ? meta.name : rule.providerId
+  ];
+  (rule.conditions || []).forEach(c => parts.push(c.value));
+  (rule.actions || []).forEach(a => {
+    const s = actionSummary(a);
+    parts.push(s.label, s.detail);
+  });
+  return parts.join(" ").toLowerCase();
+}
+
+function buildRuleDetails(rule) {
+  const details = el("div", "rule-details");
+  const def = eventDef(rule.event.type);
+
+  const metaGrid = el("div", "rule-meta-grid");
+  function metaItem(label, value) {
+    const item = el("div", "rule-meta-item");
+    item.appendChild(el("span", "rule-meta-label", label));
+    item.appendChild(el("span", "rule-meta-value", value));
+    metaGrid.appendChild(item);
+  }
+  metaItem("Status", rule.enabled ? "Ativa" : "Inativa");
+  metaItem("Evento", def ? def.label : rule.event.type);
+  metaItem(
+    "Provider",
+    PROVIDER_REGISTRY[rule.providerId]
+      ? PROVIDER_REGISTRY[rule.providerId].name
+      : rule.providerId
+  );
+  if (rule.event.matchField) metaItem("Campo avaliado", rule.event.matchField);
+  details.appendChild(metaGrid);
+
+  const condBlock = el("div", "rule-block");
+  condBlock.appendChild(
+    el("div", "rule-block-title", `Condições (${rule.conditions.length})`)
+  );
+  if (!rule.conditions.length) {
+    condBlock.appendChild(
+      el("div", "rule-block-empty", "Sem condições — sempre executa.")
+    );
+  } else {
+    rule.conditions.forEach(cond => {
+      condBlock.appendChild(el("div", "rule-line", conditionSummary(cond)));
+    });
+  }
+  details.appendChild(condBlock);
+
+  const actBlock = el("div", "rule-block");
+  actBlock.appendChild(
+    el("div", "rule-block-title", `Ações (${rule.actions.length})`)
+  );
+  if (!rule.actions.length) {
+    actBlock.appendChild(el("div", "rule-block-empty", "Nenhuma ação."));
+  } else {
+    rule.actions.forEach((action, index) => {
+      const info = actionSummary(action);
+      const line = el("div", "rule-line");
+      line.appendChild(el("span", "rule-line-idx", `${index + 1}`));
+      line.appendChild(el("span", "rule-line-main", info.label));
+      if (info.detail)
+        line.appendChild(el("span", "rule-line-sub", info.detail));
+      actBlock.appendChild(line);
+    });
+  }
+  details.appendChild(actBlock);
+
+  const actions = el("div", "rule-actions");
+  const toggleBtn = el(
+    "button",
+    "btn-ghost-sm",
+    rule.enabled ? "Desativar" : "Ativar"
+  );
+  toggleBtn.type = "button";
+  toggleBtn.dataset.action = "toggle";
+  const editBtn = iconButton("icon-btn", "edit", "Editar");
+  editBtn.dataset.action = "edit";
+  const dupBtn = iconButton("icon-btn", "copy", "Duplicar");
+  dupBtn.dataset.action = "duplicate";
+  const delBtn = iconButton("icon-btn danger", "trash", "Excluir");
+  delBtn.dataset.action = "delete";
+  actions.appendChild(toggleBtn);
+  actions.appendChild(editBtn);
+  actions.appendChild(dupBtn);
+  actions.appendChild(delBtn);
+  details.appendChild(actions);
+
+  return details;
+}
+
 function buildRuleRow(rule) {
-  const row = el("div", `rule-row${rule.enabled ? "" : " off"}`);
+  const expanded = expandedRules.has(rule.id);
+  const row = el(
+    "div",
+    `card rule-row${rule.enabled ? "" : " off"}${expanded ? " expanded" : ""}`
+  );
   row.dataset.ruleId = rule.id;
 
+  const head = el("div", "rule-head");
+  head.dataset.action = "expand";
+
   const dot = el("span", "rule-dot");
-  dot.dataset.action = "toggle";
-  dot.title = "Ativar/Desativar";
-  row.appendChild(dot);
+  head.appendChild(dot);
 
   const info = el("div", "rule-info");
   const top = el("div", "rule-top");
@@ -952,44 +1140,41 @@ function buildRuleRow(rule) {
 
   const def = eventDef(rule.event.type);
   const flow = el("div", "rule-flow");
-  flow.appendChild(
-    el("span", "flow-part", def ? def.label : rule.event.type)
-  );
-  flow.appendChild(el("span", "flow-sep", "›"));
-  flow.appendChild(
-    el(
-      "span",
-      "flow-part",
-      countLabel(rule.conditions.length, "condição", "condições")
-    )
-  );
+  flow.appendChild(el("span", "flow-part", def ? def.label : rule.event.type));
   flow.appendChild(el("span", "flow-sep", "›"));
   flow.appendChild(
     el("span", "flow-part", countLabel(rule.actions.length, "ação", "ações"))
   );
   info.appendChild(flow);
-  row.appendChild(info);
+  head.appendChild(info);
 
-  const actions = el("div", "rule-actions");
-  const editBtn = iconButton("icon-btn", "edit", "Editar");
-  editBtn.dataset.action = "edit";
-  const dupBtn = iconButton("icon-btn", "copy", "Duplicar");
-  dupBtn.dataset.action = "duplicate";
-  const delBtn = iconButton("icon-btn danger", "trash", "Excluir");
-  delBtn.dataset.action = "delete";
-  actions.appendChild(editBtn);
-  actions.appendChild(dupBtn);
-  actions.appendChild(delBtn);
-  row.appendChild(actions);
+  const chevron = el("span", "rule-chevron");
+  chevron.innerHTML = ICONS.chevron;
+  head.appendChild(chevron);
+  row.appendChild(head);
+
+  if (expanded) row.appendChild(buildRuleDetails(rule));
 
   return row;
 }
 
+let ruleSearchQuery = "";
+
+function filteredRules() {
+  const q = ruleSearchQuery.trim().toLowerCase();
+  const rules = allRules();
+  if (!q) return rules;
+  return rules.filter(rule => ruleSearchText(rule).includes(q));
+}
+
 function renderRuleList() {
+  const rules = filteredRules();
   renderCollection(
     dom.ruleList,
-    allRules(),
-    "Nenhuma regra cadastrada ainda.",
+    rules,
+    ruleSearchQuery.trim()
+      ? "Nenhuma regra encontrada para esta busca."
+      : "Nenhuma regra cadastrada ainda.",
     buildRuleRow
   );
 }
@@ -1031,6 +1216,50 @@ function deleteRule(rule) {
   }, "Regra excluída");
 }
 
+function confirmDeleteRule(rule) {
+  const overlay = el("div", "dialog-overlay");
+  const dialog = el("div", "dialog confirm-dialog");
+
+  const iconWrap = el("div", "confirm-icon");
+  iconWrap.innerHTML = ICONS.alert;
+  dialog.appendChild(iconWrap);
+
+  dialog.appendChild(el("h3", "confirm-title", "Excluir regra?"));
+  dialog.appendChild(
+    el(
+      "p",
+      "confirm-text",
+      `A regra “${rule.name}” será removida permanentemente. Essa ação não pode ser desfeita.`
+    )
+  );
+
+  const foot = el("div", "dialog-foot");
+  const cancel = el("button", "btn btn-ghost", "Cancelar");
+  cancel.type = "button";
+  cancel.addEventListener("click", closeDialog);
+  const confirm = el("button", "btn btn-danger", "Excluir");
+  confirm.type = "button";
+  confirm.addEventListener("click", () => {
+    closeDialog();
+    expandedRules.delete(rule.id);
+    deleteRule(rule);
+  });
+  foot.appendChild(cancel);
+  foot.appendChild(confirm);
+  dialog.appendChild(foot);
+
+  overlay.appendChild(dialog);
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) closeDialog();
+  });
+  dom.dialogRoot.innerHTML = "";
+  dom.dialogRoot.appendChild(overlay);
+  dialogKeyHandler = event => {
+    if (event.key === "Escape") closeDialog();
+  };
+  document.addEventListener("keydown", dialogKeyHandler);
+}
+
 function handleRuleListClick(event) {
   const target = event.target.closest("[data-action]");
   const row = event.target.closest("[data-rule-id]");
@@ -1049,7 +1278,12 @@ function handleRuleListClick(event) {
       duplicateRule(rule);
       break;
     case "delete":
-      deleteRule(rule);
+      confirmDeleteRule(rule);
+      break;
+    case "expand":
+      if (expandedRules.has(rule.id)) expandedRules.delete(rule.id);
+      else expandedRules.add(rule.id);
+      renderRuleList();
       break;
   }
 }
@@ -1057,6 +1291,12 @@ function handleRuleListClick(event) {
 function bindRulesPage() {
   dom.addRuleBtn.addEventListener("click", () => openRuleDialog(null));
   dom.ruleList.addEventListener("click", handleRuleListClick);
+  if (dom.ruleSearchInput) {
+    dom.ruleSearchInput.addEventListener("input", () => {
+      ruleSearchQuery = dom.ruleSearchInput.value;
+      renderRuleList();
+    });
+  }
 }
 
 function buildProviderRow(id) {
@@ -1065,7 +1305,7 @@ function buildProviderRow(id) {
   const enabled = !!(providers[id] && providers[id].enabled);
   const live = enabled && appState.monitorActive;
 
-  const row = el("div", `provider-row${enabled ? "" : " off"}`);
+  const row = el("div", `card provider-row${enabled ? "" : " off"}`);
   row.dataset.providerId = id;
 
   const iconWrap = el("span", "provider-icon");
@@ -1084,6 +1324,7 @@ function buildProviderRow(id) {
   const input = document.createElement("input");
   input.type = "checkbox";
   input.checked = enabled;
+  input.disabled = appState.providersBusy;
   sw.appendChild(input);
   sw.appendChild(el("span", "track"));
   sw.appendChild(el("span", "knob"));
@@ -1109,6 +1350,7 @@ function updateProviderRow(row, id) {
 
   const input = row.querySelector('input[type="checkbox"]');
   if (input.checked !== enabled) input.checked = enabled;
+  input.disabled = appState.providersBusy;
 }
 
 function renderProviderList() {
@@ -1149,9 +1391,14 @@ function updateProvidersPageStats() {
 }
 
 function setProviderEnabled(id, enabled) {
+  appState.providersBusy = true;
+  syncUI();
   return performConfigMutation(() => {
     appState.config.providers[id].enabled = enabled;
-  }, "Provider atualizado");
+  }, "Provider atualizado").finally(() => {
+    appState.providersBusy = false;
+    syncUI();
+  });
 }
 
 function handleProviderListChange(event) {
@@ -1442,9 +1689,13 @@ function attachVariableDropdown(rowEl, vars) {
   function selectItem(item) {
     const insertText = `{${item.dataset.varKey}}`;
     const start =
-      fieldEl.selectionStart != null ? fieldEl.selectionStart : fieldEl.value.length;
+      fieldEl.selectionStart != null
+        ? fieldEl.selectionStart
+        : fieldEl.value.length;
     const end =
-      fieldEl.selectionEnd != null ? fieldEl.selectionEnd : fieldEl.value.length;
+      fieldEl.selectionEnd != null
+        ? fieldEl.selectionEnd
+        : fieldEl.value.length;
     const current = fieldEl.value || "";
     fieldEl.value = current.slice(0, start) + insertText + current.slice(end);
     fieldEl.dispatchEvent(new Event("input"));
@@ -1455,22 +1706,31 @@ function attachVariableDropdown(rowEl, vars) {
     fieldEl.setSelectionRange(cursor, cursor);
   }
 
-  // pointerdown (não click) para rodar antes do blur do campo, preservando
-  // selectionStart/selectionEnd — é o evento nativo em qualquer input
-  // (touch/mouse/caneta) no WebView do Tasker, sem depender da camada de
-  // emulação mouse-a-partir-de-touch. preventDefault() aqui já suprime o
-  // click sintetizado que viria em seguida no toque/clique normal.
+  // pointerdown apenas previne o blur do campo (preservando selectionStart);
+  // a seleção só acontece se o pointerup ocorrer no MESMO item — assim
+  // deslizar o dedo sobre a lista não escolhe nada.
+  let pressedItem = null;
   dropdown.addEventListener("pointerdown", event => {
     const item = event.target.closest(".var-dd-item");
-    if (!item) return;
+    pressedItem = item || null;
     event.preventDefault();
+  });
+
+  dropdown.addEventListener("pointerup", event => {
+    const item = event.target.closest(".var-dd-item");
+    const same = item && item === pressedItem;
+    pressedItem = null;
+    if (!same) return;
     selectItem(item);
   });
 
-  // click como reforço só para ativação via teclado (Tab + Enter/Espaço),
-  // que nunca passa por pointerdown — não duplica a inserção no toque/clique
-  // porque o preventDefault() acima já impede esse click sintetizado.
+  dropdown.addEventListener("pointercancel", () => {
+    pressedItem = null;
+  });
+
+  // teclado (Tab + Enter/Espaço) dispara click sem pointer events.
   dropdown.addEventListener("click", event => {
+    if (event.detail !== 0) return;
     const item = event.target.closest(".var-dd-item");
     if (!item) return;
     selectItem(item);
@@ -1525,7 +1785,12 @@ function buildActionConfigFields(container, action, draft, actionIndex) {
     );
   } else if (type === "ai") {
     container.appendChild(
-      createBoundVariableSelectRow("Variável de entrada", config, "inputVariable", vars)
+      createBoundVariableSelectRow(
+        "Variável de entrada",
+        config,
+        "inputVariable",
+        vars
+      )
     );
     container.appendChild(
       createBoundTextareaBlock(
@@ -1547,7 +1812,12 @@ function buildActionConfigFields(container, action, draft, actionIndex) {
     );
   } else if (type === "translate") {
     container.appendChild(
-      createBoundVariableSelectRow("Variável de entrada", config, "inputVariable", vars)
+      createBoundVariableSelectRow(
+        "Variável de entrada",
+        config,
+        "inputVariable",
+        vars
+      )
     );
     container.appendChild(
       createBoundSelectRow("Idioma", config, "language", LANG_OPTIONS)
@@ -1759,16 +2029,6 @@ function openRuleDialog(existingRule) {
   nameInput.placeholder = "Nome da regra";
   nameRow.appendChild(nameInput);
   infoSection.appendChild(nameRow);
-  const enabledRow = el("div", "field-row");
-  enabledRow.appendChild(el("label", null, "Ativada"));
-  const enabledInput = document.createElement("input");
-  enabledInput.type = "checkbox";
-  enabledInput.checked = draft.enabled;
-  enabledInput.addEventListener("change", () => {
-    draft.enabled = enabledInput.checked;
-  });
-  enabledRow.appendChild(enabledInput);
-  infoSection.appendChild(enabledRow);
   body.appendChild(infoSection);
 
   const eventSection = el("div", "editor-section");
@@ -1993,7 +2253,7 @@ function openRuleDialog(existingRule) {
       () => {
         const persistedRule = {
           id: isEdit ? existingRule.id : genId(),
-          enabled: draft.enabled,
+          enabled: isEdit ? draft.enabled : true,
           name,
           event: deepClone(draft.event),
           conditions: deepClone(draft.conditions),
@@ -2007,13 +2267,19 @@ function openRuleDialog(existingRule) {
             loc.arr[loc.index] = persistedRule;
           } else {
             loc.arr.splice(loc.index, 1);
-            if (!Array.isArray(appState.config.rules_by_provider[draft.provider])) {
+            if (
+              !Array.isArray(appState.config.rules_by_provider[draft.provider])
+            ) {
               appState.config.rules_by_provider[draft.provider] = [];
             }
-            appState.config.rules_by_provider[draft.provider].push(persistedRule);
+            appState.config.rules_by_provider[draft.provider].push(
+              persistedRule
+            );
           }
         } else {
-          if (!Array.isArray(appState.config.rules_by_provider[draft.provider])) {
+          if (
+            !Array.isArray(appState.config.rules_by_provider[draft.provider])
+          ) {
             appState.config.rules_by_provider[draft.provider] = [];
           }
           appState.config.rules_by_provider[draft.provider].push(persistedRule);
