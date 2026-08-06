@@ -1,11 +1,8 @@
-"use strict";
-
-const TASK_NAME = "TK_Reactor";
+const TASK_NAME = "RC 02 - MONITOR CONTROL";
 const TASK_TIMEOUT_MS = 12000;
 
 /* =========================================================================
- * PROVIDER_REGISTRY — substitui PROVIDERS_META + EVENTS_META + PROVIDER_EVENTS
- * + CONDITION_OPERATORS(allowlist) + EVENT_ALLOWED_OPERATORS + SINGLE_ENDS_WITH_EVENTS
+ * PROVIDER_REGISTRY — providers, eventos e operadores de condição permitidos
  * ========================================================================= */
 
 const CONDITION_OPERATORS = {
@@ -219,7 +216,7 @@ function isUnimplementedProvider(providerId) {
 }
 
 /* =========================================================================
- * ACTION_REGISTRY — substitui ACTION_TYPES_META + defaultActionConfig(switch)
+ * ACTION_REGISTRY — tipos de ação disponíveis e suas configs padrão
  * ========================================================================= */
 
 const ACTION_REGISTRY = {
@@ -334,7 +331,7 @@ function outputModeHint(actionType, mode) {
 }
 
 /* Variáveis disponíveis num ponto da regra: as do evento + ai_result/translate_result
- * de qualquer ação "processor" anterior na mesma regra (seção 7 do plano). */
+ * de qualquer ação "processor" anterior na mesma regra. */
 function availableVariablesAt(draft, actionIndex) {
   const vars = variablesOfEvent(draft.event.type).slice();
   const limit = Math.min(actionIndex, draft.actions.length);
@@ -404,7 +401,7 @@ const ICONS = {
 };
 
 /* =========================================================================
- * Configuração padrão — regras agrupadas por provider (seção 11 do plano)
+ * Configuração padrão — regras agrupadas por provider
  * ========================================================================= */
 
 const DEFAULT_CONFIG = {
@@ -427,6 +424,167 @@ const DEFAULT_CONFIG = {
           {
             type: "text_replacer",
             config: { text: "Chave PIX: 123.456.789-00" }
+          }
+        ]
+      },
+      {
+        id: "rule_seed4",
+        enabled: true,
+        name: "Perguntar para IA",
+        event: { type: "typed_text" },
+        conditions: [{ operator: "ends_with", value: "@ia" }],
+        actions: [
+          {
+            type: "ai",
+            config: {
+              inputVariable: "input",
+              systemInstructions:
+                "Você é um assistente de respostas rápidas integrado ao teclado do usuário. Responda à pergunta ou pedido de forma direta, objetiva e curta — preferencialmente em uma ou duas frases, sem saudações, introduções ou explicações desnecessárias. Vá direto ao ponto, como se estivesse completando o texto que a pessoa está digitando. Não use markdown, listas ou formatação, apenas texto corrido. Se a resposta exigir um dado factual ou numérico, informe apenas o essencial.",
+              outputMode: "replace_field"
+            }
+          }
+        ]
+      },
+
+      {
+        id: "rule_seed5",
+        enabled: true,
+        name: "Traduzir para Inglês",
+        event: { type: "typed_text" },
+        conditions: [{ operator: "ends_with", value: "@en" }],
+        actions: [
+          {
+            type: "translate",
+            config: {
+              inputVariable: "input",
+              language: "en",
+              outputMode: "replace_field"
+            }
+          }
+        ]
+      },
+      {
+        id: "rule_seed6",
+        enabled: true,
+        name: "Traduzir para Português",
+        event: { type: "typed_text" },
+        conditions: [{ operator: "ends_with", value: "@pt" }],
+        actions: [
+          {
+            type: "translate",
+            config: {
+              inputVariable: "input",
+              language: "pt",
+              outputMode: "replace_field"
+            }
+          }
+        ]
+      },
+      {
+        id: "rule_seed7",
+        enabled: true,
+        name: "Traduzir para Espanhol",
+        event: { type: "typed_text" },
+        conditions: [{ operator: "ends_with", value: "@es" }],
+        actions: [
+          {
+            type: "translate",
+            config: {
+              inputVariable: "input",
+              language: "es",
+              outputMode: "replace_field"
+            }
+          }
+        ]
+      },
+
+      {
+        id: "rule_seed8",
+        enabled: true,
+        name: "Deixar texto formal",
+        event: { type: "typed_text" },
+        conditions: [{ operator: "ends_with", value: "@formal" }],
+        actions: [
+          {
+            type: "ai",
+            config: {
+              inputVariable: "input",
+              systemInstructions:
+                "Reescreva o texto do usuário utilizando um tom formal e profissional, adequado para e-mails corporativos ou comunicações oficiais. Mantenha o mesmo significado e intenção da mensagem original, apenas ajustando vocabulário, gramática e estrutura das frases para soar mais educado e respeitoso. Não adicione saudações, despedidas ou informações que não estavam no texto original. Responda apenas com o texto reescrito, sem comentários adicionais.",
+              outputMode: "replace_field"
+            }
+          }
+        ]
+      },
+      {
+        id: "rule_seed9",
+        enabled: true,
+        name: "Deixar texto casual",
+        event: { type: "typed_text" },
+        conditions: [{ operator: "ends_with", value: "@casual" }],
+        actions: [
+          {
+            type: "ai",
+            config: {
+              inputVariable: "input",
+              systemInstructions:
+                "Reescreva o texto do usuário utilizando um tom casual e descontraído, como numa conversa com um amigo próximo. Simplifique frases muito formais e use uma linguagem mais leve e natural, sem soar deselegante. Mantenha o significado original da mensagem. Responda apenas com o texto reescrito, sem comentários adicionais.",
+              outputMode: "replace_field"
+            }
+          }
+        ]
+      },
+      {
+        id: "rule_seed10",
+        enabled: true,
+        name: "Corrigir texto",
+        event: { type: "typed_text" },
+        conditions: [{ operator: "ends_with", value: "@corrigir" }],
+        actions: [
+          {
+            type: "ai",
+            config: {
+              inputVariable: "input",
+              systemInstructions:
+                "Corrija a ortografia, a gramática e a pontuação do texto do usuário, mantendo o sentido, o tom e o estilo originais da mensagem. Não reescreva além do necessário para corrigir os erros — preserve a forma como a pessoa se expressa. Responda apenas com o texto corrigido, sem explicações sobre o que foi alterado.",
+              outputMode: "replace_field"
+            }
+          }
+        ]
+      },
+      {
+        id: "rule_seed11",
+        enabled: true,
+        name: "Resumir texto",
+        event: { type: "typed_text" },
+        conditions: [{ operator: "ends_with", value: "@resumir" }],
+        actions: [
+          {
+            type: "ai",
+            config: {
+              inputVariable: "input",
+              systemInstructions:
+                "Resuma o texto do usuário de forma clara e objetiva, mantendo apenas as informações mais importantes. O resumo deve ser significativamente mais curto que o original, preservando o sentido central da mensagem. Responda apenas com o resumo, sem introduções como 'aqui está o resumo' ou comentários adicionais.",
+              outputMode: "replace_field"
+            }
+          }
+        ]
+      },
+      {
+        id: "rule_seed12",
+        enabled: true,
+        name: "Adicionar emojis",
+        event: { type: "typed_text" },
+        conditions: [{ operator: "ends_with", value: "@emoji" }],
+        actions: [
+          {
+            type: "ai",
+            config: {
+              inputVariable: "input",
+              systemInstructions:
+                "Reescreva o texto do usuário adicionando emojis relevantes e adequados ao contexto, de forma natural e sem exagero. Não altere o conteúdo ou o significado da mensagem original — apenas insira emojis nos pontos em que fizer sentido para deixar o texto mais expressivo. Responda apenas com o texto com os emojis adicionados.",
+              outputMode: "replace_field"
+            }
           }
         ]
       }
@@ -487,9 +645,8 @@ function normalizeConfig(config) {
   return normalized;
 }
 
-/* Achata rules_by_provider numa lista única (tela de Regras continua igual
- * visualmente); cada item leva um providerId atribuído na leitura, não
- * persistido (seção 11 do plano). */
+/* Achata rules_by_provider numa lista única; cada item leva um providerId
+ * atribuído na leitura, mas não persistido. */
 function allRules() {
   const grouped = (appState.config && appState.config.rules_by_provider) || {};
   const result = [];
@@ -550,6 +707,14 @@ function el(tag, className, text) {
   if (className) node.className = className;
   if (text !== undefined) node.textContent = text;
   return node;
+}
+
+function qs(selector, scope) {
+  return (scope || document).querySelector(selector);
+}
+
+function qsa(selector, scope) {
+  return Array.from((scope || document).querySelectorAll(selector));
 }
 
 function iconButton(className, iconName, title) {
@@ -621,11 +786,7 @@ function createTaskerEnvironment() {
     }
   }
 
-  // Fila: TK_Reactor não roda em paralelo consigo mesma. Se duas chamadas
-  // (ex.: dois toggles de provider em sequência) saírem juntas, a 2ª runTaskForResult
-  // fica pendurada esperando a task liberar e só cai depois do TASK_TIMEOUT_MS,
-  // gerando o "Falha ao chamar ... Tempo esgotado". Serializando aqui, a 2ª
-  // chamada só é disparada depois que a 1ª já respondeu (sucesso ou erro).
+  // Fila de chamadas para serializar acessos ao Tasker
   let taskQueue = Promise.resolve();
 
   function callTask(action, payload) {
@@ -703,7 +864,6 @@ function createWebEnvironment() {
         return {
           ok: true,
           monitorActive,
-          needsRestart: !!payload.providersChanged && monitorActive,
           message: "Configuração salva"
         };
 
@@ -744,7 +904,6 @@ const environment = selectEnvironment();
 
 const appState = {
   monitorActive: false,
-  restarting: false,
   providersBusy: false,
   config: {
     providers: {},
@@ -760,43 +919,58 @@ const appState = {
 
 const dom = {};
 
+/* Mapa propriedade-do-dom → seletor. Adicionar um novo elemento à UI passa
+ * a ser só uma linha aqui, em vez de mais uma chamada solta a getElementById. */
+const DOM_SELECTORS = {
+  masterSwitch: "#masterSwitch",
+  masterLed: "#masterLed",
+  masterState: "#masterState",
+
+  statRulesTotal: "#statRulesTotal",
+  statRulesActive: "#statRulesActive",
+  statProvidersActive: "#statProvidersActive",
+  statMonitorState: "#statMonitorState",
+  flowTrack: "#flowTrack",
+  powerCardTitle: "#powerCardTitle",
+  powerCardSubtitle: "#powerCardSubtitle",
+  powerToggleBtn: "#powerToggleBtn",
+
+  addRuleBtn: "#addRuleBtn",
+  rulesCountLabel: "#rulesCountLabel",
+  ruleList: "#ruleList",
+  ruleSearchInput: "#ruleSearchInput",
+
+  providersCountLabel: "#providersCountLabel",
+  providerList: "#providerList",
+
+  themeSelect: "#themeSelect",
+  langSelect: "#langSelect",
+  geminiModelSelect: "#geminiModelSelect",
+  geminiApiKeyInput: "#geminiApiKeyInput",
+  geminiApiKeyWarning: "#geminiApiKeyWarning",
+  exportConfigBtn: "#exportConfigBtn",
+  importConfigBtn: "#importConfigBtn",
+  importFileInput: "#importFileInput",
+
+  toast: "#toast",
+  toastMsg: "#toastMsg",
+  toastText: "#toastText",
+  dialogRoot: "#dialogRoot"
+};
+
+// Elementos que existem em mais de uma cópia na página (listas de nós).
+const DOM_SELECTOR_LISTS = {
+  tabButtons: ".tab",
+  pages: ".page"
+};
+
 function cacheDom() {
-  dom.masterSwitch = document.getElementById("masterSwitch");
-  dom.masterLed = document.getElementById("masterLed");
-  dom.masterState = document.getElementById("masterState");
-
-  dom.tabButtons = Array.from(document.querySelectorAll(".tab"));
-  dom.pages = Array.from(document.querySelectorAll(".page"));
-
-  dom.statRulesTotal = document.getElementById("statRulesTotal");
-  dom.statRulesActive = document.getElementById("statRulesActive");
-  dom.statProvidersActive = document.getElementById("statProvidersActive");
-  dom.statMonitorState = document.getElementById("statMonitorState");
-  dom.flowTrack = document.getElementById("flowTrack");
-  dom.powerCardTitle = document.getElementById("powerCardTitle");
-  dom.powerCardSubtitle = document.getElementById("powerCardSubtitle");
-  dom.powerToggleBtn = document.getElementById("powerToggleBtn");
-
-  dom.addRuleBtn = document.getElementById("addRuleBtn");
-  dom.rulesCountLabel = document.getElementById("rulesCountLabel");
-  dom.ruleList = document.getElementById("ruleList");
-  dom.ruleSearchInput = document.getElementById("ruleSearchInput");
-
-  dom.providersCountLabel = document.getElementById("providersCountLabel");
-  dom.providerList = document.getElementById("providerList");
-
-  dom.themeSelect = document.getElementById("themeSelect");
-  dom.langSelect = document.getElementById("langSelect");
-  dom.geminiModelSelect = document.getElementById("geminiModelSelect");
-  dom.geminiApiKeyInput = document.getElementById("geminiApiKeyInput");
-  dom.exportConfigBtn = document.getElementById("exportConfigBtn");
-  dom.importConfigBtn = document.getElementById("importConfigBtn");
-  dom.importFileInput = document.getElementById("importFileInput");
-
-  dom.toast = document.getElementById("toast");
-  dom.toastMsg = document.getElementById("toastMsg");
-  dom.toastText = document.getElementById("toastText");
-  dom.dialogRoot = document.getElementById("dialogRoot");
+  Object.keys(DOM_SELECTORS).forEach(key => {
+    dom[key] = qs(DOM_SELECTORS[key]);
+  });
+  Object.keys(DOM_SELECTOR_LISTS).forEach(key => {
+    dom[key] = qsa(DOM_SELECTOR_LISTS[key]);
+  });
 }
 
 let toastTimer = null;
@@ -827,35 +1001,6 @@ async function performAction(action, payload) {
   if (feedback) showToast(feedback, response.ok === false);
 
   return response;
-}
-
-async function toggleMonitorQuiet() {
-  const response = await environment.runAction("toggle_monitor", {});
-  if (typeof response.monitorActive === "boolean") {
-    appState.monitorActive = response.monitorActive;
-  }
-  if (response.error) showToast(response.error, true);
-  return response;
-}
-
-async function restartMonitor() {
-  appState.restarting = true;
-  syncUI();
-
-  try {
-    await toggleMonitorQuiet();
-    // Dá tempo da assinatura RxJava antiga (debounce/takeUntil cruzam thread)
-    // realmente se desinscrever antes de reabrir — sem isso, um evento de
-    // acessibilidade em trânsito pode ser processado por ambas as assinaturas
-    // e disparar uma regra em duplicidade.
-    await sleep(400);
-    await toggleMonitorQuiet();
-  } finally {
-    // Garante que o card nunca fique preso em "Reiniciando..." mesmo se a
-    // tarefa do Tasker travar/estourar o timeout ou lançar um erro inesperado.
-    appState.restarting = false;
-    syncUI();
-  }
 }
 
 async function performConfigMutation(mutateFn, successMessage) {
@@ -892,9 +1037,6 @@ async function performConfigMutation(mutateFn, successMessage) {
     response.message ||
     (response.ok !== false ? successMessage : null);
   if (feedback) showToast(feedback, response.ok === false);
-  if (response.needsRestart) {
-    await restartMonitor();
-  }
 
   return response;
 }
@@ -915,51 +1057,25 @@ function bindTabs() {
   });
 }
 
-function setMonitorControlsDisabled(disabled) {
-  dom.masterSwitch.disabled = disabled;
-  dom.powerToggleBtn.disabled = disabled;
-}
-
 function updateMasterPower() {
-  setMonitorControlsDisabled(appState.restarting);
-
-  if (appState.restarting) {
-    dom.masterLed.className = "led restarting";
-    dom.masterState.textContent = "REINICIANDO...";
-    return;
-  }
-
   dom.masterSwitch.checked = appState.monitorActive;
   dom.masterLed.className = `led ${appState.monitorActive ? "on" : "off"}`;
   dom.masterState.textContent = appState.monitorActive ? "ATIVO" : "PARADO";
 }
 
 function handleMonitorToggleRequest() {
-  if (appState.restarting) return;
   performAction("toggle_monitor", {});
 }
 
 function updatePowerCard() {
-  const restarting = appState.restarting;
   const active = appState.monitorActive;
 
-  dom.powerCardTitle.textContent = restarting
-    ? "Reiniciando monitor"
-    : active
-      ? "Monitor ativo"
-      : "Monitor parado";
-  dom.powerCardSubtitle.textContent = restarting
-    ? "Aplicando mudança de providers…"
-    : active
-      ? "Reagindo a eventos em tempo real."
-      : "Nenhum evento está sendo observado.";
-  dom.powerToggleBtn.textContent = restarting
-    ? "Reiniciando..."
-    : active
-      ? "Parar"
-      : "Iniciar";
-  dom.powerToggleBtn.classList.toggle("on", !restarting && active);
-  dom.powerToggleBtn.classList.toggle("restarting", restarting);
+  dom.powerCardTitle.textContent = active ? "Monitor ativo" : "Monitor parado";
+  dom.powerCardSubtitle.textContent = active
+    ? "Reagindo a eventos em tempo real."
+    : "Nenhum evento está sendo observado.";
+  dom.powerToggleBtn.textContent = active ? "Parar" : "Iniciar";
+  dom.powerToggleBtn.classList.toggle("on", active);
 }
 
 function updateDashboardCards() {
@@ -974,16 +1090,11 @@ function updateDashboardCards() {
   dom.statRulesTotal.textContent = String(rules.length);
   dom.statRulesActive.textContent = String(activeRules);
   dom.statProvidersActive.textContent = `${activeProviders}/${providerIds.length}`;
-  dom.statMonitorState.textContent = appState.restarting
-    ? "Reiniciando"
-    : appState.monitorActive
-      ? "Ligado"
-      : "Desligado";
+  dom.statMonitorState.textContent = appState.monitorActive
+    ? "Ligado"
+    : "Desligado";
 
-  dom.flowTrack.classList.toggle(
-    "live",
-    appState.restarting || appState.monitorActive
-  );
+  dom.flowTrack.classList.toggle("live", appState.monitorActive);
 
   updatePowerCard();
 }
@@ -1340,15 +1451,15 @@ function updateProviderRow(row, id) {
 
   row.classList.toggle("off", !enabled);
 
-  const nameRow = row.querySelector(".provider-name-row");
-  const chip = nameRow.querySelector(".chip.ok");
+  const nameRow = qs(".provider-name-row", row);
+  const chip = qs(".chip.ok", nameRow);
   if (live && !chip) {
     nameRow.appendChild(el("span", "chip ok", "monitorando"));
   } else if (!live && chip) {
     chip.remove();
   }
 
-  const input = row.querySelector('input[type="checkbox"]');
+  const input = qs('input[type="checkbox"]', row);
   if (input.checked !== enabled) input.checked = enabled;
   input.disabled = appState.providersBusy;
 }
@@ -1433,6 +1544,20 @@ function applySettingsToForm() {
   dom.langSelect.value = settings.language || "pt";
   dom.geminiModelSelect.value = gemini.model || "gemini-2.5-flash";
   dom.geminiApiKeyInput.value = gemini.apiKey || "";
+  updateGeminiWarning();
+}
+
+function isGeminiConfigured() {
+  const gemini =
+    (appState.config.settings && appState.config.settings.gemini) ||
+    DEFAULT_CONFIG.settings.gemini;
+  return !!(gemini.apiKey && gemini.apiKey.trim() && gemini.model);
+}
+
+function updateGeminiWarning() {
+  dom.geminiApiKeyWarning.textContent = isGeminiConfigured()
+    ? ""
+    : 'Sem chave de API configurada, qualquer regra com a ação "Processar com IA" vai falhar quando disparada.';
 }
 
 function saveThemeSetting() {
@@ -1455,6 +1580,7 @@ function saveGeminiSettings() {
       apiKey: dom.geminiApiKeyInput.value
     };
   }, "Preferências salvas");
+  updateGeminiWarning();
 }
 
 async function handleImportFile() {
@@ -1552,16 +1678,24 @@ function createBoundNumberRow(label, obj, key) {
   return row;
 }
 
-function createBoundSelectRow(label, obj, key, options) {
-  const row = el("div", "field-row");
-  row.appendChild(el("label", null, label));
-  const select = document.createElement("select");
+/* Preenche um <select> a partir de uma lista de pares [value, text],
+ * limpando opções anteriores. Usado por todo select construído na mão
+ * (provider, evento, campo, operador, tipo de ação, etc.). */
+function populateSelectOptions(select, options) {
+  select.innerHTML = "";
   options.forEach(([value, text]) => {
     const option = document.createElement("option");
     option.value = value;
     option.textContent = text;
     select.appendChild(option);
   });
+}
+
+function createBoundSelectRow(label, obj, key, options) {
+  const row = el("div", "field-row");
+  row.appendChild(el("label", null, label));
+  const select = document.createElement("select");
+  populateSelectOptions(select, options);
   select.value = obj[key] || options[0][0];
   select.addEventListener("change", () => {
     obj[key] = select.value;
@@ -1571,26 +1705,17 @@ function createBoundSelectRow(label, obj, key, options) {
 }
 
 /* Select vinculado a uma variável disponível naquele ponto da regra
- * (usado por inputVariable de ai/translate — seção 7 do plano). */
+ * (usado por inputVariable de ai/translate). */
 function createBoundVariableSelectRow(label, obj, key, vars) {
   const row = el("div", "field-row");
   row.appendChild(el("label", null, label));
   const select = document.createElement("select");
   const validKeys = vars.map(v => v.key);
 
-  if (vars.length === 0) {
-    const option = document.createElement("option");
-    option.value = "";
-    option.textContent = "Nenhuma variável disponível";
-    select.appendChild(option);
-  } else {
-    vars.forEach(v => {
-      const option = document.createElement("option");
-      option.value = v.key;
-      option.textContent = `{${v.key}} — ${v.label}`;
-      select.appendChild(option);
-    });
-  }
+  const options = vars.length
+    ? vars.map(v => [v.key, `{${v.key}} — ${v.label}`])
+    : [["", "Nenhuma variável disponível"]];
+  populateSelectOptions(select, options);
 
   if (validKeys.indexOf(obj[key]) === -1) {
     obj[key] = validKeys[0] || "";
@@ -1659,7 +1784,7 @@ document.addEventListener("pointerdown", event => {
  * logo abaixo — abre no foco do campo, insere {chave} no cursor ao clicar
  * numa linha, e fecha ao selecionar ou ao clicar fora. */
 function attachVariableDropdown(rowEl, vars) {
-  const fieldEl = rowEl.querySelector("input, textarea");
+  const fieldEl = qs("input, textarea", rowEl);
   if (!fieldEl || !vars || !vars.length) return;
 
   const wrap = el("div", "var-field-wrap");
@@ -1744,125 +1869,169 @@ function appendTemplateFieldWithVariables(container, rowEl, vars) {
   attachVariableDropdown(rowEl, vars);
 }
 
+/* =========================================================================
+ * ACTION_FIELD_BUILDERS — um builder de campos por tipo de ação, no mesmo
+ * espírito de ACTION_REGISTRY. Cada builder recebe (container, action,
+ * config, vars, draft) e monta os campos de configuração daquela ação.
+ * ========================================================================= */
+
+function buildTemplateTextareaFields(container, action, config, vars) {
+  appendTemplateFieldWithVariables(
+    container,
+    createBoundTextareaBlock("Texto", config, "text"),
+    vars
+  );
+  if (action.type === "text_replacer") {
+    container.appendChild(
+      el(
+        "div",
+        "hint",
+        "Use {trigger} para inserir o texto do gatilho reconhecido. O texto digitado antes do gatilho (input) é mantido automaticamente antes do texto de substituição."
+      )
+    );
+  }
+}
+
+function buildRunTaskFields(container, action, config, vars) {
+  container.appendChild(
+    createBoundTextRow("Tarefa", config, "task", "Nome da task no Tasker")
+  );
+  appendTemplateFieldWithVariables(
+    container,
+    createBoundTextRow("%par1", config, "par1"),
+    vars
+  );
+  appendTemplateFieldWithVariables(
+    container,
+    createBoundTextRow("%par2", config, "par2"),
+    vars
+  );
+}
+
+function buildOpenAppFields(container, action, config) {
+  container.appendChild(
+    createBoundTextRow("Pacote", config, "package", "com.exemplo.app")
+  );
+}
+
+function buildAiFields(container, action, config, vars, draft) {
+  container.appendChild(
+    createBoundVariableSelectRow(
+      "Variável de entrada",
+      config,
+      "inputVariable",
+      vars
+    )
+  );
+  container.appendChild(
+    createBoundTextareaBlock(
+      "Instruções do sistema",
+      config,
+      "systemInstructions"
+    )
+  );
+  container.appendChild(
+    createBoundSelectRow(
+      "Modo de saída",
+      config,
+      "outputMode",
+      outputModeOptions(draft.event.type)
+    )
+  );
+  container.appendChild(
+    el("div", "hint", outputModeHint("ai", config.outputMode))
+  );
+  if (!isGeminiConfigured()) {
+    container.appendChild(
+      el(
+        "div",
+        "hint hint-warn",
+        "Chave de API do Gemini não configurada — esta ação vai falhar quando disparada. Configure em Configurações > IA · Gemini."
+      )
+    );
+  }
+}
+
+function buildTranslateFields(container, action, config, vars, draft) {
+  container.appendChild(
+    createBoundVariableSelectRow(
+      "Variável de entrada",
+      config,
+      "inputVariable",
+      vars
+    )
+  );
+  container.appendChild(
+    createBoundSelectRow("Idioma", config, "language", LANG_OPTIONS)
+  );
+  container.appendChild(
+    createBoundSelectRow(
+      "Modo de saída",
+      config,
+      "outputMode",
+      outputModeOptions(draft.event.type)
+    )
+  );
+  container.appendChild(
+    el("div", "hint", outputModeHint("translate", config.outputMode))
+  );
+}
+
+function buildSearchFields(container, action, config, vars) {
+  container.appendChild(
+    createBoundSelectRow("Mecanismo", config, "engine", SEARCH_ENGINES)
+  );
+  appendTemplateFieldWithVariables(
+    container,
+    createBoundTextRow("Consulta", config, "query", "{input}"),
+    vars
+  );
+}
+
+function buildOpenUrlFields(container, action, config, vars) {
+  appendTemplateFieldWithVariables(
+    container,
+    createBoundTextRow("URL", config, "url", "https://..."),
+    vars
+  );
+}
+
+function buildNotificationFields(container, action, config, vars) {
+  appendTemplateFieldWithVariables(
+    container,
+    createBoundTextRow("Título", config, "title"),
+    vars
+  );
+  appendTemplateFieldWithVariables(
+    container,
+    createBoundTextareaBlock("Mensagem", config, "body"),
+    vars
+  );
+}
+
+function buildClickFields(container, action, config) {
+  container.appendChild(createBoundNumberRow("X", config, "x"));
+  container.appendChild(createBoundNumberRow("Y", config, "y"));
+}
+
+const ACTION_FIELD_BUILDERS = {
+  text_replacer: buildTemplateTextareaFields,
+  clipboard: buildTemplateTextareaFields,
+  run_task: buildRunTaskFields,
+  open_app: buildOpenAppFields,
+  ai: buildAiFields,
+  translate: buildTranslateFields,
+  search: buildSearchFields,
+  open_url: buildOpenUrlFields,
+  notification: buildNotificationFields,
+  click: buildClickFields
+};
+
 function buildActionConfigFields(container, action, draft, actionIndex) {
   container.innerHTML = "";
-  const type = action.type;
-  const config = action.config;
   const vars = availableVariablesAt(draft, actionIndex);
-
-  if (type === "text_replacer" || type === "clipboard") {
-    appendTemplateFieldWithVariables(
-      container,
-      createBoundTextareaBlock("Texto", config, "text"),
-      vars
-    );
-    if (type === "text_replacer") {
-      container.appendChild(
-        el(
-          "div",
-          "hint",
-          "Use {trigger} para inserir o texto do gatilho reconhecido. O texto digitado antes do gatilho (input) é mantido automaticamente antes do texto de substituição."
-        )
-      );
-    }
-  } else if (type === "run_task") {
-    container.appendChild(
-      createBoundTextRow("Tarefa", config, "task", "Nome da task no Tasker")
-    );
-    appendTemplateFieldWithVariables(
-      container,
-      createBoundTextRow("%par1", config, "par1"),
-      vars
-    );
-    appendTemplateFieldWithVariables(
-      container,
-      createBoundTextRow("%par2", config, "par2"),
-      vars
-    );
-  } else if (type === "open_app") {
-    container.appendChild(
-      createBoundTextRow("Pacote", config, "package", "com.exemplo.app")
-    );
-  } else if (type === "ai") {
-    container.appendChild(
-      createBoundVariableSelectRow(
-        "Variável de entrada",
-        config,
-        "inputVariable",
-        vars
-      )
-    );
-    container.appendChild(
-      createBoundTextareaBlock(
-        "Instruções do sistema",
-        config,
-        "systemInstructions"
-      )
-    );
-    container.appendChild(
-      createBoundSelectRow(
-        "Modo de saída",
-        config,
-        "outputMode",
-        outputModeOptions(draft.event.type)
-      )
-    );
-    container.appendChild(
-      el("div", "hint", outputModeHint("ai", config.outputMode))
-    );
-  } else if (type === "translate") {
-    container.appendChild(
-      createBoundVariableSelectRow(
-        "Variável de entrada",
-        config,
-        "inputVariable",
-        vars
-      )
-    );
-    container.appendChild(
-      createBoundSelectRow("Idioma", config, "language", LANG_OPTIONS)
-    );
-    container.appendChild(
-      createBoundSelectRow(
-        "Modo de saída",
-        config,
-        "outputMode",
-        outputModeOptions(draft.event.type)
-      )
-    );
-    container.appendChild(
-      el("div", "hint", outputModeHint("translate", config.outputMode))
-    );
-  } else if (type === "search") {
-    container.appendChild(
-      createBoundSelectRow("Mecanismo", config, "engine", SEARCH_ENGINES)
-    );
-    appendTemplateFieldWithVariables(
-      container,
-      createBoundTextRow("Consulta", config, "query", "{input}"),
-      vars
-    );
-  } else if (type === "open_url") {
-    appendTemplateFieldWithVariables(
-      container,
-      createBoundTextRow("URL", config, "url", "https://..."),
-      vars
-    );
-  } else if (type === "notification") {
-    appendTemplateFieldWithVariables(
-      container,
-      createBoundTextRow("Título", config, "title"),
-      vars
-    );
-    appendTemplateFieldWithVariables(
-      container,
-      createBoundTextareaBlock("Mensagem", config, "body"),
-      vars
-    );
-  } else if (type === "click") {
-    container.appendChild(createBoundNumberRow("X", config, "x"));
-    container.appendChild(createBoundNumberRow("Y", config, "y"));
-  }
+  const builder = ACTION_FIELD_BUILDERS[action.type];
+  if (builder) builder(container, action, action.config, vars, draft);
 }
 
 function renderConditionsList(container, draft) {
@@ -1893,12 +2062,13 @@ function renderConditionsList(container, draft) {
       );
     } else {
       const opSelect = document.createElement("select");
-      allowedOperatorsForEvent(draft.event.type).forEach(op => {
-        const option = document.createElement("option");
-        option.value = op;
-        option.textContent = CONDITION_OPERATORS[op];
-        opSelect.appendChild(option);
-      });
+      populateSelectOptions(
+        opSelect,
+        allowedOperatorsForEvent(draft.event.type).map(op => [
+          op,
+          CONDITION_OPERATORS[op]
+        ])
+      );
       opSelect.value = cond.operator;
       opSelect.addEventListener("change", () => {
         cond.operator = opSelect.value;
@@ -1948,12 +2118,10 @@ function renderActionsList(container, draft) {
     const head = el("div", "action-card-head");
 
     const typeSelect = document.createElement("select");
-    allowedTypes.forEach(type => {
-      const option = document.createElement("option");
-      option.value = type;
-      option.textContent = ACTION_REGISTRY[type].label;
-      typeSelect.appendChild(option);
-    });
+    populateSelectOptions(
+      typeSelect,
+      allowedTypes.map(type => [type, ACTION_REGISTRY[type].label])
+    );
     typeSelect.value = action.type;
     typeSelect.addEventListener("change", () => {
       action.type = typeSelect.value;
@@ -2036,12 +2204,10 @@ function openRuleDialog(existingRule) {
   const providerRow = el("div", "field-row");
   providerRow.appendChild(el("label", null, "Provider"));
   const providerSelect = document.createElement("select");
-  Object.keys(PROVIDER_REGISTRY).forEach(id => {
-    const option = document.createElement("option");
-    option.value = id;
-    option.textContent = PROVIDER_REGISTRY[id].name;
-    providerSelect.appendChild(option);
-  });
+  populateSelectOptions(
+    providerSelect,
+    Object.keys(PROVIDER_REGISTRY).map(id => [id, PROVIDER_REGISTRY[id].name])
+  );
   providerSelect.value = draft.provider;
   providerRow.appendChild(providerSelect);
   eventSection.appendChild(providerRow);
@@ -2053,7 +2219,7 @@ function openRuleDialog(existingRule) {
   eventSection.appendChild(eventRow);
 
   // Seletor "Campo de correspondência" — visível só quando o evento tem
-  // matchFieldOptions (hoje, só notification_received) — seção 5 do plano.
+  // matchFieldOptions (hoje, só notification_received).
   const matchFieldRow = el("div", "field-row");
   matchFieldRow.appendChild(el("label", null, "Campo"));
   const matchFieldSelect = document.createElement("select");
@@ -2075,14 +2241,13 @@ function openRuleDialog(existingRule) {
       return;
     }
     const def = eventDef(draft.event.type);
-    matchFieldSelect.innerHTML = "";
-    def.matchFieldOptions.forEach(key => {
-      const option = document.createElement("option");
-      option.value = key;
-      const varMeta = def.variables.find(v => v.key === key);
-      option.textContent = varMeta ? `${varMeta.label} (${key})` : key;
-      matchFieldSelect.appendChild(option);
-    });
+    populateSelectOptions(
+      matchFieldSelect,
+      def.matchFieldOptions.map(key => {
+        const varMeta = def.variables.find(v => v.key === key);
+        return [key, varMeta ? `${varMeta.label} (${key})` : key];
+      })
+    );
     if (
       !draft.event.matchField ||
       def.matchFieldOptions.indexOf(draft.event.matchField) === -1
@@ -2109,13 +2274,13 @@ function openRuleDialog(existingRule) {
   }
 
   function refreshEventOptions() {
-    eventSelect.innerHTML = "";
-    eventsOfProvider(providerSelect.value).forEach(type => {
-      const option = document.createElement("option");
-      option.value = type;
-      option.textContent = eventDef(type).label;
-      eventSelect.appendChild(option);
-    });
+    populateSelectOptions(
+      eventSelect,
+      eventsOfProvider(providerSelect.value).map(type => [
+        type,
+        eventDef(type).label
+      ])
+    );
     const stillValid =
       draft.event.type &&
       PROVIDER_REGISTRY[providerSelect.value].events[draft.event.type];

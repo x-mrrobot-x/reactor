@@ -1,12 +1,13 @@
 <TaskerData sr="" dvi="1" tv="6.7.6-beta">
 	<dmetric>1080.0,2307.0</dmetric>
 	<Profile sr="prof2020" ve="2">
-		<cdate>1785555105867</cdate>
+		<cdate>1785950121852</cdate>
+		<clp>true</clp>
 		<edate>1785593921091</edate>
 		<flags>40</flags>
 		<id>2020</id>
 		<limit>true</limit>
-		<mid0>2017</mid0>
+		<mid0>2013</mid0>
 		<nme>Iniciar Monitor de Acessibilidade</nme>
 		<Event sr="con0" ve="2">
 			<code>307</code>
@@ -16,10 +17,10 @@
 	<Project sr="proj0" ve="2">
 		<cdate>1745400000000</cdate>
 		<id>3fc9c99c-2059-4be3-b354-4c4df60830e9</id>
-		<name>Reactor</name>
+		<name>REACTOR</name>
 		<pids>2020</pids>
 		<scenes>REACTOR UI,REACTOR</scenes>
-		<tids>2013,2017,2021,2019,2015,2022,2014</tids>
+		<tids>2018,2016,2014,2015,2013</tids>
 		<tsort>Alpha</tsort>
 	</Project>
 	<Scene sr="sceneREACTOR">
@@ -54,7 +55,7 @@
 			<Str sr="arg8" ve="3"/>
 		</WebElement>
 		<PropertiesElement sr="props">
-			<keyTask>2021</keyTask>
+			<keyTask>2015</keyTask>
 			<Int sr="arg0" val="1"/>
 			<Int sr="arg1" val="0"/>
 			<Str sr="arg2" ve="3">#00FFFFFF</Str>
@@ -71,1532 +72,8 @@
 	</Scene>
 	<Task sr="task2013">
 		<cdate>1745400000000</cdate>
-		<edate>1785653677911</edate>
-		<id>2013</id>
-		<nme>TK_ModuleManager</nme>
-		<pri>100</pri>
-		<Action sr="act0" ve="7">
-			<code>548</code>
-			<on>false</on>
-			<Str sr="arg0" ve="3">%par1
-
-%par2</Str>
-			<Int sr="arg1" val="0"/>
-			<Str sr="arg10" ve="3"/>
-			<Int sr="arg11" val="1"/>
-			<Int sr="arg12" val="0"/>
-			<Str sr="arg13" ve="3">1</Str>
-			<Int sr="arg14" val="0"/>
-			<Str sr="arg15" ve="3"/>
-			<Int sr="arg2" val="1"/>
-			<Str sr="arg3" ve="3"/>
-			<Str sr="arg4" ve="3"/>
-			<Str sr="arg5" ve="3"/>
-			<Str sr="arg6" ve="3">#FF1A61AF</Str>
-			<Str sr="arg7" ve="3"/>
-			<Str sr="arg8" ve="3">99999</Str>
-			<Int sr="arg9" val="1"/>
-		</Action>
-		<Action sr="act1" ve="7">
-			<code>37</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
-					<op>2</op>
-					<rhs>get_status</rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-		<Action sr="act10" ve="7">
-			<code>474</code>
-			<Str sr="arg0" ve="3">import org.json.JSONObject;
-import java.io.File;
-import java.io.FileWriter;
-import java.util.regex.Pattern;
-import com.joaomgcd.taskerm.action.java.JavaCodeException;
-
-CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
-rawCfg = tasker.getJavaVariable("wmModulesConfig");
-if (rawCfg == null || rawCfg == void) throw new JavaCodeException("Configuração não carregada.");
-cfgRoot = (JSONObject) rawCfg;
-
-payload = new JSONObject(tasker.getVariable("par2"));
-moduleId = payload.getString("moduleId");
-token = payload.getString("trigger");
-modulesObj = cfgRoot.getJSONObject("modules");
-if (!modulesObj.has(moduleId)) throw new JavaCodeException("Módulo não encontrado.");
-moduleObj = modulesObj.getJSONObject(moduleId);
-engine = moduleObj.getString("engine");
-
-if (engine.equals("expander") &amp;&amp; !Pattern.matches("^@[a-z0-9_]+$", token)) {
-    throw new JavaCodeException("Gatilho de expansão deve ser minúsculo, sem espaços, começando com '@' (ex: @pix)");
-}
-if (engine.equals("command") &amp;&amp; !Pattern.matches("^[a-z0-9_-]+$", token)) {
-    throw new JavaCodeException("Nome de comando deve ser minúsculo, sem espaços e sem ':' (ex: flash)");
-}
-
-triggersObj = moduleObj.getJSONObject("triggers");
-entry = new JSONObject();
-entry.put("enabled", true);
-if (engine.equals("expander")) {
-    kind = payload.getString("kind");
-    entry.put("kind", kind);
-    if (kind.equals("static")) entry.put("value", payload.optString("value", ""));
-    if (kind.equals("translate")) entry.put("lang", payload.optString("lang", "en"));
-    if (kind.equals("ai")) entry.put("instruction", payload.optString("instruction", ""));
-} else {
-    entry.put("description", payload.optString("description", ""));
-}
-triggersObj.put(token, entry);
-
-writer = new FileWriter(new File(CONFIG_PATH), false);
-writer.write(cfgRoot.toString(2));
-writer.close();
-
-result = new JSONObject();
-result.put("ok", true);
-result.put("needsRestart", false);
-result.put("message", "Gatilho adicionado");
-return result.toString();</Str>
-			<Str sr="arg1" ve="3">%jc_result</Str>
-			<Int sr="arg2" val="0"/>
-		</Action>
-		<Action sr="act11" ve="7">
-			<code>43</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
-					<op>2</op>
-					<rhs>remove_trigger</rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-		<Action sr="act12" ve="7">
-			<code>474</code>
-			<Str sr="arg0" ve="3">import org.json.JSONObject;
-import java.io.File;
-import java.io.FileWriter;
-import com.joaomgcd.taskerm.action.java.JavaCodeException;
-
-CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
-rawCfg = tasker.getJavaVariable("wmModulesConfig");
-if (rawCfg == null || rawCfg == void) throw new JavaCodeException("Configuração não carregada.");
-cfgRoot = (JSONObject) rawCfg;
-
-payload = new JSONObject(tasker.getVariable("par2"));
-moduleId = payload.getString("moduleId");
-token = payload.getString("trigger");
-modulesObj = cfgRoot.getJSONObject("modules");
-if (!modulesObj.has(moduleId)) throw new JavaCodeException("Módulo não encontrado.");
-triggersObj = modulesObj.getJSONObject(moduleId).getJSONObject("triggers");
-triggersObj.remove(token);
-
-writer = new FileWriter(new File(CONFIG_PATH), false);
-writer.write(cfgRoot.toString(2));
-writer.close();
-
-result = new JSONObject();
-result.put("ok", true);
-result.put("needsRestart", false);
-result.put("message", "Gatilho removido");
-return result.toString();</Str>
-			<Str sr="arg1" ve="3">%jc_result</Str>
-			<Int sr="arg2" val="0"/>
-		</Action>
-		<Action sr="act13" ve="7">
-			<code>43</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
-					<op>2</op>
-					<rhs>toggle_trigger</rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-		<Action sr="act14" ve="7">
-			<code>474</code>
-			<Str sr="arg0" ve="3">import org.json.JSONObject;
-import java.io.File;
-import java.io.FileWriter;
-import com.joaomgcd.taskerm.action.java.JavaCodeException;
-
-CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
-rawCfg = tasker.getJavaVariable("wmModulesConfig");
-if (rawCfg == null || rawCfg == void) throw new JavaCodeException("Configuração não carregada.");
-cfgRoot = (JSONObject) rawCfg;
-
-payload = new JSONObject(tasker.getVariable("par2"));
-moduleId = payload.getString("moduleId");
-token = payload.getString("trigger");
-modulesObj = cfgRoot.getJSONObject("modules");
-if (!modulesObj.has(moduleId)) throw new JavaCodeException("Módulo não encontrado.");
-triggersObj = modulesObj.getJSONObject(moduleId).getJSONObject("triggers");
-if (!triggersObj.has(token)) throw new JavaCodeException("Gatilho não encontrado.");
-triggersObj.getJSONObject(token).put("enabled", payload.getBoolean("enabled"));
-
-writer = new FileWriter(new File(CONFIG_PATH), false);
-writer.write(cfgRoot.toString(2));
-writer.close();
-
-result = new JSONObject();
-result.put("ok", true);
-result.put("needsRestart", false);
-result.put("message", "Gatilho atualizado");
-return result.toString();</Str>
-			<Str sr="arg1" ve="3">%jc_result</Str>
-			<Int sr="arg2" val="0"/>
-		</Action>
-		<Action sr="act15" ve="7">
-			<code>43</code>
-		</Action>
-		<Action sr="act16" ve="7">
-			<code>547</code>
-			<Str sr="arg0" ve="3">%jc_result</Str>
-			<Str sr="arg1" ve="3">{"ok":false,"error":"ação desconhecida"}</Str>
-			<Int sr="arg2" val="0"/>
-			<Int sr="arg3" val="0"/>
-			<Int sr="arg4" val="0"/>
-			<Int sr="arg5" val="3"/>
-			<Int sr="arg6" val="0"/>
-		</Action>
-		<Action sr="act17" ve="7">
-			<code>38</code>
-		</Action>
-		<Action sr="act18" ve="7">
-			<code>126</code>
-			<Str sr="arg0" ve="3">%jc_result</Str>
-			<Int sr="arg1" val="0"/>
-			<Int sr="arg2" val="0"/>
-			<Int sr="arg3" val="0"/>
-			<Str sr="arg4" ve="3"/>
-		</Action>
-		<Action sr="act2" ve="7">
-			<code>474</code>
-			<Str sr="arg0" ve="3">import org.json.JSONObject;
-import org.json.JSONArray;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.util.Map;
-
-String CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
-
-String DEFAULT_CONFIG = "{\"modules\":{"
-    + "\"expander_default\":{\"displayName\":\"Expansor de Texto\",\"engine\":\"expander\",\"enabled\":true,"
-    +   "\"config\":{\"apiKey\":\"\",\"model\":\"\",\"systemInstructions\":\"\"},"
-    +   "\"triggers\":{"
-    +   "\"@pix\":{\"enabled\":true,\"kind\":\"static\",\"value\":\"Chave PIX: 123.456.789-00\"},"
-    +   "\"@mail\":{\"enabled\":true,\"kind\":\"static\",\"value\":\"john.smith@email.com\"},"
-    +   "\"@en\":{\"enabled\":true,\"kind\":\"translate\",\"lang\":\"en\"},"
-    +   "\"@es\":{\"enabled\":true,\"kind\":\"translate\",\"lang\":\"es\"},"
-    +   "\"@ia\":{\"enabled\":true,\"kind\":\"ai\",\"instruction\":\"\"},"
-    +   "\"@yt\":{\"enabled\":true,\"kind\":\"youtube\"}"
-    + "}},"
-    + "\"command_default\":{\"displayName\":\"Executor de Comandos\",\"engine\":\"command\",\"enabled\":true,"
-    +   "\"config\":{\"prefix\":\"&gt;&gt;\",\"taskName\":\"TK_CommandRouter\",\"restrictToKnown\":false},"
-    +   "\"triggers\":{"
-    +     "\"flash\":{\"enabled\":true,\"description\":\"Liga/desliga a lanterna\"},"
-    +     "\"wifi\":{\"enabled\":true,\"description\":\"Alterna o Wi-Fi\"}"
-    +   "}}}}";
-
-/* Carrega a config em memória, se ainda não estiver. */
-rawCfg = tasker.getJavaVariable("wmModulesConfig");
-if (rawCfg == null || rawCfg == void) {
-    file = new File(CONFIG_PATH);
-    if (file.exists()) {
-        reader = new FileReader(file);
-        buf = new char[(int) file.length()];
-        reader.read(buf);
-        reader.close();
-        cfgRoot = new JSONObject(new String(buf));
-    } else {
-        cfgRoot = new JSONObject(DEFAULT_CONFIG);
-        file.getParentFile().mkdirs();
-        writer = new FileWriter(file, false);
-        writer.write(cfgRoot.toString(2));
-        writer.close();
-    }
-    tasker.setJavaVariable("wmModulesConfig", cfgRoot);
-} else {
-    cfgRoot = (JSONObject) rawCfg;
-}
-
-/* Estado ao vivo: monitor ligado? quais módulos estão realmente registrados? */
-monStatus = tasker.getJavaVariable("stopAccessibilityMonitor");
-monitorActive = (monStatus != null &amp;&amp; monStatus != void);
-
-rawLogics = tasker.getJavaVariable("accessibilityLogics");
-activeIds = new JSONArray();
-if (rawLogics != null &amp;&amp; rawLogics != void) {
-    logicsMap = (Map) rawLogics;
-    it = logicsMap.keySet().iterator();
-    while (it.hasNext()) {
-        activeIds.put(it.next().toString());
-    }
-}
-
-result = new JSONObject();
-result.put("ok", true);
-result.put("monitorActive", monitorActive);
-result.put("activeModuleIds", activeIds);
-result.put("config", cfgRoot);
-
-return result.toString();</Str>
-			<Str sr="arg1" ve="3">%jc_result</Str>
-			<Int sr="arg2" val="0"/>
-		</Action>
-		<Action sr="act3" ve="7">
-			<code>43</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
-					<op>2</op>
-					<rhs>toggle_monitor</rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-		<Action sr="act4" ve="7">
-			<code>474</code>
-			<Str sr="arg0" ve="3">import io.reactivex.subjects.CompletableSubject;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.os.Bundle;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.content.pm.LabeledIntent;
-import android.net.Uri;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
-import java.net.URLEncoder;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import com.joaomgcd.taskerm.action.java.JavaCodeException;
-
-rawCfg = tasker.getJavaVariable("wmModulesConfig");
-if (rawCfg == null || rawCfg == void) {
-    throw new JavaCodeException("Configuração não carregada. Abra o painel primeiro.");
-}
-cfgRoot = (JSONObject) rawCfg;
-
-sig = tasker.getJavaVariable("stopAccessibilityMonitor");
-currentlyActive = (sig != null &amp;&amp; sig != void);
-
-if (currentlyActive) {
-    /* --- DESLIGAR --- */
-    s = (CompletableSubject) sig;
-    s.onComplete();
-    tasker.setJavaVariable("stopAccessibilityMonitor", null);
-
-    result = new JSONObject();
-    result.put("ok", true);
-    result.put("monitorActive", false);
-    result.put("message", "Monitor parado");
-    return result.toString();
-}
-
-/* --- LIGAR --- */
-if (tasker.getAccessibilityService() == null) {
-    throw new JavaCodeException("Acessibilidade do Tasker está desligada.");
-}
-
-/* Monta o registro de módulos habilitados a partir da configuração. */
-logics = new HashMap();
-modulesObj = cfgRoot.getJSONObject("modules");
-ids = modulesObj.keys();
-while (ids.hasNext()) {
-    moduleId = ids.next().toString();
-    moduleObj = modulesObj.getJSONObject(moduleId);
-    if (!moduleObj.getBoolean("enabled")) continue;
-    engine = moduleObj.getString("engine");
-    final String finalModuleId = moduleId;
-
-    if (engine.equals("expander")) {
-        consumer = new Consumer() {
-            accept(Object eventObj) {
-                try {
-                    event = (AccessibilityEvent) eventObj;
-                    if (event.getEventType() != AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) return;
-                    source = event.getSource();
-                    if (source == null || source.getText() == null) return;
-                    currentText = source.getText().toString();
-
-                    liveCfg = (JSONObject) tasker.getJavaVariable("wmModulesConfig");
-                    liveModule = liveCfg.getJSONObject("modules").getJSONObject(finalModuleId);
-                    if (!liveModule.getBoolean("enabled")) return;
-                    triggers = liveModule.getJSONObject("triggers");
-
-                    keys = triggers.keys();
-                    matchedKey = null;
-                    matchLen = 0;
-                    while (keys.hasNext()) {
-                        k = keys.next().toString();
-                        trg = triggers.getJSONObject(k);
-                        if (!trg.getBoolean("enabled")) continue;
-                        needle = k.toLowerCase() + " ";
-                        if (currentText.toLowerCase().endsWith(needle)) { matchedKey = k; matchLen = needle.length(); break; }
-                    }
-                    if (matchedKey == null) return;
-                    
-                    trg = triggers.getJSONObject(matchedKey);
-                    kind = trg.getString("kind");
-                    baseText = currentText.substring(0, currentText.length() - matchLen);
-
-                    if (kind.equals("static")) {
-                        newText = baseText + trg.getString("value");
-                        args = new Bundle();
-                        args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, newText);
-                        source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
-                        return;
-                    }
-
-                    if (kind.equals("youtube")) {
-                        query = baseText.trim();
-                        args = new Bundle();
-                        args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, "");
-                        source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
-                        if (query.length() == 0) return;
-                        try {
-                            pm = context.getPackageManager();
-                            targets = new ArrayList();
-
-                            ytIntent = new Intent(Intent.ACTION_SEARCH);
-                            ytIntent.setPackage("com.google.android.youtube");
-                            ytIntent.putExtra("query", query);
-                            ytMatches = pm.queryIntentActivities(ytIntent, 0);
-                            for (i = 0; i &lt; ytMatches.size(); i++) {
-                                info = (ResolveInfo) ytMatches.get(i);
-                                target = new Intent(ytIntent);
-                                target.setClassName(info.activityInfo.packageName, info.activityInfo.name);
-                                targets.add(new LabeledIntent(target, info.activityInfo.packageName, info.loadLabel(pm), info.icon));
-                            }
-
-                            searchUri = Uri.parse("https://www.youtube.com/results?search_query=" + URLEncoder.encode(query, "UTF-8"));
-                            viewIntent = new Intent(Intent.ACTION_VIEW, searchUri);
-                            viewMatches = pm.queryIntentActivities(viewIntent, 0);
-                            for (i = 0; i &lt; viewMatches.size(); i++) {
-                                info = (ResolveInfo) viewMatches.get(i);
-                                target = new Intent(Intent.ACTION_VIEW, searchUri);
-                                target.setClassName(info.activityInfo.packageName, info.activityInfo.name);
-                                targets.add(new LabeledIntent(target, info.activityInfo.packageName, info.loadLabel(pm), info.icon));
-                            }
-                            if (targets.size() == 0) { tasker.log("YouTube: nenhum app encontrado"); return; }
-
-                            first = (LabeledIntent) targets.remove(0);
-                            chooser = Intent.createChooser(first, "Abrir pesquisa com");
-                            rest = new LabeledIntent[targets.size()];
-                            for (i = 0; i &lt; targets.size(); i++) rest[i] = (LabeledIntent) targets.get(i);
-                            chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, rest);
-                            chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            context.startActivity(chooser);
-                        } catch (Exception e) {
-                            tasker.log("Erro YouTube: " + e.toString());
-                        }
-                        return;
-                    }
-
-                    /* translate / ai seguem em background. */
-                    finalKind = kind; finalSource = source; finalBaseText = baseText; finalTrg = trg;
-
-                    /* Chave/modelo Gemini vêm da própria config do módulo (definida no app). */
-                    moduleConfig = liveModule.optJSONObject("config");
-                    finalApiKey = moduleConfig != null ? moduleConfig.optString("apiKey", "") : "";
-                    finalModel = moduleConfig != null ? moduleConfig.optString("model", "") : "";
-                    finalSysInstr = moduleConfig != null ? moduleConfig.optString("systemInstructions", "") : "";
-
-                    new Thread(new Runnable() {
-                        run() {
-                            try {
-                                client = new OkHttpClient();
-                                resultText = null;
-
-                                if (finalKind.equals("translate")) {
-                                    lang = finalTrg.getString("lang");
-                                    text = finalBaseText.trim();
-                                    if (text.length() == 0) return;
-                                    url = "https://translate.googleapis.com/translate_a/single?client=gtx&amp;sl=auto&amp;dt=t&amp;q="
-                                        + URLEncoder.encode(text, "UTF-8") + "&amp;tl=" + lang;
-                                    req = new Request.Builder().url(url).build();
-                                    resp = client.newCall(req).execute();
-                                    if (resp.isSuccessful()) {
-                                        root = new JSONArray(resp.body().string());
-                                        sentences = root.getJSONArray(0);
-                                        sb = new StringBuilder();
-                                        for (i = 0; i &lt; sentences.length(); i++) sb.append(sentences.getJSONArray(i).getString(0));
-                                        resultText = sb.toString();
-                                    }
-                                    resp.close();
-                                } else if (finalKind.equals("ai")) {
-                                    text = finalBaseText.trim();
-                                    instruction = finalTrg.optString("instruction", "");
-                                    apiKey = finalApiKey;
-                                    model = finalModel;
-                                    sysInstr = finalSysInstr;
-                                    if (text.length() == 0 || apiKey.length() == 0 || model.length() == 0) {
-                                        tasker.log("Modulo IA (" + finalModuleId + "): chave de API ou modelo Gemini não configurados nas Configurações do módulo.");
-                                        return;
-                                    }
-
-                                    userText = instruction.length() &gt; 0 ? instruction + "\n\nTexto:\n" + text : text;
-                                    part = new JSONObject(); part.put("text", userText);
-                                    parts = new JSONArray(); parts.put(part);
-                                    contentObj = new JSONObject(); contentObj.put("parts", parts);
-                                    contents = new JSONArray(); contents.put(contentObj);
-                                    body = new JSONObject();
-                                    if (sysInstr != null &amp;&amp; sysInstr.length() &gt; 0) {
-                                        sp = new JSONObject(); sp.put("text", sysInstr);
-                                        spArr = new JSONArray(); spArr.put(sp);
-                                        si = new JSONObject(); si.put("parts", spArr);
-                                        body.put("systemInstruction", si);
-                                    }
-                                    body.put("contents", contents);
-
-                                    url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
-                                    mediaType = MediaType.parse("application/json; charset=utf-8");
-                                    reqBody = RequestBody.create(mediaType, body.toString());
-                                    req = new Request.Builder().url(url).post(reqBody).build();
-                                    resp = client.newCall(req).execute();
-                                    if (resp.isSuccessful()) {
-                                        root = new JSONObject(resp.body().string());
-                                        cand = root.getJSONArray("candidates").getJSONObject(0);
-                                        respParts = cand.getJSONObject("content").getJSONArray("parts");
-                                        sb = new StringBuilder();
-                                        for (i = 0; i &lt; respParts.length(); i++) sb.append(respParts.getJSONObject(i).getString("text"));
-                                        resultText = sb.toString().trim();
-                                    }
-                                    resp.close();
-                                }
-
-                                if (resultText != null &amp;&amp; resultText.length() &gt; 0) {
-                                    args = new Bundle();
-                                    args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, resultText);
-                                    finalSource.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
-                                }
-                            } catch (Exception e) {
-                                tasker.log("Erro modulo expander (" + finalModuleId + "): " + e.toString());
-                            }
-                        }
-                    }).start();
-
-                } catch (Exception e) {
-                    tasker.log("Erro modulo expander: " + e.toString());
-                }
-            }
-        };
-        logics.put(moduleId, consumer);
-    }
-
-    if (engine.equals("command")) {
-        consumer = new Consumer() {
-            accept(Object eventObj) {
-                try {
-                    event = (AccessibilityEvent) eventObj;
-                    if (event.getEventType() != AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) return;
-                    source = event.getSource();
-                    if (source == null || source.getText() == null) return;
-                    currentText = source.getText().toString();
-
-                    liveCfg = (JSONObject) tasker.getJavaVariable("wmModulesConfig");
-                    liveModule = liveCfg.getJSONObject("modules").getJSONObject(finalModuleId);
-                    if (!liveModule.getBoolean("enabled")) return;
-                    cfg = liveModule.getJSONObject("config");
-                    prefix = cfg.getString("prefix");
-                    taskName = cfg.getString("taskName");
-                    restrictToKnown = cfg.optBoolean("restrictToKnown", false);
-
-                    pattern = Pattern.compile(Pattern.quote(prefix) + "(\\S+)\\s$");
-                    matcher = pattern.matcher(currentText);
-                    if (!matcher.find()) return;
-
-                    commandName = matcher.group(1);
-                    if (commandName == null || commandName.length() == 0) return;
-
-                    if (restrictToKnown) {
-                        triggers = liveModule.getJSONObject("triggers");
-                        if (!triggers.has(commandName) || !triggers.getJSONObject(commandName).getBoolean("enabled")) return;
-                    }
-
-                    newText = currentText.substring(0, matcher.start()) + currentText.substring(matcher.end());
-                    args = new Bundle();
-                    args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, newText);
-                    source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
-
-                    vars = new HashMap();
-                    vars.put("par1", commandName);
-                    tasker.callTask(taskName, vars);
-                    tasker.log("Comando enviado: " + commandName + " -&gt; " + taskName);
-
-                } catch (Exception e) {
-                    tasker.log("Erro modulo comando: " + e.toString());
-                }
-            }
-        };
-        logics.put(moduleId, consumer);
-    }
-}
-tasker.setJavaVariable("accessibilityLogics", logics);
-
-/* Assina o stream de eventos de acessibilidade — despachante genérico. */
-stopSignal = CompletableSubject.create();
-tasker.setJavaVariable("stopAccessibilityMonitor", stopSignal);
-
-events = tasker.getAccessibilityEvents();
-disposable = events.subscribe(new Consumer() {
-    accept(Object eventObject) {
-        rawVar = tasker.getJavaVariable("accessibilityLogics");
-        if (rawVar == null || rawVar == void) return;
-        currentLogics = (Map) rawVar;
-        if (currentLogics.isEmpty()) return;
-        snapshot = currentLogics.values().toArray();
-        for (i = 0; i &lt; snapshot.length; i++) {
-            try {
-                mod = (Consumer) snapshot[i];
-                mod.accept(eventObject);
-            } catch (Exception e) {
-                tasker.log("Erro em modulo: " + e.toString());
-            }
-        }
-    }
-}, new Consumer() {
-    accept(Object errorObject) {
-        tasker.setJavaVariable("stopAccessibilityMonitor", null);
-    }
-});
-
-tasker.setJavaVariable("accessibilityMonitorDisposable", disposable);
-
-cleanupAction = new Action() {
-    run() {
-        globalDisp = tasker.getJavaVariable("accessibilityMonitorDisposable");
-        if (globalDisp != null &amp;&amp; globalDisp != void) {
-            d = (Disposable) globalDisp;
-            if (!d.isDisposed()) d.dispose();
-        }
-        tasker.setJavaVariable("stopAccessibilityMonitor", null);
-        tasker.setJavaVariable("accessibilityMonitorDisposable", null);
-    }
-};
-stopSignal.subscribe(cleanupAction);
-
-result = new JSONObject();
-result.put("ok", true);
-result.put("monitorActive", true);
-result.put("message", "Monitor iniciado");
-return result.toString();</Str>
-			<Str sr="arg1" ve="3">%jc_result</Str>
-			<Int sr="arg2" val="0"/>
-		</Action>
-		<Action sr="act5" ve="7">
-			<code>43</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
-					<op>2</op>
-					<rhs>toggle_module</rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-		<Action sr="act6" ve="7">
-			<code>474</code>
-			<Str sr="arg0" ve="3">import org.json.JSONObject;
-import java.io.File;
-import java.io.FileWriter;
-import com.joaomgcd.taskerm.action.java.JavaCodeException;
-
-CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
-rawCfg = tasker.getJavaVariable("wmModulesConfig");
-if (rawCfg == null || rawCfg == void) throw new JavaCodeException("Configuração não carregada.");
-cfgRoot = (JSONObject) rawCfg;
-
-payload = new JSONObject(tasker.getVariable("par2"));
-moduleId = payload.getString("id");
-modulesObj = cfgRoot.getJSONObject("modules");
-if (!modulesObj.has(moduleId)) throw new JavaCodeException("Módulo não encontrado.");
-modulesObj.getJSONObject(moduleId).put("enabled", payload.getBoolean("enabled"));
-
-writer = new FileWriter(new File(CONFIG_PATH), false);
-writer.write(cfgRoot.toString(2));
-writer.close();
-
-monStatus = tasker.getJavaVariable("stopAccessibilityMonitor");
-result = new JSONObject();
-result.put("ok", true);
-result.put("needsRestart", monStatus != null &amp;&amp; monStatus != void);
-result.put("message", "Módulo atualizado");
-return result.toString();</Str>
-			<Str sr="arg1" ve="3">%jc_result</Str>
-			<Int sr="arg2" val="0"/>
-		</Action>
-		<Action sr="act7" ve="7">
-			<code>43</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
-					<op>2</op>
-					<rhs>update_module_config</rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-		<Action sr="act8" ve="7">
-			<code>474</code>
-			<Str sr="arg0" ve="3">import org.json.JSONObject;
-import java.io.File;
-import java.io.FileWriter;
-import com.joaomgcd.taskerm.action.java.JavaCodeException;
-
-CONFIG_PATH = "/storage/emulated/0/Tasker/ModuleManager/modules.json";
-rawCfg = tasker.getJavaVariable("wmModulesConfig");
-if (rawCfg == null || rawCfg == void) throw new JavaCodeException("Configuração não carregada.");
-cfgRoot = (JSONObject) rawCfg;
-
-payload = new JSONObject(tasker.getVariable("par2"));
-moduleId = payload.getString("moduleId");
-modulesObj = cfgRoot.getJSONObject("modules");
-if (!modulesObj.has(moduleId)) throw new JavaCodeException("Módulo não encontrado.");
-moduleObj = modulesObj.getJSONObject(moduleId);
-
-if (payload.has("displayName")) moduleObj.put("displayName", payload.getString("displayName"));
-
-engine = moduleObj.getString("engine");
-if (engine.equals("command") &amp;&amp; payload.has("config")) {
-    incoming = payload.getJSONObject("config");
-    cfgObj = moduleObj.has("config") ? moduleObj.getJSONObject("config") : new JSONObject();
-    if (incoming.has("prefix")) cfgObj.put("prefix", incoming.getString("prefix"));
-    if (incoming.has("taskName")) cfgObj.put("taskName", incoming.getString("taskName"));
-    if (incoming.has("restrictToKnown")) cfgObj.put("restrictToKnown", incoming.getBoolean("restrictToKnown"));
-    moduleObj.put("config", cfgObj);
-}
-if (engine.equals("expander") &amp;&amp; payload.has("config")) {
-    incoming = payload.getJSONObject("config");
-    cfgObj = moduleObj.has("config") ? moduleObj.getJSONObject("config") : new JSONObject();
-    if (incoming.has("apiKey")) cfgObj.put("apiKey", incoming.getString("apiKey"));
-    if (incoming.has("model")) cfgObj.put("model", incoming.getString("model"));
-    if (incoming.has("systemInstructions")) cfgObj.put("systemInstructions", incoming.getString("systemInstructions"));
-    moduleObj.put("config", cfgObj);
-}
-
-writer = new FileWriter(new File(CONFIG_PATH), false);
-writer.write(cfgRoot.toString(2));
-writer.close();
-
-result = new JSONObject();
-result.put("ok", true);
-result.put("needsRestart", false);
-result.put("message", "Configuração atualizada");
-return result.toString();</Str>
-			<Str sr="arg1" ve="3">%jc_result</Str>
-			<Int sr="arg2" val="0"/>
-		</Action>
-		<Action sr="act9" ve="7">
-			<code>43</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
-					<op>2</op>
-					<rhs>add_trigger</rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-	</Task>
-	<Task sr="task2014">
-		<cdate>1745400000000</cdate>
-		<edate>1785925327924</edate>
-		<id>2014</id>
-		<nme>TK_Reactor</nme>
-		<pri>100</pri>
-		<rty>2</rty>
-		<Action sr="act0" ve="7">
-			<code>548</code>
-			<on>false</on>
-			<Str sr="arg0" ve="3">%qtime
-
-%par1
-
-%par2</Str>
-			<Int sr="arg1" val="0"/>
-			<Str sr="arg10" ve="3"/>
-			<Int sr="arg11" val="1"/>
-			<Int sr="arg12" val="0"/>
-			<Str sr="arg13" ve="3">1</Str>
-			<Int sr="arg14" val="0"/>
-			<Str sr="arg15" ve="3"/>
-			<Int sr="arg2" val="1"/>
-			<Str sr="arg3" ve="3"/>
-			<Str sr="arg4" ve="3"/>
-			<Str sr="arg5" ve="3"/>
-			<Str sr="arg6" ve="3">#FF1A61AF</Str>
-			<Str sr="arg7" ve="3"/>
-			<Str sr="arg8" ve="3">99999</Str>
-			<Int sr="arg9" val="1"/>
-		</Action>
-		<Action sr="act1" ve="7">
-			<code>37</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
-					<op>2</op>
-					<rhs>get_status</rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-		<Action sr="act10" ve="7">
-			<code>548</code>
-			<on>false</on>
-			<Str sr="arg0" ve="3">fim: %qtime
-
-%par1
-
-%jc_result</Str>
-			<Int sr="arg1" val="0"/>
-			<Str sr="arg10" ve="3"/>
-			<Int sr="arg11" val="1"/>
-			<Int sr="arg12" val="0"/>
-			<Str sr="arg13" ve="3">1</Str>
-			<Int sr="arg14" val="0"/>
-			<Str sr="arg15" ve="3"/>
-			<Int sr="arg2" val="1"/>
-			<Str sr="arg3" ve="3"/>
-			<Str sr="arg4" ve="3"/>
-			<Str sr="arg5" ve="3"/>
-			<Str sr="arg6" ve="3">#FF1A61AF</Str>
-			<Str sr="arg7" ve="3"/>
-			<Str sr="arg8" ve="3">99999</Str>
-			<Int sr="arg9" val="1"/>
-		</Action>
-		<Action sr="act11" ve="7">
-			<code>126</code>
-			<Str sr="arg0" ve="3">%jc_result</Str>
-			<Int sr="arg1" val="0"/>
-			<Int sr="arg2" val="0"/>
-			<Int sr="arg3" val="0"/>
-			<Str sr="arg4" ve="3"/>
-		</Action>
-		<Action sr="act2" ve="7">
-			<code>474</code>
-			<Str sr="arg0" ve="3">import org.json.JSONObject;
-import java.io.File;
-import java.io.FileReader;
-
-CONFIG_PATH = "/storage/emulated/0/Tasker/Reactor/reactor.json";
-
-rawCfg = tasker.getJavaVariable("reactorConfig");
-if (rawCfg != null &amp;&amp; rawCfg != void) {
-    cfgRoot = (JSONObject) rawCfg;
-} else {
-    file = new File(CONFIG_PATH);
-    if (file.exists()) {
-        reader = new FileReader(file);
-        buf = new char[(int) file.length()];
-        reader.read(buf);
-        reader.close();
-        cfgRoot = new JSONObject(new String(buf));
-        tasker.setJavaVariable("reactorConfig", cfgRoot);
-    } else {
-        cfgRoot = null;
-    }
-}
-
-monStatus = tasker.getJavaVariable("stopReactorMonitor");
-monitorActive = (monStatus != null &amp;&amp; monStatus != void);
-
-result = new JSONObject();
-result.put("ok", true);
-result.put("monitorActive", monitorActive);
-result.put("config", cfgRoot != null ? cfgRoot : JSONObject.NULL);
-return result.toString();</Str>
-			<Str sr="arg1" ve="3">%jc_result</Str>
-			<Int sr="arg2" val="0"/>
-		</Action>
-		<Action sr="act3" ve="7">
-			<code>43</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
-					<op>2</op>
-					<rhs>toggle_monitor</rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-		<Action sr="act4" ve="7">
-			<code>474</code>
-			<Str sr="arg0" ve="3">import io.reactivex.subjects.CompletableSubject;
-import io.reactivex.functions.Action;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Predicate;
-import java.util.concurrent.TimeUnit;
-import org.json.JSONObject;
-import org.json.JSONArray;
-import android.view.accessibility.AccessibilityEvent;
-import android.view.accessibility.AccessibilityNodeInfo;
-import android.accessibilityservice.AccessibilityService;
-import android.accessibilityservice.GestureDescription;
-import android.graphics.Path;
-import android.os.Bundle;
-import android.os.Build;
-import android.os.Vibrator;
-import android.os.VibrationEffect;
-import android.content.Intent;
-import android.content.Context;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.net.Uri;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
-import java.net.URLEncoder;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import com.joaomgcd.taskerm.action.java.JavaCodeException;
-
-rawCfg = tasker.getJavaVariable("reactorConfig");
-if (rawCfg == null || rawCfg == void) {
-    throw new JavaCodeException("Configuração não carregada. Abra o painel primeiro.");
-}
-cfgRoot = (JSONObject) rawCfg;
-
-setFieldTextAndMark(node, text) {
-    if (node == null) return false;
-    args = new Bundle();
-    args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
-    node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
-    tasker.setJavaVariable("reactorLastFieldWriteTs", System.currentTimeMillis());
-    return true;
-}
-
-launchExternalIntent(intent, node) {
-    cleared = setFieldTextAndMark(node, "");
-    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-    context.startActivity(intent);
-    return cleared;
-}
-
-vibrateTriggerDetected() {
-    vib = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-    if (vib == null || !vib.hasVibrator()) return;
-    if (Build.VERSION.SDK_INT &gt;= 26) {
-        vib.vibrate(VibrationEffect.createOneShot(15, VibrationEffect.DEFAULT_AMPLITUDE));
-    } else {
-        vib.vibrate(15);
-    }
-}
-
-showLoadingIndicator(node, textBeforeTrigger) {
-    setFieldTextAndMark(node, textBeforeTrigger + "\u23F3");
-}
-
-clearLoadingIndicator(node) {
-    setFieldTextAndMark(node, "");
-}
-
-buildResult(active, message) {
-    result = new JSONObject();
-    result.put("ok", true);
-    result.put("monitorActive", active);
-    result.put("message", message);
-    return result.toString();
-}
-
-applyTemplate(template, ctx) {
-    if (template == null) return "";
-    result = template;
-    it = ctx.keySet().iterator();
-    while (it.hasNext()) {
-        key = (String) it.next();
-        val = ctx.get(key);
-        result = result.replace("{" + key + "}", val != null ? (String) val : "");
-    }
-    return result;
-}
-
-collectReferencedVariables(rule) {
-    refs = new HashSet();
-    actions = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
-    varPattern = Pattern.compile("\\{(\\w+)\\}");
-    for (i = 0; i &lt; actions.length(); i++) {
-        action = actions.getJSONObject(i);
-        actType = action.getString("type");
-        config = action.has("config") ? action.getJSONObject("config") : new JSONObject();
-        if (actType.equals("ai") || actType.equals("translate")) {
-            iv = config.optString("inputVariable", "");
-            if (iv.length() &gt; 0) refs.add(iv);
-        } else {
-            keys = config.keys();
-            while (keys.hasNext()) {
-                fieldKey = (String) keys.next();
-                fieldVal = config.opt(fieldKey);
-                if (fieldVal instanceof String) {
-                    m = varPattern.matcher((String) fieldVal);
-                    while (m.find()) refs.add(m.group(1));
-                }
-            }
-        }
-    }
-    return refs;
-}
-
-resolveAppName(pkg) {
-    if (pkg == null || pkg.length() == 0) return "";
-    try {
-        pm = context.getPackageManager();
-        appInfo = pm.getApplicationInfo(pkg, 0);
-        return pm.getApplicationLabel(appInfo).toString();
-    } catch (Exception e) {
-        return pkg;
-    }
-}
-
-getCachedPattern(cv) {
-    regexCache = tasker.getJavaVariable("reactorRegexCache");
-    if (regexCache == null || regexCache == void) {
-        regexCache = new HashMap();
-        tasker.setJavaVariable("reactorRegexCache", regexCache);
-    }
-    pattern = (Pattern) regexCache.get(cv);
-    if (pattern == null) {
-        pattern = Pattern.compile(cv, Pattern.CASE_INSENSITIVE);
-        regexCache.put(cv, pattern);
-    }
-    return pattern;
-}
-
-sig = tasker.getJavaVariable("stopReactorMonitor");
-currentlyActive = (sig != null &amp;&amp; sig != void);
-
-if (currentlyActive) {
-    s = (CompletableSubject) sig;
-    s.onComplete();
-    tasker.setJavaVariable("stopReactorMonitor", null);
-
-    return buildResult(false, "Monitor parado");
-}
-
-if (tasker.getAccessibilityService() == null) {
-    throw new JavaCodeException("Acessibilidade do Tasker está desligada.");
-}
-
-providersObj = cfgRoot.getJSONObject("providers");
-active = new HashSet();
-if (providersObj.has("keyboard") &amp;&amp; providersObj.getJSONObject("keyboard").optBoolean("enabled", false)) active.add("keyboard");
-if (providersObj.has("app") &amp;&amp; providersObj.getJSONObject("app").optBoolean("enabled", false)) active.add("app");
-if (providersObj.has("notification") &amp;&amp; providersObj.getJSONObject("notification").optBoolean("enabled", false)) active.add("notification");
-final HashSet finalActiveProviders = active;
-
-stopSignal = CompletableSubject.create();
-tasker.setJavaVariable("stopReactorMonitor", stopSignal);
-
-events = tasker.getAccessibilityEvents();
-
-KEYBOARD_DEBOUNCE_MS = 150;
-
-keyboardTextEvents = events.filter(new Predicate() {
-    test(Object o) {
-        return ((AccessibilityEvent) o).getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
-    }
-}).debounce(KEYBOARD_DEBOUNCE_MS, TimeUnit.MILLISECONDS);
-
-otherProviderEvents = events.filter(new Predicate() {
-    test(Object o) {
-        return ((AccessibilityEvent) o).getEventType() != AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
-    }
-});
-
-events = io.reactivex.Observable.merge(keyboardTextEvents, otherProviderEvents)
-    .takeUntil(stopSignal.toObservable())
-    .doFinally(new Action() {
-        run() {
-            tasker.setJavaVariable("stopReactorMonitor", null);
-            tasker.setJavaVariable("reactorMonitorDisposable", null);
-            tasker.setJavaVariable("reactorLastFieldWriteTs", null);
-        }
-    });
-
-disposable = events.subscribe(new Consumer() {
-    accept(Object eventObject) {
-        try {
-            event = (AccessibilityEvent) eventObject;
-            type = event.getEventType();
-
-            provider = null;
-            sourceNode = null;
-            rawValue = null;
-            eventContext = new HashMap();
-
-            if (type == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
-                if (!finalActiveProviders.contains("keyboard")) return;
-
-                lastWriteObj = tasker.getJavaVariable("reactorLastFieldWriteTs");
-                if (lastWriteObj != null &amp;&amp; lastWriteObj != void) {
-                    elapsedSinceWrite = System.currentTimeMillis() - ((Long) lastWriteObj).longValue();
-                    if (elapsedSinceWrite &lt; 600) return;
-                }
-
-                sourceNode = event.getSource();
-                if (sourceNode == null || sourceNode.getText() == null) return;
-                provider = "keyboard";
-                rawValue = sourceNode.getText().toString();
-
-                pkgObj = event.getPackageName();
-                eventContext.put("app_package", pkgObj != null ? pkgObj.toString() : "");
-
-            } else if (type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                if (!finalActiveProviders.contains("app")) return;
-                pkgObj = event.getPackageName();
-                if (pkgObj == null) return;
-                provider = "app";
-                rawValue = pkgObj.toString();
-                eventContext.put("app_package", rawValue);
-
-            } else if (type == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
-                if (!finalActiveProviders.contains("notification")) return;
-                texts = event.getText();
-                if (texts == null || texts.isEmpty()) return;
-
-                notifTitle = texts.get(0).toString();
-                sbBody = new StringBuilder();
-                for (ti = 1; ti &lt; texts.size(); ti++) {
-                    if (ti &gt; 1) sbBody.append(" ");
-                    sbBody.append(texts.get(ti).toString());
-                }
-                sbFull = new StringBuilder();
-                for (ti = 0; ti &lt; texts.size(); ti++) {
-                    if (ti &gt; 0) sbFull.append(" ");
-                    sbFull.append(texts.get(ti).toString());
-                }
-
-                pkgObj = event.getPackageName();
-
-                provider = "notification";
-                rawValue = sbFull.toString();
-
-                eventContext.put("app_package", pkgObj != null ? pkgObj.toString() : "");
-                eventContext.put("title", notifTitle);
-                eventContext.put("body", sbBody.toString());
-                eventContext.put("full_text", sbFull.toString());
-
-            } else {
-                return;
-            }
-            if (rawValue == null || rawValue.length() == 0) return;
-
-            liveCfg = (JSONObject) tasker.getJavaVariable("reactorConfig");
-            if (liveCfg == null) return;
-
-            providerRules = liveCfg.getJSONObject("rules_by_provider").optJSONArray(provider);
-            if (providerRules == null || providerRules.length() == 0) return;
-
-            final String finalValue = rawValue;
-            final String finalProvider = provider;
-            final AccessibilityNodeInfo finalSourceNode = sourceNode;
-            final HashMap finalEventContext = eventContext;
-            final JSONObject finalLiveCfg = liveCfg;
-
-            anyRuleMatched = false;
-            hasRewritingAction = false;
-            alreadyClearedField = false;
-            loadingShown = false;
-
-            executeAction(actions, index, ctx, node, cfgRootArg) {
-                if (index &gt;= actions.length()) return;
-                actionObj = actions.getJSONObject(index);
-                actionType = actionObj.getString("type");
-                actionConfig = actionObj.has("config") ? actionObj.getJSONObject("config") : new JSONObject();
-
-                if (actionType.equals("text_replacer") || actionType.equals("ai") || actionType.equals("translate")) {
-                    hasRewritingAction = true;
-                }
-
-                if (actionType.equals("ai") || actionType.equals("translate")) {
-                    final HashMap finalContext = ctx;
-                    final JSONArray finalActions = actions;
-                    final int finalIndex = index;
-                    final AccessibilityNodeInfo finalNode = node;
-                    final JSONObject finalCfgRoot = cfgRootArg;
-                    final JSONObject finalActionConfig = actionConfig;
-                    final String finalActionType = actionType;
-
-                    inputKey = finalActionConfig.optString("inputVariable", "");
-                    final String inputText = finalContext.containsKey(inputKey) ? (String) finalContext.get(inputKey) : "";
-
-                    new Thread(new Runnable() {
-                        run() {
-                            resultText = null;
-                            try {
-                                client = new OkHttpClient();
-
-                                if (finalActionType.equals("translate")) {
-                                    lang = finalActionConfig.optString("language", "en");
-                                    text = inputText.trim();
-                                    if (text.length() &gt; 0) {
-                                        url = "https://translate.googleapis.com/translate_a/single?client=gtx&amp;sl=auto&amp;dt=t&amp;q="
-                                            + URLEncoder.encode(text, "UTF-8") + "&amp;tl=" + lang;
-                                        req = new Request.Builder().url(url).build();
-                                        resp = client.newCall(req).execute();
-                                        if (resp.isSuccessful()) {
-                                            root = new JSONArray(resp.body().string());
-                                            sentences = root.getJSONArray(0);
-                                            sb2 = new StringBuilder();
-                                            for (si = 0; si &lt; sentences.length(); si++) sb2.append(sentences.getJSONArray(si).getString(0));
-                                            resultText = sb2.toString();
-                                        }
-                                        resp.close();
-                                    }
-
-                                } else {
-                                    text = inputText.trim();
-                                    sysInstr = finalActionConfig.optString("systemInstructions", "");
-                                    gemini = finalCfgRoot.getJSONObject("settings").getJSONObject("gemini");
-                                    apiKey = gemini.optString("apiKey", "");
-                                    model = gemini.optString("model", "");
-                                    if (text.length() &gt; 0 &amp;&amp; apiKey.length() &gt; 0 &amp;&amp; model.length() &gt; 0) {
-                                        part = new JSONObject(); part.put("text", text);
-                                        parts = new JSONArray(); parts.put(part);
-                                        contentObj = new JSONObject(); contentObj.put("parts", parts);
-                                        contents = new JSONArray(); contents.put(contentObj);
-                                        geminiBody = new JSONObject();
-                                        if (sysInstr.length() &gt; 0) {
-                                            sp = new JSONObject(); sp.put("text", sysInstr);
-                                            spArr = new JSONArray(); spArr.put(sp);
-                                            siObj = new JSONObject(); siObj.put("parts", spArr);
-                                            geminiBody.put("systemInstruction", siObj);
-                                        }
-                                        geminiBody.put("contents", contents);
-
-                                        url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
-                                        mediaType = MediaType.parse("application/json; charset=utf-8");
-                                        reqBody = RequestBody.create(mediaType, geminiBody.toString());
-                                        req = new Request.Builder().url(url).post(reqBody).build();
-                                        resp = client.newCall(req).execute();
-                                        if (resp.isSuccessful()) {
-                                            root = new JSONObject(resp.body().string());
-                                            cand = root.getJSONArray("candidates").getJSONObject(0);
-                                            respParts = cand.getJSONObject("content").getJSONArray("parts");
-                                            sb2 = new StringBuilder();
-                                            for (pi = 0; pi &lt; respParts.length(); pi++) sb2.append(respParts.getJSONObject(pi).getString("text"));
-                                            resultText = sb2.toString().trim();
-                                        }
-                                        resp.close();
-                                    } else {
-                                        tasker.log("Reactor IA: chave de API ou modelo não configurados em Configurações &gt; IA - Gemini.");
-                                    }
-                                }
-                            } catch (Exception e) {
-                                tasker.log("Erro Reactor (" + finalActionType + "): " + e.toString());
-                            }
-
-                            resultKey = finalActionType.equals("translate") ? "translate_result" : "ai_result";
-                            finalContext.put(resultKey, resultText != null ? resultText : "");
-
-                            outputMode = finalActionConfig.optString("outputMode", "expose_variable");
-                            if (outputMode.equals("replace_field")) {
-                                if (resultText != null &amp;&amp; resultText.length() &gt; 0) {
-                                    setFieldTextAndMark(finalNode, resultText);
-                                } else {
-                                    clearLoadingIndicator(finalNode);
-                                }
-                            }
-
-                            executeAction(finalActions, finalIndex + 1, finalContext, finalNode, finalCfgRoot);
-                        }
-                    }).start();
-                    return;
-                }
-
-                if (actionType.equals("text_replacer")) {
-                    inputVal = ctx.containsKey("input") ? (String) ctx.get("input") : "";
-                    replacement = applyTemplate(actionConfig.optString("text", ""), ctx);
-                    setFieldTextAndMark(node, inputVal + replacement);
-
-                } else if (actionType.equals("clipboard")) {
-                    clipText = applyTemplate(actionConfig.optString("text", ""), ctx);
-                    cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                    cm.setPrimaryClip(ClipData.newPlainText("reactor", clipText));
-
-                } else if (actionType.equals("run_task")) {
-                    taskName = actionConfig.optString("task", "");
-                    if (taskName.length() &gt; 0) {
-                        par1 = applyTemplate(actionConfig.optString("par1", ""), ctx);
-                        par2 = applyTemplate(actionConfig.optString("par2", ""), ctx);
-                        taskVars = new HashMap();
-                        taskVars.put("par1", par1);
-                        taskVars.put("par2", par2);
-                        tasker.callTask(taskName, taskVars);
-                    }
-
-                } else if (actionType.equals("open_app")) {
-                    pkgName = actionConfig.optString("package", "");
-                    if (pkgName.length() &gt; 0) {
-                        pm = context.getPackageManager();
-                        launchIntent = pm.getLaunchIntentForPackage(pkgName);
-                        if (launchIntent != null) {
-                            alreadyClearedField = launchExternalIntent(launchIntent, node);
-                        }
-                    }
-
-                } else if (actionType.equals("open_url")) {
-                    urlText = applyTemplate(actionConfig.optString("url", ""), ctx);
-                    if (urlText.length() &gt; 0) {
-                        alreadyClearedField = launchExternalIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(urlText)), node);
-                    }
-
-                } else if (actionType.equals("search")) {
-                    engine = actionConfig.optString("engine", "google");
-                    queryTemplate = actionConfig.optString("query", "{input}");
-                    resolvedQuery = applyTemplate(queryTemplate, ctx).trim();
-                    query = URLEncoder.encode(resolvedQuery, "UTF-8");
-                    searchUrl = "https://www.google.com/search?q=" + query;
-                    if (engine.equals("bing")) searchUrl = "https://www.bing.com/search?q=" + query;
-                    else if (engine.equals("duckduckgo")) searchUrl = "https://duckduckgo.com/?q=" + query;
-                    else if (engine.equals("youtube")) searchUrl = "https://www.youtube.com/results?search_query=" + query;
-                    alreadyClearedField = launchExternalIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(searchUrl)), node);
-
-                } else if (actionType.equals("notification")) {
-                    notifTitleText = applyTemplate(actionConfig.optString("title", "Reactor"), ctx);
-                    notifBodyText = applyTemplate(actionConfig.optString("body", ""), ctx);
-                    nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-                    channelId = "reactor_channel";
-                    if (Build.VERSION.SDK_INT &gt;= 26) {
-                        channel = new NotificationChannel(channelId, "Reactor", NotificationManager.IMPORTANCE_DEFAULT);
-                        nm.createNotificationChannel(channel);
-                    }
-                    nb = new Notification.Builder(context);
-                    nb.setContentTitle(notifTitleText);
-                    nb.setContentText(notifBodyText);
-                    nb.setSmallIcon(android.R.drawable.ic_dialog_info);
-                    if (Build.VERSION.SDK_INT &gt;= 26) nb.setChannelId(channelId);
-                    nm.notify((int) System.currentTimeMillis(), nb.build());
-
-                } else if (actionType.equals("click")) {
-                    cx = actionConfig.optDouble("x", -1);
-                    cy = actionConfig.optDouble("y", -1);
-                    svc = tasker.getAccessibilityService();
-                    if (svc != null &amp;&amp; cx &gt;= 0 &amp;&amp; cy &gt;= 0 &amp;&amp; Build.VERSION.SDK_INT &gt;= 24) {
-                        path = new Path();
-                        path.moveTo((float) cx, (float) cy);
-                        stroke = new GestureDescription.StrokeDescription(path, 0, 50);
-                        gb = new GestureDescription.Builder();
-                        gb.addStroke(stroke);
-                        ((AccessibilityService) svc).dispatchGesture(gb.build(), null, null);
-                    }
-                }
-
-                executeAction(actions, index + 1, ctx, node, cfgRootArg);
-            }
-
-            for (ri = 0; ri &lt; providerRules.length(); ri++) {
-                rule = providerRules.getJSONObject(ri);
-                if (!rule.optBoolean("enabled", false)) continue;
-
-                eventObj = rule.getJSONObject("event");
-
-                testValue = finalValue;
-                if (finalProvider.equals("notification")) {
-                    matchFieldKey = eventObj.optString("matchField", "body");
-                    testValue = finalEventContext.containsKey(matchFieldKey) ? (String) finalEventContext.get(matchFieldKey) : "";
-                    if (testValue == null) testValue = "";
-                }
-
-                conditions = rule.optJSONArray("conditions") != null ? rule.getJSONArray("conditions") : new JSONArray();
-                passed = true;
-                matchedEndsWithValue = null;
-                for (ci = 0; ci &lt; conditions.length(); ci++) {
-                    cond = conditions.getJSONObject(ci);
-                    op = cond.getString("operator");
-                    cv = cond.optString("value", "");
-                    ok = false;
-                    if (op.equals("match")) {
-                        ok = testValue.equalsIgnoreCase(cv);
-                    } else if (op.equals("contains")) {
-                        ok = testValue.toLowerCase().contains(cv.toLowerCase());
-                    } else if (op.equals("starts_with")) {
-                        ok = testValue.toLowerCase().startsWith(cv.toLowerCase());
-                    } else if (op.equals("ends_with")) {
-                        ok = testValue.toLowerCase().endsWith(cv.toLowerCase());
-                    } else if (op.equals("regex")) {
-                        try {
-                            regexPattern = getCachedPattern(cv);
-                            ok = regexPattern.matcher(testValue).find();
-                        } catch (Exception pe) {
-                            ok = false;
-                        }
-                    }
-                    if (ok &amp;&amp; op.equals("ends_with")) matchedEndsWithValue = cv;
-                    if (!ok) { passed = false; break; }
-                }
-                if (!passed) continue;
-
-                anyRuleMatched = true;
-
-                ruleContext = new HashMap(finalEventContext);
-                textBeforeTrigger = finalValue;
-                triggerText = "";
-                if (finalProvider.equals("keyboard") &amp;&amp; matchedEndsWithValue != null) {
-                    cutIndex = finalValue.length() - matchedEndsWithValue.length();
-                    if (cutIndex &lt; 0) cutIndex = 0;
-                    textBeforeTrigger = finalValue.substring(0, cutIndex);
-                    triggerText = finalValue.substring(cutIndex);
-                }
-                if (finalProvider.equals("keyboard")) {
-                    ruleContext.put("input", textBeforeTrigger);
-                    ruleContext.put("trigger", triggerText);
-                }
-                final String finalTextBeforeTrigger = textBeforeTrigger;
-
-                referencedVars = collectReferencedVariables(rule);
-                if (referencedVars.contains("app_name") &amp;&amp; ruleContext.containsKey("app_package")) {
-                    ruleContext.put("app_name", resolveAppName((String) ruleContext.get("app_package")));
-                }
-
-                if (finalProvider.equals("keyboard") &amp;&amp; !loadingShown) {
-                    vibrateTriggerDetected();
-
-                    ruleActionsPeek = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
-                    ruleHasAsyncAction = false;
-                    for (pk = 0; pk &lt; ruleActionsPeek.length(); pk++) {
-                        peekType = ruleActionsPeek.getJSONObject(pk).getString("type");
-                        if (peekType.equals("ai") || peekType.equals("translate")) {
-                            ruleHasAsyncAction = true;
-                            break;
-                        }
-                    }
-                    if (ruleHasAsyncAction) {
-                        showLoadingIndicator(finalSourceNode, finalTextBeforeTrigger);
-                    }
-
-                    loadingShown = true;
-                }
-
-                actions = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
-                executeAction(actions, 0, ruleContext, finalSourceNode, finalLiveCfg);
-            }
-
-            if (finalProvider.equals("keyboard") &amp;&amp; anyRuleMatched &amp;&amp; !hasRewritingAction &amp;&amp; !alreadyClearedField) {
-                setFieldTextAndMark(finalSourceNode, "");
-            }
-        } catch (Exception e) {
-            tasker.log("Erro Reactor dispatcher: " + e.toString());
-        }
-    }
-}, new Consumer() {
-    accept(Object errorObject) {
-        tasker.log("Erro fatal no monitor Reactor: " + errorObject.toString());
-    }
-});
-
-tasker.setJavaVariable("reactorMonitorDisposable", disposable);
-
-return buildResult(true, "Monitor iniciado");</Str>
-			<Str sr="arg1" ve="3">%jc_result</Str>
-			<Int sr="arg2" val="0"/>
-		</Action>
-		<Action sr="act5" ve="7">
-			<code>43</code>
-			<ConditionList sr="if">
-				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
-					<op>2</op>
-					<rhs>save_config</rhs>
-				</Condition>
-			</ConditionList>
-		</Action>
-		<Action sr="act6" ve="7">
-			<code>474</code>
-			<Str sr="arg0" ve="3">import org.json.JSONObject;
-import java.io.File;
-import java.io.FileWriter;
-import com.joaomgcd.taskerm.action.java.JavaCodeException;
-
-CONFIG_PATH = "/storage/emulated/0/Tasker/Reactor/reactor.json";
-
-payload = new JSONObject(tasker.getVariable("par2"));
-if (!payload.has("config")) throw new JavaCodeException("Config ausente no payload.");
-cfgRoot = payload.getJSONObject("config");
-
-file = new File(CONFIG_PATH);
-file.getParentFile().mkdirs();
-writer = new FileWriter(file, false);
-writer.write(cfgRoot.toString(2));
-writer.close();
-
-tasker.setJavaVariable("reactorConfig", cfgRoot);
-
-monStatus = tasker.getJavaVariable("stopReactorMonitor");
-monitorActive = (monStatus != null &amp;&amp; monStatus != void);
-providersChanged = payload.optBoolean("providersChanged", false);
-
-result = new JSONObject();
-result.put("ok", true);
-result.put("monitorActive", monitorActive);
-result.put("needsRestart", providersChanged &amp;&amp; monitorActive);
-result.put("message", "Configuração salva");
-return result.toString();</Str>
-			<Str sr="arg1" ve="3">%jc_result</Str>
-			<Int sr="arg2" val="0"/>
-		</Action>
-		<Action sr="act7" ve="7">
-			<code>43</code>
-		</Action>
-		<Action sr="act8" ve="7">
-			<code>547</code>
-			<Str sr="arg0" ve="3">%jc_result</Str>
-			<Str sr="arg1" ve="3">{"ok":false,"error":"ação desconhecida"}</Str>
-			<Int sr="arg2" val="0"/>
-			<Int sr="arg3" val="0"/>
-			<Int sr="arg4" val="0"/>
-			<Int sr="arg5" val="3"/>
-			<Int sr="arg6" val="0"/>
-		</Action>
-		<Action sr="act9" ve="7">
-			<code>38</code>
-		</Action>
-	</Task>
-	<Task sr="task2015">
-		<cdate>1785725490530</cdate>
-		<edate>1785725537220</edate>
-		<id>2015</id>
-		<nme>RECEIVER</nme>
-		<pri>1000</pri>
-		<Action sr="act0" ve="7">
-			<code>548</code>
-			<Str sr="arg0" ve="3">%par1
-
-%par2</Str>
-			<Int sr="arg1" val="0"/>
-			<Str sr="arg10" ve="3"/>
-			<Int sr="arg11" val="1"/>
-			<Int sr="arg12" val="0"/>
-			<Str sr="arg13" ve="3"/>
-			<Int sr="arg14" val="0"/>
-			<Str sr="arg15" ve="3"/>
-			<Int sr="arg2" val="1"/>
-			<Str sr="arg3" ve="3"/>
-			<Str sr="arg4" ve="3"/>
-			<Str sr="arg5" ve="3"/>
-			<Str sr="arg6" ve="3">#FF0F5088</Str>
-			<Str sr="arg7" ve="3"/>
-			<Str sr="arg8" ve="3">99999</Str>
-			<Int sr="arg9" val="1"/>
-		</Action>
-	</Task>
-	<Task sr="task2017">
-		<cdate>1745400000000</cdate>
 		<edate>1785593921091</edate>
-		<id>2017</id>
+		<id>2013</id>
 		<pri>100</pri>
 		<Action sr="act0" ve="7">
 			<code>130</code>
@@ -1614,11 +91,11 @@ return result.toString();</Str>
 			<Int sr="arg9" val="0"/>
 		</Action>
 	</Task>
-	<Task sr="task2019">
+	<Task sr="task2014">
 		<cdate>1745400000000</cdate>
-		<edate>1785594806861</edate>
-		<id>2019</id>
-		<nme>TK_CommandRouter</nme>
+		<edate>1786008281700</edate>
+		<id>2014</id>
+		<nme>RC 03 - COMMAND EXECUTOR</nme>
 		<pri>1000</pri>
 		<Action sr="act0" ve="7">
 			<code>37</code>
@@ -1803,38 +280,23 @@ Output resulting from the command. May be empty.&lt;/_array_net.dinglisch.androi
 			</ConditionList>
 		</Action>
 	</Task>
-	<Task sr="task2021">
+	<Task sr="task2015">
 		<cdate>1785555576149</cdate>
 		<edate>1785555576149</edate>
-		<id>2021</id>
+		<id>2015</id>
 		<pri>102</pri>
 		<Action sr="act0" ve="7">
 			<code>49</code>
 			<Str sr="arg0" ve="3">REACTOR UI</Str>
 		</Action>
 	</Task>
-	<Task sr="task2022">
+	<Task sr="task2016">
 		<cdate>1785555608857</cdate>
-		<edate>1785899626890</edate>
-		<id>2022</id>
+		<edate>1786007706630</edate>
+		<id>2016</id>
 		<nme>RC 01 - MAIN</nme>
 		<pri>100</pri>
 		<Action sr="act0" ve="7">
-			<code>47</code>
-			<on>false</on>
-			<Str sr="arg0" ve="3">REACTOR UI</Str>
-			<Int sr="arg1" val="10"/>
-			<Int sr="arg10" val="1"/>
-			<Int sr="arg2" val="100"/>
-			<Int sr="arg3" val="100"/>
-			<Int sr="arg4" val="0"/>
-			<Int sr="arg5" val="0"/>
-			<Int sr="arg6" val="1"/>
-			<Int sr="arg7" val="1"/>
-			<Int sr="arg8" val="1"/>
-			<Int sr="arg9" val="1"/>
-		</Action>
-		<Action sr="act1" ve="7">
 			<code>479</code>
 			<Bundle sr="arg0">
 				<Vals sr="val">
@@ -1858,6 +320,823 @@ Output resulting from the command. May be empty.&lt;/_array_net.dinglisch.androi
 			<Str sr="arg7" ve="3"/>
 			<Int sr="arg8" val="1"/>
 			<Str sr="arg9" ve="3"/>
+		</Action>
+	</Task>
+	<Task sr="task2018">
+		<cdate>1745400000000</cdate>
+		<edate>1786009135672</edate>
+		<id>2018</id>
+		<nme>RC 02 - MONITOR CONTROL</nme>
+		<pri>100</pri>
+		<rty>2</rty>
+		<Action sr="act0" ve="7">
+			<code>37</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>get_status</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act1" ve="7">
+			<code>547</code>
+			<Str sr="arg0" ve="3">%java_code</Str>
+			<Str sr="arg1" ve="3">import org.json.JSONObject;
+import java.io.File;
+import java.io.FileReader;
+
+CONFIG_PATH = "/storage/emulated/0/Tasker/Reactor/reactor.json";
+
+rawCfg = tasker.getJavaVariable("reactorConfig");
+if (rawCfg != null &amp;&amp; rawCfg != void) {
+    cfgRoot = (JSONObject) rawCfg;
+} else {
+    file = new File(CONFIG_PATH);
+    if (file.exists()) {
+        reader = new FileReader(file);
+        buf = new char[(int) file.length()];
+        reader.read(buf);
+        reader.close();
+        cfgRoot = new JSONObject(new String(buf));
+        tasker.setJavaVariable("reactorConfig", cfgRoot);
+    } else {
+        cfgRoot = null;
+    }
+}
+
+monStatus = tasker.getJavaVariable("stopReactorMonitor");
+monitorActive = (monStatus != null &amp;&amp; monStatus != void);
+
+result = new JSONObject();
+result.put("ok", true);
+result.put("monitorActive", monitorActive);
+result.put("config", cfgRoot != null ? cfgRoot : JSONObject.NULL);
+return result.toString();</Str>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="0"/>
+		</Action>
+		<Action sr="act10" ve="7">
+			<code>547</code>
+			<Str sr="arg0" ve="3">%jc_result</Str>
+			<Str sr="arg1" ve="3">{"ok":false,"error":"ação desconhecida"}</Str>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="0"/>
+		</Action>
+		<Action sr="act11" ve="7">
+			<code>38</code>
+		</Action>
+		<Action sr="act12" ve="7">
+			<code>126</code>
+			<Str sr="arg0" ve="3">%jc_result</Str>
+			<Int sr="arg1" val="0"/>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Str sr="arg4" ve="3"/>
+		</Action>
+		<Action sr="act2" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>toggle_monitor</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act3" ve="7">
+			<code>547</code>
+			<Str sr="arg0" ve="3">%java_code</Str>
+			<Str sr="arg1" ve="3">import io.reactivex.subjects.CompletableSubject;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Predicate;
+import java.util.concurrent.TimeUnit;
+import org.json.JSONObject;
+import org.json.JSONArray;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.GestureDescription;
+import android.graphics.Path;
+import android.os.Bundle;
+import android.os.Build;
+import android.os.Vibrator;
+import android.os.VibrationEffect;
+import android.content.Intent;
+import android.content.Context;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.net.Uri;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+import java.net.URLEncoder;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+
+try {
+
+rawCfg = tasker.getJavaVariable("reactorConfig");
+if (rawCfg == null || rawCfg == void) {
+    throw new JavaCodeException("Configuração não carregada. Abra o painel primeiro.");
+}
+cfgRoot = (JSONObject) rawCfg;
+
+// Constantes
+REACTOR_AI_ERROR_NOTIF_ID = 990001;
+APP_EVENT_DEDUPE_MS = 1200;
+
+setFieldTextAndMark(node, text) {
+    if (node == null) return false;
+    args = new Bundle();
+    args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
+    node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
+    tasker.setJavaVariable("reactorLastFieldWriteTs", System.currentTimeMillis());
+    return true;
+}
+
+launchExternalIntent(intent, node) {
+    cleared = setFieldTextAndMark(node, "");
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    context.startActivity(intent);
+    return cleared;
+}
+
+vibrateTriggerDetected() {
+    vib = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    if (vib == null || !vib.hasVibrator()) return;
+    if (Build.VERSION.SDK_INT &gt;= 26) {
+        vib.vibrate(VibrationEffect.createOneShot(15, VibrationEffect.DEFAULT_AMPLITUDE));
+    } else {
+        vib.vibrate(15);
+    }
+}
+
+showLoadingIndicator(node, textBeforeTrigger) {
+    setFieldTextAndMark(node, textBeforeTrigger + "\u23F3");
+}
+
+clearLoadingIndicator(node) {
+    setFieldTextAndMark(node, "");
+}
+
+vibrateError() {
+    vib = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    if (vib == null || !vib.hasVibrator()) return;
+    pattern = new long[]{0, 40, 80, 40};
+    if (Build.VERSION.SDK_INT &gt;= 26) {
+        vib.vibrate(VibrationEffect.createWaveform(pattern, -1));
+    } else {
+        vib.vibrate(pattern, -1);
+    }
+}
+
+showSystemNotification(id, title, body) {
+    nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    channelId = "reactor_channel";
+    nb = new Notification.Builder(context);
+    nb.setContentTitle(title);
+    nb.setContentText(body);
+    nb.setSmallIcon(android.R.drawable.ic_dialog_info);
+    nb.setOnlyAlertOnce(true);
+    if (Build.VERSION.SDK_INT &gt;= 26) nb.setChannelId(channelId);
+    nm.notify(id, nb.build());
+}
+
+buildResult(active, message) {
+    result = new JSONObject();
+    result.put("ok", true);
+    result.put("monitorActive", active);
+    result.put("message", message);
+    return result.toString();
+}
+
+applyTemplate(template, ctx) {
+    if (template == null) return "";
+    result = template;
+    it = ctx.keySet().iterator();
+    while (it.hasNext()) {
+        key = (String) it.next();
+        val = ctx.get(key);
+        result = result.replace("{" + key + "}", val != null ? (String) val : "");
+    }
+    return result;
+}
+
+collectReferencedVariables(rule) {
+    refs = new HashSet();
+    actions = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
+    varPattern = Pattern.compile("\\{(\\w+)\\}");
+    for (i = 0; i &lt; actions.length(); i++) {
+        action = actions.getJSONObject(i);
+        actType = action.getString("type");
+        config = action.has("config") ? action.getJSONObject("config") : new JSONObject();
+        if (actType.equals("ai") || actType.equals("translate")) {
+            iv = config.optString("inputVariable", "");
+            if (iv.length() &gt; 0) refs.add(iv);
+        } else {
+            keys = config.keys();
+            while (keys.hasNext()) {
+                fieldKey = (String) keys.next();
+                fieldVal = config.opt(fieldKey);
+                if (fieldVal instanceof String) {
+                    m = varPattern.matcher((String) fieldVal);
+                    while (m.find()) refs.add(m.group(1));
+                }
+            }
+        }
+    }
+    return refs;
+}
+
+resolveAppName(pkg) {
+    if (pkg == null || pkg.length() == 0) return "";
+    try {
+        pm = context.getPackageManager();
+        appInfo = pm.getApplicationInfo(pkg, 0);
+        return pm.getApplicationLabel(appInfo).toString();
+    } catch (Exception e) {
+        return pkg;
+    }
+}
+
+getCachedPattern(cv) {
+    regexCache = tasker.getJavaVariable("reactorRegexCache");
+    if (regexCache == null || regexCache == void) {
+        regexCache = new HashMap();
+        tasker.setJavaVariable("reactorRegexCache", regexCache);
+    }
+    pattern = (Pattern) regexCache.get(cv);
+    if (pattern == null) {
+        pattern = Pattern.compile(cv, Pattern.CASE_INSENSITIVE);
+        regexCache.put(cv, pattern);
+    }
+    return pattern;
+}
+
+sig = tasker.getJavaVariable("stopReactorMonitor");
+currentlyActive = (sig != null &amp;&amp; sig != void);
+
+if (currentlyActive) {
+    s = (CompletableSubject) sig;
+    s.onComplete();
+    tasker.setJavaVariable("stopReactorMonitor", null);
+    
+    return buildResult(false, "Monitor parado");
+}
+
+if (tasker.getAccessibilityService() == null) {
+    throw new JavaCodeException("Acessibilidade do Tasker está desligada.");
+}
+
+if (Build.VERSION.SDK_INT &gt;= 26) {
+    nmSetup = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    nmSetup.createNotificationChannel(new NotificationChannel("reactor_channel", "Reactor", NotificationManager.IMPORTANCE_DEFAULT));
+}
+
+stopSignal = CompletableSubject.create();
+tasker.setJavaVariable("stopReactorMonitor", stopSignal);
+
+events = tasker.getAccessibilityEvents();
+
+KEYBOARD_DEBOUNCE_MS = 150;
+
+keyboardTextEvents = events.filter(new Predicate() {
+    test(Object o) {
+        return ((AccessibilityEvent) o).getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
+    }
+}).debounce(KEYBOARD_DEBOUNCE_MS, TimeUnit.MILLISECONDS);
+
+otherProviderEvents = events.filter(new Predicate() {
+    test(Object o) {
+        return ((AccessibilityEvent) o).getEventType() != AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
+    }
+});
+
+events = io.reactivex.Observable.merge(keyboardTextEvents, otherProviderEvents);
+
+disposable = events.subscribe(new Consumer() {
+    accept(Object eventObject) {
+        try {
+            event = (AccessibilityEvent) eventObject;
+            type = event.getEventType();
+
+            provider = null;
+            sourceNode = null;
+            rawValue = null;
+            eventContext = new HashMap();
+
+            liveCfg = (JSONObject) tasker.getJavaVariable("reactorConfig");
+            if (liveCfg == null) return;
+            
+            liveProvidersObj = liveCfg.getJSONObject("providers");
+
+            if (type == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+                if (!liveProvidersObj.has("keyboard") || !liveProvidersObj.getJSONObject("keyboard").optBoolean("enabled", false)) return;
+
+                lastWriteObj = tasker.getJavaVariable("reactorLastFieldWriteTs");
+                if (lastWriteObj != null &amp;&amp; lastWriteObj != void) {
+                    elapsedSinceWrite = System.currentTimeMillis() - ((Long) lastWriteObj).longValue();
+                    if (elapsedSinceWrite &lt; 600) return;
+                }
+
+                sourceNode = event.getSource();
+                if (sourceNode == null || sourceNode.getText() == null) return;
+                provider = "keyboard";
+                rawValue = sourceNode.getText().toString();
+
+                pkgObj = event.getPackageName();
+                eventContext.put("app_package", pkgObj != null ? pkgObj.toString() : "");
+
+            } else if (type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                if (!liveProvidersObj.has("app") || !liveProvidersObj.getJSONObject("app").optBoolean("enabled", false)) return;
+                pkgObj = event.getPackageName();
+                if (pkgObj == null) return;
+                rawPkg = pkgObj.toString();
+
+                lastAppPkgObj = tasker.getJavaVariable("reactorLastAppPkg");
+                lastAppTsObj = tasker.getJavaVariable("reactorLastAppTs");
+                if (lastAppPkgObj != null &amp;&amp; lastAppPkgObj != void &amp;&amp; lastAppTsObj != null &amp;&amp; lastAppTsObj != void) {
+                    elapsedSinceAppEvent = System.currentTimeMillis() - ((Long) lastAppTsObj).longValue();
+                    if (rawPkg.equals((String) lastAppPkgObj) &amp;&amp; elapsedSinceAppEvent &lt; APP_EVENT_DEDUPE_MS) return;
+                }
+                tasker.setJavaVariable("reactorLastAppPkg", rawPkg);
+                tasker.setJavaVariable("reactorLastAppTs", System.currentTimeMillis());
+
+                provider = "app";
+                rawValue = rawPkg;
+                eventContext.put("app_package", rawValue);
+
+            } else if (type == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
+                if (!liveProvidersObj.has("notification") || !liveProvidersObj.getJSONObject("notification").optBoolean("enabled", false)) return;
+                texts = event.getText();
+                if (texts == null || texts.isEmpty()) return;
+
+                notifTitle = texts.get(0).toString();
+                sbBody = new StringBuilder();
+                for (ti = 1; ti &lt; texts.size(); ti++) {
+                    if (ti &gt; 1) sbBody.append(" ");
+                    sbBody.append(texts.get(ti).toString());
+                }
+                sbFull = new StringBuilder();
+                for (ti = 0; ti &lt; texts.size(); ti++) {
+                    if (ti &gt; 0) sbFull.append(" ");
+                    sbFull.append(texts.get(ti).toString());
+                }
+
+                pkgObj = event.getPackageName();
+
+                provider = "notification";
+                rawValue = sbFull.toString();
+
+                eventContext.put("app_package", pkgObj != null ? pkgObj.toString() : "");
+                eventContext.put("title", notifTitle);
+                eventContext.put("body", sbBody.toString());
+                eventContext.put("full_text", sbFull.toString());
+
+            } else {
+                return;
+            }
+
+            if (rawValue == null || rawValue.length() == 0) return;
+
+            providerRules = liveCfg.getJSONObject("rules_by_provider").optJSONArray(provider);
+            if (providerRules == null || providerRules.length() == 0) return;
+
+            final String finalValue = rawValue;
+            final String finalProvider = provider;
+            final AccessibilityNodeInfo finalSourceNode = sourceNode;
+            final HashMap finalEventContext = eventContext;
+            final JSONObject finalLiveCfg = liveCfg;
+
+            anyRuleMatched = false;
+            hasRewritingAction = false;
+            alreadyClearedField = false;
+            loadingShown = false;
+
+            executeAction(actions, index, ctx, node, cfgRootArg) {
+                if (index &gt;= actions.length()) return;
+                actionObj = actions.getJSONObject(index);
+                actionType = actionObj.getString("type");
+                actionConfig = actionObj.has("config") ? actionObj.getJSONObject("config") : new JSONObject();
+
+                if (actionType.equals("text_replacer") || actionType.equals("ai") || actionType.equals("translate")) {
+                    hasRewritingAction = true;
+                }
+
+                if (actionType.equals("ai") || actionType.equals("translate")) {
+                    final HashMap finalContext = ctx;
+                    final JSONArray finalActions = actions;
+                    final int finalIndex = index;
+                    final AccessibilityNodeInfo finalNode = node;
+                    final JSONObject finalCfgRoot = cfgRootArg;
+                    final JSONObject finalActionConfig = actionConfig;
+                    final String finalActionType = actionType;
+
+                    inputKey = finalActionConfig.optString("inputVariable", "");
+                    final String inputText = finalContext.containsKey(inputKey) ? (String) finalContext.get(inputKey) : "";
+
+                    new Thread(new Runnable() {
+                        run() {
+                            resultText = null;
+                            failureReason = null;
+                            try {
+                                client = new OkHttpClient();
+
+                                if (finalActionType.equals("translate")) {
+                                    lang = finalActionConfig.optString("language", "en");
+                                    text = inputText.trim();
+                                    if (text.length() &gt; 0) {
+                                        url = "https://translate.googleapis.com/translate_a/single?client=gtx&amp;sl=auto&amp;dt=t&amp;q="
+                                            + URLEncoder.encode(text, "UTF-8") + "&amp;tl=" + lang;
+                                        req = new Request.Builder().url(url).build();
+                                        resp = client.newCall(req).execute();
+                                        if (resp.isSuccessful()) {
+                                            root = new JSONArray(resp.body().string());
+                                            sentences = root.getJSONArray(0);
+                                            sb2 = new StringBuilder();
+                                            for (si = 0; si &lt; sentences.length(); si++) sb2.append(sentences.getJSONArray(si).getString(0));
+                                            resultText = sb2.toString();
+                                        } else {
+                                            failureReason = "Falha ao traduzir (erro do servidor).";
+                                            tasker.log("Reactor Tradução: resposta HTTP " + resp.code());
+                                        }
+                                        resp.close();
+                                    }
+                                    // texto vazio: nada a traduzir, não é um erro.
+
+                                } else {
+                                    text = inputText.trim();
+                                    sysInstr = finalActionConfig.optString("systemInstructions", "");
+                                    gemini = finalCfgRoot.getJSONObject("settings").getJSONObject("gemini");
+                                    apiKey = gemini.optString("apiKey", "");
+                                    model = gemini.optString("model", "");
+
+                                    if (text.length() == 0) {
+                                        // nada a processar, não é um erro.
+                                    } else if (apiKey.length() == 0 || model.length() == 0) {
+                                        failureReason = "Chave de API do Gemini não configurada. Abra o Reactor &gt; Configurações &gt; IA · Gemini.";
+                                        tasker.log("Reactor IA: chave de API ou modelo não configurados em Configurações &gt; IA - Gemini.");
+                                    } else {
+                                        part = new JSONObject(); part.put("text", text);
+                                        parts = new JSONArray(); parts.put(part);
+                                        contentObj = new JSONObject(); contentObj.put("parts", parts);
+                                        contents = new JSONArray(); contents.put(contentObj);
+                                        geminiBody = new JSONObject();
+                                        if (sysInstr.length() &gt; 0) {
+                                            sp = new JSONObject(); sp.put("text", sysInstr);
+                                            spArr = new JSONArray(); spArr.put(sp);
+                                            siObj = new JSONObject(); siObj.put("parts", spArr);
+                                            geminiBody.put("systemInstruction", siObj);
+                                        }
+                                        geminiBody.put("contents", contents);
+
+                                        url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
+                                        mediaType = MediaType.parse("application/json; charset=utf-8");
+                                        reqBody = RequestBody.create(mediaType, geminiBody.toString());
+                                        req = new Request.Builder().url(url).post(reqBody).build();
+                                        resp = client.newCall(req).execute();
+                                        if (resp.isSuccessful()) {
+                                            root = new JSONObject(resp.body().string());
+                                            cand = root.getJSONArray("candidates").getJSONObject(0);
+                                            respParts = cand.getJSONObject("content").getJSONArray("parts");
+                                            sb2 = new StringBuilder();
+                                            for (pi = 0; pi &lt; respParts.length(); pi++) sb2.append(respParts.getJSONObject(pi).getString("text"));
+                                            resultText = sb2.toString().trim();
+                                        } else {
+                                            failureReason = "Falha ao processar com IA (erro do servidor Gemini).";
+                                            tasker.log("Reactor IA: resposta HTTP " + resp.code());
+                                        }
+                                        resp.close();
+                                    }
+                                }
+                            } catch (Exception e) {
+                                failureReason = "Falha ao processar com IA (erro inesperado).";
+                                tasker.log("Erro Reactor (" + finalActionType + "): " + e.toString());
+                            }
+
+                            resultKey = finalActionType.equals("translate") ? "translate_result" : "ai_result";
+                            finalContext.put(resultKey, resultText != null ? resultText : "");
+
+                            outputMode = finalActionConfig.optString("outputMode", "expose_variable");
+                            if (outputMode.equals("replace_field")) {
+                                if (resultText != null &amp;&amp; resultText.length() &gt; 0) {
+                                    setFieldTextAndMark(finalNode, resultText);
+                                } else if (failureReason != null) {
+                                    // Falha real: restaura o texto original do usuário em vez de apagar o campo,
+                                    // e avisa via notificação + vibração já que a WebView pode não estar em primeiro plano.
+                                    originalInput = finalContext.containsKey("input") ? (String) finalContext.get("input") : "";
+                                    setFieldTextAndMark(finalNode, originalInput);
+                                    vibrateError();
+                                    showSystemNotification(REACTOR_AI_ERROR_NOTIF_ID, "Reactor", failureReason);
+                                } else {
+                                    // Sem resultado mas também sem erro (ex: nada a processar).
+                                    clearLoadingIndicator(finalNode);
+                                }
+                            }
+
+                            executeAction(finalActions, finalIndex + 1, finalContext, finalNode, finalCfgRoot);
+                        }
+                    }).start();
+                    return;
+                }
+
+                if (actionType.equals("text_replacer")) {
+                    inputVal = ctx.containsKey("input") ? (String) ctx.get("input") : "";
+                    replacement = applyTemplate(actionConfig.optString("text", ""), ctx);
+                    setFieldTextAndMark(node, inputVal + replacement);
+
+                } else if (actionType.equals("clipboard")) {
+                    clipText = applyTemplate(actionConfig.optString("text", ""), ctx);
+                    cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    cm.setPrimaryClip(ClipData.newPlainText("reactor", clipText));
+
+                } else if (actionType.equals("run_task")) {
+                    taskName = actionConfig.optString("task", "");
+                    if (taskName.length() &gt; 0) {
+                        par1 = applyTemplate(actionConfig.optString("par1", ""), ctx);
+                        par2 = applyTemplate(actionConfig.optString("par2", ""), ctx);
+                        taskVars = new HashMap();
+                        taskVars.put("par1", par1);
+                        taskVars.put("par2", par2);
+                        tasker.callTask(taskName, taskVars);
+                    }
+
+                } else if (actionType.equals("open_app")) {
+                    pkgName = actionConfig.optString("package", "");
+                    if (pkgName.length() &gt; 0) {
+                        pm = context.getPackageManager();
+                        launchIntent = pm.getLaunchIntentForPackage(pkgName);
+                        if (launchIntent != null) {
+                            alreadyClearedField = launchExternalIntent(launchIntent, node);
+                        }
+                    }
+
+                } else if (actionType.equals("open_url")) {
+                    urlText = applyTemplate(actionConfig.optString("url", ""), ctx);
+                    if (urlText.length() &gt; 0) {
+                        alreadyClearedField = launchExternalIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(urlText)), node);
+                    }
+
+                } else if (actionType.equals("search")) {
+                    engine = actionConfig.optString("engine", "google");
+                    queryTemplate = actionConfig.optString("query", "{input}");
+                    resolvedQuery = applyTemplate(queryTemplate, ctx).trim();
+                    query = URLEncoder.encode(resolvedQuery, "UTF-8");
+                    searchUrl = "https://www.google.com/search?q=" + query;
+                    if (engine.equals("bing")) searchUrl = "https://www.bing.com/search?q=" + query;
+                    else if (engine.equals("duckduckgo")) searchUrl = "https://duckduckgo.com/?q=" + query;
+                    else if (engine.equals("youtube")) searchUrl = "https://www.youtube.com/results?search_query=" + query;
+                    alreadyClearedField = launchExternalIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(searchUrl)), node);
+
+                } else if (actionType.equals("notification")) {
+                    notifTitleText = applyTemplate(actionConfig.optString("title", "Reactor"), ctx);
+                    notifBodyText = applyTemplate(actionConfig.optString("body", ""), ctx);
+                    ruleIdForNotif = ctx.containsKey("_rule_id") ? (String) ctx.get("_rule_id") : "";
+                    notifId = (ruleIdForNotif + "#" + index).hashCode();
+                    showSystemNotification(notifId, notifTitleText, notifBodyText);
+
+                } else if (actionType.equals("click")) {
+                    cx = actionConfig.optDouble("x", -1);
+                    cy = actionConfig.optDouble("y", -1);
+                    svc = tasker.getAccessibilityService();
+                    if (svc != null &amp;&amp; cx &gt;= 0 &amp;&amp; cy &gt;= 0 &amp;&amp; Build.VERSION.SDK_INT &gt;= 24) {
+                        path = new Path();
+                        path.moveTo((float) cx, (float) cy);
+                        stroke = new GestureDescription.StrokeDescription(path, 0, 50);
+                        gb = new GestureDescription.Builder();
+                        gb.addStroke(stroke);
+                        ((AccessibilityService) svc).dispatchGesture(gb.build(), null, null);
+                    }
+                }
+
+                executeAction(actions, index + 1, ctx, node, cfgRootArg);
+            }
+
+            for (ri = 0; ri &lt; providerRules.length(); ri++) {
+                rule = providerRules.getJSONObject(ri);
+                if (!rule.optBoolean("enabled", false)) continue;
+
+                eventObj = rule.getJSONObject("event");
+
+                testValue = finalValue;
+                if (finalProvider.equals("notification")) {
+                    matchFieldKey = eventObj.optString("matchField", "body");
+                    testValue = finalEventContext.containsKey(matchFieldKey) ? (String) finalEventContext.get(matchFieldKey) : "";
+                    if (testValue == null) testValue = "";
+                }
+
+                conditions = rule.optJSONArray("conditions") != null ? rule.getJSONArray("conditions") : new JSONArray();
+                passed = true;
+                matchedEndsWithValue = null;
+                for (ci = 0; ci &lt; conditions.length(); ci++) {
+                    cond = conditions.getJSONObject(ci);
+                    op = cond.getString("operator");
+                    cv = cond.optString("value", "");
+                    ok = false;
+                    if (op.equals("match")) {
+                        ok = testValue.equalsIgnoreCase(cv);
+                    } else if (op.equals("contains")) {
+                        ok = testValue.toLowerCase().contains(cv.toLowerCase());
+                    } else if (op.equals("starts_with")) {
+                        ok = testValue.toLowerCase().startsWith(cv.toLowerCase());
+                    } else if (op.equals("ends_with")) {
+                        ok = testValue.toLowerCase().endsWith(cv.toLowerCase());
+                    } else if (op.equals("regex")) {
+                        try {
+                            regexPattern = getCachedPattern(cv);
+                            ok = regexPattern.matcher(testValue).find();
+                        } catch (Exception pe) {
+                            ok = false;
+                        }
+                    }
+                    if (ok &amp;&amp; op.equals("ends_with")) matchedEndsWithValue = cv;
+                    if (!ok) { passed = false; break; }
+                }
+                if (!passed) continue;
+
+                anyRuleMatched = true;
+
+                ruleContext = new HashMap(finalEventContext);
+                ruleContext.put("_rule_id", rule.optString("id", ""));
+                textBeforeTrigger = finalValue;
+                triggerText = "";
+                if (finalProvider.equals("keyboard") &amp;&amp; matchedEndsWithValue != null) {
+                    cutIndex = finalValue.length() - matchedEndsWithValue.length();
+                    if (cutIndex &lt; 0) cutIndex = 0;
+                    textBeforeTrigger = finalValue.substring(0, cutIndex);
+                    triggerText = finalValue.substring(cutIndex);
+                }
+                if (finalProvider.equals("keyboard")) {
+                    ruleContext.put("input", textBeforeTrigger);
+                    ruleContext.put("trigger", triggerText);
+                }
+                final String finalTextBeforeTrigger = textBeforeTrigger;
+
+                referencedVars = collectReferencedVariables(rule);
+                if (referencedVars.contains("app_name") &amp;&amp; ruleContext.containsKey("app_package")) {
+                    ruleContext.put("app_name", resolveAppName((String) ruleContext.get("app_package")));
+                }
+
+                if (finalProvider.equals("keyboard") &amp;&amp; !loadingShown) {
+                    vibrateTriggerDetected();
+
+                    ruleActionsPeek = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
+                    ruleHasAsyncAction = false;
+                    for (pk = 0; pk &lt; ruleActionsPeek.length(); pk++) {
+                        peekType = ruleActionsPeek.getJSONObject(pk).getString("type");
+                        if (peekType.equals("ai") || peekType.equals("translate")) {
+                            ruleHasAsyncAction = true;
+                            break;
+                        }
+                    }
+                    if (ruleHasAsyncAction) {
+                        showLoadingIndicator(finalSourceNode, finalTextBeforeTrigger);
+                    }
+
+                    loadingShown = true;
+                }
+
+                actions = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
+                executeAction(actions, 0, ruleContext, finalSourceNode, finalLiveCfg);
+            }
+
+            if (finalProvider.equals("keyboard") &amp;&amp; anyRuleMatched &amp;&amp; !hasRewritingAction &amp;&amp; !alreadyClearedField) {
+                setFieldTextAndMark(finalSourceNode, "");
+            }
+        } catch (Exception e) {
+            tasker.log("Erro Reactor dispatcher: " + e.toString());
+        }
+    }
+}, new Consumer() {
+    accept(Object errorObject) {
+        tasker.log("Erro fatal no monitor Reactor: " + errorObject.toString());
+    }
+});
+
+    tasker.setJavaVariable("reactorMonitorDisposable", disposable);
+
+    cleanupAction = new Action() {
+        run() {
+            globalDisp = tasker.getJavaVariable("reactorMonitorDisposable");
+            if (globalDisp != null &amp;&amp; globalDisp != void) {
+                d = (Disposable) globalDisp;
+                if (!d.isDisposed()) d.dispose();
+            }
+            tasker.setJavaVariable("stopReactorMonitor", null);
+            tasker.setJavaVariable("reactorMonitorDisposable", null);
+            tasker.setJavaVariable("reactorLastFieldWriteTs", null);
+            tasker.setJavaVariable("reactorLastAppPkg", null);
+            tasker.setJavaVariable("reactorLastAppTs", null);
+        }
+    };
+    stopSignal.subscribe(cleanupAction);
+
+    return buildResult(true, "Monitor iniciado");
+} catch (Throwable e) {
+    err = new JSONObject();
+    err.put("ok", false);
+    err.put("error", "Java Error: " + e.toString());
+    return err.toString();
+}</Str>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="0"/>
+		</Action>
+		<Action sr="act4" ve="7">
+			<code>43</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%par1</lhs>
+					<op>2</op>
+					<rhs>save_config</rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act5" ve="7">
+			<code>547</code>
+			<Str sr="arg0" ve="3">%java_code</Str>
+			<Str sr="arg1" ve="3">import org.json.JSONObject;
+import java.io.File;
+import java.io.FileWriter;
+import com.joaomgcd.taskerm.action.java.JavaCodeException;
+
+try {
+
+    CONFIG_PATH = "/storage/emulated/0/Tasker/Reactor/reactor.json";
+
+    payload = new JSONObject(tasker.getVariable("par2"));
+    if (!payload.has("config")) throw new JavaCodeException("Config ausente no payload.");
+    cfgRoot = payload.getJSONObject("config");
+
+    file = new File(CONFIG_PATH);
+    file.getParentFile().mkdirs();
+    writer = new FileWriter(file, false);
+    writer.write(cfgRoot.toString(2));
+    writer.close();
+
+    tasker.setJavaVariable("reactorConfig", cfgRoot);
+
+    monStatus = tasker.getJavaVariable("stopReactorMonitor");
+    monitorActive = (monStatus != null &amp;&amp; monStatus != void);
+
+    result = new JSONObject();
+    result.put("ok", true);
+    result.put("monitorActive", monitorActive);
+    result.put("message", "Configuração salva");
+    return result.toString();
+
+} catch (Throwable e) {
+    err = new JSONObject();
+    err.put("ok", false);
+    err.put("error", "Erro ao salvar configuração: " + e.toString());
+    return err.toString();
+}</Str>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="0"/>
+		</Action>
+		<Action sr="act6" ve="7">
+			<code>38</code>
+		</Action>
+		<Action sr="act7" ve="7">
+			<code>37</code>
+			<ConditionList sr="if">
+				<Condition sr="c0" ve="3">
+					<lhs>%java_code</lhs>
+					<op>12</op>
+					<rhs></rhs>
+				</Condition>
+			</ConditionList>
+		</Action>
+		<Action sr="act8" ve="7">
+			<code>474</code>
+			<se>false</se>
+			<Str sr="arg0" ve="3">%java_code</Str>
+			<Str sr="arg1" ve="3">%jc_result</Str>
+			<Int sr="arg2" val="0"/>
+		</Action>
+		<Action sr="act9" ve="7">
+			<code>43</code>
 		</Action>
 	</Task>
 </TaskerData>
