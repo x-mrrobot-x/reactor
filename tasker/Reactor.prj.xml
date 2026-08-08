@@ -3,12 +3,12 @@
 	<Profile sr="prof2020" ve="2">
 		<cdate>1785950121852</cdate>
 		<clp>true</clp>
-		<edate>1785593921091</edate>
+		<edate>1786176159968</edate>
 		<flags>40</flags>
 		<id>2020</id>
 		<limit>true</limit>
 		<mid0>2013</mid0>
-		<nme>Iniciar Monitor de Acessibilidade</nme>
+		<nme>RC - START EVENT MONITOR</nme>
 		<Event sr="con0" ve="2">
 			<code>307</code>
 			<pri>0</pri>
@@ -19,8 +19,8 @@
 		<id>3fc9c99c-2059-4be3-b354-4c4df60830e9</id>
 		<name>REACTOR</name>
 		<pids>2020</pids>
-		<scenes>REACTOR UI,REACTOR</scenes>
-		<tids>2018,2016,2014,2015,2013</tids>
+		<scenes>REACTOR</scenes>
+		<tids>2018,2014,2013,2016</tids>
 		<tsort>Alpha</tsort>
 	</Project>
 	<Scene sr="sceneREACTOR">
@@ -33,52 +33,14 @@
 		<widthLand>-1</widthLand>
 		<widthPort>-1</widthPort>
 	</Scene>
-	<Scene sr="sceneREACTOR UI">
-		<cdate>1785555490821</cdate>
-		<edate>1785555587490</edate>
-		<heightLand>-1</heightLand>
-		<heightPort>2400</heightPort>
-		<nme>REACTOR UI</nme>
-		<widthLand>-1</widthLand>
-		<widthPort>1080</widthPort>
-		<WebElement sr="elements0" ve="2">
-			<flags>6</flags>
-			<geom>0,0,1080,2400,-1,-1,-1,-1</geom>
-			<Str sr="arg0" ve="3">ENGINE</Str>
-			<Int sr="arg1" val="1"/>
-			<Str sr="arg2" ve="3">/storage/0BF9-13F1/1 - Dev/1 - Projetos/1 - Tasker/Reactor/index.html</Str>
-			<Int sr="arg3" val="1"/>
-			<Int sr="arg4" val="1"/>
-			<Int sr="arg5" val="0"/>
-			<Int sr="arg6" val="1"/>
-			<Int sr="arg7" val="1"/>
-			<Str sr="arg8" ve="3"/>
-		</WebElement>
-		<PropertiesElement sr="props">
-			<keyTask>2015</keyTask>
-			<Int sr="arg0" val="1"/>
-			<Int sr="arg1" val="0"/>
-			<Str sr="arg2" ve="3">#00FFFFFF</Str>
-			<Int sr="arg3" val="0"/>
-			<Str sr="arg4" ve="3">REACTOR UI</Str>
-			<Str sr="arg5" ve="3"/>
-			<Img sr="arg6" ve="2"/>
-			<Str sr="arg7" ve="3"/>
-			<LinkClickFilter sr="filter0">
-				<stopEvent>true</stopEvent>
-				<urlMatch>back</urlMatch>
-			</LinkClickFilter>
-		</PropertiesElement>
-	</Scene>
 	<Task sr="task2013">
 		<cdate>1745400000000</cdate>
-		<edate>1785593921091</edate>
+		<edate>1786176080287</edate>
 		<id>2013</id>
 		<pri>100</pri>
 		<Action sr="act0" ve="7">
 			<code>130</code>
-			<on>false</on>
-			<Str sr="arg0" ve="3">TK_ModuleManager</Str>
+			<Str sr="arg0" ve="3">RC 02 - MONITOR CONTROL</Str>
 			<Int sr="arg1" val="10"/>
 			<Int sr="arg10" val="0"/>
 			<Str sr="arg2" ve="3">toggle_monitor</Str>
@@ -280,19 +242,9 @@ Output resulting from the command. May be empty.&lt;/_array_net.dinglisch.androi
 			</ConditionList>
 		</Action>
 	</Task>
-	<Task sr="task2015">
-		<cdate>1785555576149</cdate>
-		<edate>1785555576149</edate>
-		<id>2015</id>
-		<pri>102</pri>
-		<Action sr="act0" ve="7">
-			<code>49</code>
-			<Str sr="arg0" ve="3">REACTOR UI</Str>
-		</Action>
-	</Task>
 	<Task sr="task2016">
 		<cdate>1785555608857</cdate>
-		<edate>1786007706630</edate>
+		<edate>1786176031965</edate>
 		<id>2016</id>
 		<nme>RC 01 - MAIN</nme>
 		<pri>100</pri>
@@ -324,16 +276,16 @@ Output resulting from the command. May be empty.&lt;/_array_net.dinglisch.androi
 	</Task>
 	<Task sr="task2018">
 		<cdate>1745400000000</cdate>
-		<edate>1786009135672</edate>
+		<edate>1786199472035</edate>
 		<id>2018</id>
 		<nme>RC 02 - MONITOR CONTROL</nme>
 		<pri>100</pri>
-		<rty>2</rty>
+		<rty>1</rty>
 		<Action sr="act0" ve="7">
 			<code>37</code>
 			<ConditionList sr="if">
 				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
+					<lhs>%action</lhs>
 					<op>2</op>
 					<rhs>get_status</rhs>
 				</Condition>
@@ -354,12 +306,16 @@ if (rawCfg != null &amp;&amp; rawCfg != void) {
 } else {
     file = new File(CONFIG_PATH);
     if (file.exists()) {
-        reader = new FileReader(file);
-        buf = new char[(int) file.length()];
-        reader.read(buf);
-        reader.close();
-        cfgRoot = new JSONObject(new String(buf));
-        tasker.setJavaVariable("reactorConfig", cfgRoot);
+        reader = null;
+        try {
+            reader = new FileReader(file);
+            buf = new char[(int) file.length()];
+            reader.read(buf);
+            cfgRoot = new JSONObject(new String(buf));
+            tasker.setJavaVariable("reactorConfig", cfgRoot);
+        } finally {
+            if (reader != null) reader.close();
+        }
     } else {
         cfgRoot = null;
     }
@@ -393,18 +349,42 @@ return result.toString();</Str>
 			<code>38</code>
 		</Action>
 		<Action sr="act12" ve="7">
-			<code>126</code>
-			<Str sr="arg0" ve="3">%jc_result</Str>
-			<Int sr="arg1" val="0"/>
+			<code>547</code>
+			<Str sr="arg0" ve="3">%result</Str>
+			<Str sr="arg1" ve="3">{ "id": "%call_id", "payload": %jc_result }</Str>
 			<Int sr="arg2" val="0"/>
 			<Int sr="arg3" val="0"/>
-			<Str sr="arg4" ve="3"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="0"/>
+		</Action>
+		<Action sr="act13" ve="7">
+			<code>596</code>
+			<Str sr="arg0" ve="3">%result</Str>
+			<Int sr="arg1" val="24"/>
+			<Str sr="arg2" ve="3">%result</Str>
+			<Int sr="arg3" val="0"/>
+		</Action>
+		<Action sr="act14" ve="7">
+			<code>485</code>
+			<Bundle sr="arg0">
+				<Vals sr="val">
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES>&lt;StringArray sr=""/&gt;</net.dinglisch.android.tasker.RELEVANT_VARIABLES>
+					<net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>[Ljava.lang.String;</net.dinglisch.android.tasker.RELEVANT_VARIABLES-type>
+				</Vals>
+			</Bundle>
+			<Str sr="arg1" ve="3">REACTOR</Str>
+			<Str sr="arg2" ve="3">MONITOR</Str>
+			<Str sr="arg3" ve="3">load_url</Str>
+			<Str sr="arg4" ve="3">url</Str>
+			<Str sr="arg5" ve="3">javascript:onTaskResponse(`%result`)</Str>
+			<Str sr="arg6" ve="3"/>
 		</Action>
 		<Action sr="act2" ve="7">
 			<code>43</code>
 			<ConditionList sr="if">
 				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
+					<lhs>%action</lhs>
 					<op>2</op>
 					<rhs>toggle_monitor</rhs>
 				</Condition>
@@ -460,6 +440,7 @@ cfgRoot = (JSONObject) rawCfg;
 // Constantes
 REACTOR_AI_ERROR_NOTIF_ID = 990001;
 APP_EVENT_DEDUPE_MS = 1200;
+MAX_REGEX_INPUT_LEN = 500;
 
 setFieldTextAndMark(node, text) {
     if (node == null) return false;
@@ -566,13 +547,22 @@ collectReferencedVariables(rule) {
 
 resolveAppName(pkg) {
     if (pkg == null || pkg.length() == 0) return "";
+    appNameCache = tasker.getJavaVariable("reactorAppNameCache");
+    if (appNameCache == null || appNameCache == void) {
+        appNameCache = new HashMap();
+        tasker.setJavaVariable("reactorAppNameCache", appNameCache);
+    }
+    if (appNameCache.containsKey(pkg)) return (String) appNameCache.get(pkg);
+    name = pkg;
     try {
         pm = context.getPackageManager();
         appInfo = pm.getApplicationInfo(pkg, 0);
-        return pm.getApplicationLabel(appInfo).toString();
+        name = pm.getApplicationLabel(appInfo).toString();
     } catch (Exception e) {
-        return pkg;
+        name = pkg;
     }
+    appNameCache.put(pkg, name);
+    return name;
 }
 
 getCachedPattern(cv) {
@@ -756,7 +746,11 @@ disposable = events.subscribe(new Consumer() {
                             resultText = null;
                             failureReason = null;
                             try {
-                                client = new OkHttpClient();
+                                client = new OkHttpClient.Builder()
+                                    .connectTimeout(8, TimeUnit.SECONDS)
+                                    .readTimeout(8, TimeUnit.SECONDS)
+                                    .writeTimeout(8, TimeUnit.SECONDS)
+                                    .build();
 
                                 if (finalActionType.equals("translate")) {
                                     lang = finalActionConfig.optString("language", "en");
@@ -868,7 +862,9 @@ disposable = events.subscribe(new Consumer() {
 
                 } else if (actionType.equals("run_task")) {
                     taskName = actionConfig.optString("task", "");
-                    if (taskName.length() &gt; 0) {
+                    if (taskName.length() &gt; 0 &amp;&amp; taskName.equals("RC 02 - MONITOR CONTROL")) {
+                        tasker.log("Reactor: regra tentou chamar a própria task de controle (RC 02 - MONITOR CONTROL) via run_task — ignorado para evitar dependência circular.");
+                    } else if (taskName.length() &gt; 0) {
                         par1 = applyTemplate(actionConfig.optString("par1", ""), ctx);
                         par2 = applyTemplate(actionConfig.optString("par2", ""), ctx);
                         taskVars = new HashMap();
@@ -960,7 +956,10 @@ disposable = events.subscribe(new Consumer() {
                     } else if (op.equals("regex")) {
                         try {
                             regexPattern = getCachedPattern(cv);
-                            ok = regexPattern.matcher(testValue).find();
+                            safeTestValue = testValue.length() &gt; MAX_REGEX_INPUT_LEN
+                                ? testValue.substring(0, MAX_REGEX_INPUT_LEN)
+                                : testValue;
+                            ok = regexPattern.matcher(safeTestValue).find();
                         } catch (Exception pe) {
                             ok = false;
                         }
@@ -1064,7 +1063,7 @@ disposable = events.subscribe(new Consumer() {
 			<code>43</code>
 			<ConditionList sr="if">
 				<Condition sr="c0" ve="3">
-					<lhs>%par1</lhs>
+					<lhs>%action</lhs>
 					<op>2</op>
 					<rhs>save_config</rhs>
 				</Condition>
@@ -1082,15 +1081,19 @@ try {
 
     CONFIG_PATH = "/storage/emulated/0/Tasker/Reactor/reactor.json";
 
-    payload = new JSONObject(tasker.getVariable("par2"));
+    payload = new JSONObject(tasker.getVariable("config"));
     if (!payload.has("config")) throw new JavaCodeException("Config ausente no payload.");
     cfgRoot = payload.getJSONObject("config");
 
     file = new File(CONFIG_PATH);
     file.getParentFile().mkdirs();
-    writer = new FileWriter(file, false);
-    writer.write(cfgRoot.toString(2));
-    writer.close();
+    writer = null;
+    try {
+        writer = new FileWriter(file, false);
+        writer.write(cfgRoot.toString(2));
+    } finally {
+        if (writer != null) writer.close();
+    }
 
     tasker.setJavaVariable("reactorConfig", cfgRoot);
 
@@ -1138,5 +1141,19 @@ try {
 		<Action sr="act9" ve="7">
 			<code>43</code>
 		</Action>
+		<ProfileVariable sr="pv0">
+			<clearout>false</clearout>
+			<exportval>0</exportval>
+			<immutable>false</immutable>
+			<pvci>false</pvci>
+			<pvd></pvd>
+			<pvdn></pvdn>
+			<pvid>2018</pvid>
+			<pvit>t</pvit>
+			<pvn>%count</pvn>
+			<pvt>n</pvt>
+			<pvv>0</pvv>
+			<strout>false</strout>
+		</ProfileVariable>
 	</Task>
 </TaskerData>

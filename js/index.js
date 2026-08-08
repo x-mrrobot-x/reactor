@@ -1,10 +1,6 @@
 const TASK_NAME = "RC 02 - MONITOR CONTROL";
 const TASK_TIMEOUT_MS = 12000;
 
-/* =========================================================================
- * PROVIDER_REGISTRY — providers, eventos e operadores de condição permitidos
- * ========================================================================= */
-
 const CONDITION_OPERATORS = {
   match: "Igual a",
   contains: "Contém",
@@ -215,17 +211,13 @@ function isUnimplementedProvider(providerId) {
   return !PROVIDER_REGISTRY[providerId].implemented;
 }
 
-/* =========================================================================
- * ACTION_REGISTRY — tipos de ação disponíveis e suas configs padrão
- * ========================================================================= */
-
 const ACTION_REGISTRY = {
   text_replacer: {
     label: "Text Replacer",
     archetype: "template",
     templateFields: ["text"],
     defaultConfig: () => ({ text: "" }),
-    compatibleWith: evt => eventDef(evt).lockedCondition === true
+    compatibleWith: eventType => eventDef(eventType).lockedCondition === true
   },
   clipboard: {
     label: "Definir Clipboard",
@@ -271,14 +263,14 @@ const ACTION_REGISTRY = {
     label: "Processar com IA",
     archetype: "processor",
     producesVariable: "ai_result",
-    defaultConfig: evt => ({
-      inputVariable: eventDef(evt).lockedCondition
+    defaultConfig: eventType => ({
+      inputVariable: eventDef(eventType).lockedCondition
         ? "input"
-        : eventDef(evt).matchField ||
-          (variablesOfEvent(evt)[0] || {}).key ||
+        : eventDef(eventType).matchField ||
+          (variablesOfEvent(eventType)[0] || {}).key ||
           "",
       systemInstructions: "",
-      outputMode: eventDef(evt).lockedCondition
+      outputMode: eventDef(eventType).lockedCondition
         ? "replace_field"
         : "expose_variable"
     })
@@ -287,14 +279,14 @@ const ACTION_REGISTRY = {
     label: "Traduzir",
     archetype: "processor",
     producesVariable: "translate_result",
-    defaultConfig: evt => ({
-      inputVariable: eventDef(evt).lockedCondition
+    defaultConfig: eventType => ({
+      inputVariable: eventDef(eventType).lockedCondition
         ? "input"
-        : eventDef(evt).matchField ||
-          (variablesOfEvent(evt)[0] || {}).key ||
+        : eventDef(eventType).matchField ||
+          (variablesOfEvent(eventType)[0] || {}).key ||
           "",
       language: "en",
-      outputMode: eventDef(evt).lockedCondition
+      outputMode: eventDef(eventType).lockedCondition
         ? "replace_field"
         : "expose_variable"
     })
@@ -308,8 +300,8 @@ function allowedActionTypesForEvent(eventType) {
   });
 }
 
-function defaultActionConfig(type, eventType) {
-  const meta = ACTION_REGISTRY[type];
+function defaultActionConfig(actionType, eventType) {
+  const meta = ACTION_REGISTRY[actionType];
   if (!meta) return {};
   return meta.defaultConfig(eventType);
 }
@@ -330,8 +322,6 @@ function outputModeHint(actionType, mode) {
   return `O resultado fica disponível para a próxima ação da regra através de {${varName}}.`;
 }
 
-/* Variáveis disponíveis num ponto da regra: as do evento + ai_result/translate_result
- * de qualquer ação "processor" anterior na mesma regra. */
 function availableVariablesAt(draft, actionIndex) {
   const vars = variablesOfEvent(draft.event.type).slice();
   const limit = Math.min(actionIndex, draft.actions.length);
@@ -399,10 +389,6 @@ const ICONS = {
     '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>',
   eye: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>'
 };
-
-/* =========================================================================
- * Configuração padrão — regras agrupadas por provider
- * ========================================================================= */
 
 const DEFAULT_CONFIG = {
   providers: {
@@ -645,8 +631,6 @@ function normalizeConfig(config) {
   return normalized;
 }
 
-/* Achata rules_by_provider numa lista única; cada item leva um providerId
- * atribuído na leitura, mas não persistido. */
 function allRules() {
   const grouped = (appState.config && appState.config.rules_by_provider) || {};
   const result = [];
@@ -658,8 +642,6 @@ function allRules() {
   return result;
 }
 
-/* Localiza em qual array/posição uma regra está, pelo id — usado por
- * toggle/duplicate/delete/edit para operar direto em rules_by_provider. */
 function findRuleLocation(id) {
   const grouped = (appState.config && appState.config.rules_by_provider) || {};
   for (const providerId of Object.keys(PROVIDER_REGISTRY)) {
@@ -684,22 +666,6 @@ function deepClone(value) {
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function withTimeout(promise, ms, timeoutMessage) {
-  return new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(timeoutMessage)), ms);
-    promise.then(
-      value => {
-        clearTimeout(timer);
-        resolve(value);
-      },
-      error => {
-        clearTimeout(timer);
-        reject(error);
-      }
-    );
-  });
 }
 
 function el(tag, className, text) {
@@ -753,7 +719,7 @@ function emptyRule() {
   };
 }
 
-function genId() {
+function generateRuleId() {
   return `rule_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
 }
 
@@ -786,52 +752,110 @@ function createTaskerEnvironment() {
     }
   }
 
-  // Fila de chamadas para serializar acessos ao Tasker
-  let taskQueue = Promise.resolve();
+  const pendingCalls = new Map();
 
-  function callTask(action, payload) {
+  function generateCallId() {
+    return `call_${Date.now().toString(36)}${Math.random()
+      .toString(36)
+      .slice(2, 8)}`;
+  }
+
+  function registerPendingCall(id) {
+    return new Promise(resolve => {
+      const timer = setTimeout(() => expirePendingCall(id), TASK_TIMEOUT_MS);
+      pendingCalls.set(id, { resolve, timer });
+    });
+  }
+
+  function clearPendingCall(id) {
+    const entry = pendingCalls.get(id);
+    if (entry) clearTimeout(entry.timer);
+    pendingCalls.delete(id);
+  }
+
+  function settlePendingCall(id, payload) {
+    const entry = pendingCalls.get(id);
+    if (!entry) {
+      console.warn(`onTaskResponse: id desconhecido ou já resolvido (${id})`);
+      return;
+    }
+    clearPendingCall(id);
+    entry.resolve(payload);
+  }
+
+  function expirePendingCall(id) {
+    const entry = pendingCalls.get(id);
+    if (!entry) return;
+    clearPendingCall(id);
+    entry.resolve({
+      ok: false,
+      error: `Tempo esgotado aguardando resposta da tarefa ${TASK_NAME} (${TASK_TIMEOUT_MS}ms).`
+    });
+  }
+
+  function settleDispatchFailure(id, message) {
+    const entry = pendingCalls.get(id);
+    if (!entry) return;
+    clearPendingCall(id);
+    entry.resolve({ ok: false, error: message });
+  }
+
+  function onTaskResponse(base64) {
+    let jsonText;
+    try {
+      jsonText = decodeURIComponent(escape(atob(base64)));
+    } catch (error) {
+      console.warn("onTaskResponse: falha ao decodificar base64", error);
+      return;
+    }
+
+    const parsed = safeParseJSON(jsonText);
+    if (!parsed) {
+      console.warn("onTaskResponse: JSON inválido", jsonText);
+      return;
+    }
+
+    if (!parsed.id) {
+      console.warn("onTaskResponse: resposta sem id", parsed);
+      return;
+    }
+
+    settlePendingCall(
+      parsed.id,
+      parsed.payload || { ok: false, error: "Payload ausente na resposta." }
+    );
+  }
+  window.onTaskResponse = onTaskResponse;
+
+  async function dispatchTask(action, payload) {
+    let id = generateCallId();
+    while (pendingCalls.has(id)) id = generateCallId();
+
+    const promise = registerPendingCall(id);
+
     const variables = {
-      par1: action,
-      par2: JSON.stringify(payload || {})
+      action: action,
+      config: JSON.stringify(payload || {}),
+      call_id: id
     };
-    return (async () => {
-      let raw = null;
-      try {
-        const result = await withTimeout(
-          Tasker.runTaskForResult({ name: TASK_NAME, variables }),
-          TASK_TIMEOUT_MS,
-          `Tempo esgotado aguardando resposta da tarefa ${TASK_NAME}`
-        );
-        raw = result ? result.returnValue : null;
-      } catch (error) {
-        return {
-          ok: false,
-          error: `Falha ao chamar ${TASK_NAME}: ${error.message}`
-        };
-      }
-      if (!raw) {
-        return {
-          ok: false,
-          error: `Sem resposta da tarefa ${TASK_NAME}. Verifique se ela existe no Tasker.`
-        };
-      }
-      const parsed = safeParseJSON(raw);
-      return (
-        parsed || {
-          ok: false,
-          error: "Resposta inválida da tarefa (JSON malformado)."
-        }
+
+    try {
+      await Tasker.runTask({ name: TASK_NAME, variables, priority: 5 });
+    } catch (error) {
+      settleDispatchFailure(
+        id,
+        `Falha ao despachar ${TASK_NAME}: ${error.message}`
       );
-    })();
+    }
+
+    return promise;
   }
 
   function runAction(action, payload) {
     if (action === "export_config") {
       return exportConfigDirect((payload || {}).config);
     }
-    const queued = taskQueue.then(() => callTask(action, payload));
-    taskQueue = queued.catch(() => {});
-    return queued;
+    return dispatchTask(action, payload);
   }
 
   return { isAvailable, runAction };
@@ -919,8 +943,6 @@ const appState = {
 
 const dom = {};
 
-/* Mapa propriedade-do-dom → seletor. Adicionar um novo elemento à UI passa
- * a ser só uma linha aqui, em vez de mais uma chamada solta a getElementById. */
 const DOM_SELECTORS = {
   masterSwitch: "#masterSwitch",
   masterLed: "#masterLed",
@@ -958,7 +980,6 @@ const DOM_SELECTORS = {
   dialogRoot: "#dialogRoot"
 };
 
-// Elementos que existem em mais de uma cópia na página (listas de nós).
 const DOM_SELECTOR_LISTS = {
   tabButtons: ".tab",
   pages: ".page"
@@ -1313,7 +1334,7 @@ function duplicateRule(rule) {
     const loc = findRuleLocation(rule.id);
     if (!loc) throw new Error("Regra não encontrada");
     const clone = deepClone(loc.rule);
-    clone.id = genId();
+    clone.id = generateRuleId();
     clone.name = `${clone.name} (cópia)`;
     loc.arr.splice(loc.index + 1, 0, clone);
   }, "Regra duplicada");
@@ -1345,18 +1366,18 @@ function confirmDeleteRule(rule) {
   );
 
   const foot = el("div", "dialog-foot");
-  const cancel = el("button", "btn btn-ghost", "Cancelar");
-  cancel.type = "button";
-  cancel.addEventListener("click", closeDialog);
-  const confirm = el("button", "btn btn-danger", "Excluir");
-  confirm.type = "button";
-  confirm.addEventListener("click", () => {
+  const cancelBtn = el("button", "btn btn-ghost", "Cancelar");
+  cancelBtn.type = "button";
+  cancelBtn.addEventListener("click", closeDialog);
+  const confirmBtn = el("button", "btn btn-danger", "Excluir");
+  confirmBtn.type = "button";
+  confirmBtn.addEventListener("click", () => {
     closeDialog();
     expandedRules.delete(rule.id);
     deleteRule(rule);
   });
-  foot.appendChild(cancel);
-  foot.appendChild(confirm);
+  foot.appendChild(cancelBtn);
+  foot.appendChild(confirmBtn);
   dialog.appendChild(foot);
 
   overlay.appendChild(dialog);
@@ -1431,15 +1452,15 @@ function buildProviderRow(id) {
   info.appendChild(el("div", "provider-desc", meta.description));
   row.appendChild(info);
 
-  const sw = el("label", "switch sm");
+  const switchLabel = el("label", "switch sm");
   const input = document.createElement("input");
   input.type = "checkbox";
   input.checked = enabled;
   input.disabled = appState.providersBusy;
-  sw.appendChild(input);
-  sw.appendChild(el("span", "track"));
-  sw.appendChild(el("span", "knob"));
-  row.appendChild(sw);
+  switchLabel.appendChild(input);
+  switchLabel.appendChild(el("span", "track"));
+  switchLabel.appendChild(el("span", "knob"));
+  row.appendChild(switchLabel);
 
   return row;
 }
@@ -1485,8 +1506,6 @@ function renderProviderList() {
     return;
   }
 
-  // Atualiza as rows existentes em vez de recriá-las, preservando o nó do
-  // input/knob para que a transição CSS do toggle seja exibida corretamente.
   ids.forEach(id => updateProviderRow(existingRows.get(id), id));
 }
 
@@ -1637,7 +1656,7 @@ let dialogKeyHandler = null;
 
 function closeDialog() {
   dom.dialogRoot.innerHTML = "";
-  activeVarDropdown = null;
+  activeVariableDropdown = null;
   if (dialogKeyHandler) {
     document.removeEventListener("keydown", dialogKeyHandler);
     dialogKeyHandler = null;
@@ -1678,9 +1697,6 @@ function createBoundNumberRow(label, obj, key) {
   return row;
 }
 
-/* Preenche um <select> a partir de uma lista de pares [value, text],
- * limpando opções anteriores. Usado por todo select construído na mão
- * (provider, evento, campo, operador, tipo de ação, etc.). */
 function populateSelectOptions(select, options) {
   select.innerHTML = "";
   options.forEach(([value, text]) => {
@@ -1704,8 +1720,6 @@ function createBoundSelectRow(label, obj, key, options) {
   return row;
 }
 
-/* Select vinculado a uma variável disponível naquele ponto da regra
- * (usado por inputVariable de ai/translate). */
 function createBoundVariableSelectRow(label, obj, key, vars) {
   const row = el("div", "field-row");
   row.appendChild(el("label", null, label));
@@ -1740,9 +1754,6 @@ function createBoundTextareaBlock(label, obj, key) {
   return block;
 }
 
-/* Dropdown de variáveis disponíveis: uma por linha, com a explicação (label)
- * e o exemplo, para o usuário selecionar. Só aparece ao focar/clicar no
- * campo, e fecha ao clicar fora — ver attachVariableDropdown abaixo. */
 function buildVariableDropdown(vars) {
   const dropdown = el("div", "var-dropdown");
   (vars || []).forEach(v => {
@@ -1764,25 +1775,21 @@ function buildVariableDropdown(vars) {
   return dropdown;
 }
 
-/* Só um dropdown de variáveis fica aberto por vez em toda a página; um único
- * listener global cuida de fechar ao clicar fora, em vez de um listener novo
- * por campo (o que vazaria a cada re-render da lista de ações). */
-let activeVarDropdown = null;
+let activeVariableDropdown = null;
 
-function closeActiveVarDropdown() {
-  if (activeVarDropdown) activeVarDropdown.closeFn();
+function closeActiveVariableDropdown() {
+  if (activeVariableDropdown) activeVariableDropdown.closeFn();
 }
 
 document.addEventListener("pointerdown", event => {
-  if (activeVarDropdown && !activeVarDropdown.wrap.contains(event.target)) {
-    closeActiveVarDropdown();
+  if (
+    activeVariableDropdown &&
+    !activeVariableDropdown.wrap.contains(event.target)
+  ) {
+    closeActiveVariableDropdown();
   }
 });
 
-/* Substitui o campo (input/textarea) já inserido em rowEl por uma versão
- * envolvida num wrapper posicionado, com o dropdown de variáveis anexado
- * logo abaixo — abre no foco do campo, insere {chave} no cursor ao clicar
- * numa linha, e fecha ao selecionar ou ao clicar fora. */
 function attachVariableDropdown(rowEl, vars) {
   const fieldEl = qs("input, textarea", rowEl);
   if (!fieldEl || !vars || !vars.length) return;
@@ -1796,19 +1803,17 @@ function attachVariableDropdown(rowEl, vars) {
 
   function closeThisDropdown() {
     dropdown.classList.remove("open");
-    if (activeVarDropdown && activeVarDropdown.wrap === wrap) {
-      activeVarDropdown = null;
+    if (activeVariableDropdown && activeVariableDropdown.wrap === wrap) {
+      activeVariableDropdown = null;
     }
   }
   function openThisDropdown() {
-    closeActiveVarDropdown();
+    closeActiveVariableDropdown();
     dropdown.classList.add("open");
-    activeVarDropdown = { wrap, closeFn: closeThisDropdown };
+    activeVariableDropdown = { wrap, closeFn: closeThisDropdown };
   }
 
   fieldEl.addEventListener("focus", openThisDropdown);
-  // blur cobre navegação por teclado (Tab); selecionar um item não dispara
-  // blur porque o pointerdown do dropdown já chama preventDefault().
   fieldEl.addEventListener("blur", closeThisDropdown);
 
   function selectItem(item) {
@@ -1831,9 +1836,6 @@ function attachVariableDropdown(rowEl, vars) {
     fieldEl.setSelectionRange(cursor, cursor);
   }
 
-  // pointerdown apenas previne o blur do campo (preservando selectionStart);
-  // a seleção só acontece se o pointerup ocorrer no MESMO item — assim
-  // deslizar o dedo sobre a lista não escolhe nada.
   let pressedItem = null;
   dropdown.addEventListener("pointerdown", event => {
     const item = event.target.closest(".var-dd-item");
@@ -1853,7 +1855,6 @@ function attachVariableDropdown(rowEl, vars) {
     pressedItem = null;
   });
 
-  // teclado (Tab + Enter/Espaço) dispara click sem pointer events.
   dropdown.addEventListener("click", event => {
     if (event.detail !== 0) return;
     const item = event.target.closest(".var-dd-item");
@@ -1862,18 +1863,10 @@ function attachVariableDropdown(rowEl, vars) {
   });
 }
 
-/* Anexa um campo templável ao container, com o dropdown de variáveis
- * disponíveis (se houver alguma) já vinculado ao campo. */
 function appendTemplateFieldWithVariables(container, rowEl, vars) {
   container.appendChild(rowEl);
   attachVariableDropdown(rowEl, vars);
 }
-
-/* =========================================================================
- * ACTION_FIELD_BUILDERS — um builder de campos por tipo de ação, no mesmo
- * espírito de ACTION_REGISTRY. Cada builder recebe (container, action,
- * config, vars, draft) e monta os campos de configuração daquela ação.
- * ========================================================================= */
 
 function buildTemplateTextareaFields(container, action, config, vars) {
   appendTemplateFieldWithVariables(
@@ -2100,7 +2093,7 @@ function renderConditionsList(container, draft) {
 
 function renderActionsList(container, draft) {
   container.innerHTML = "";
-  activeVarDropdown = null;
+  activeVariableDropdown = null;
   const allowedTypes = allowedActionTypesForEvent(draft.event.type);
 
   if (draft.actions.length === 0) {
@@ -2130,7 +2123,7 @@ function renderActionsList(container, draft) {
     });
     head.appendChild(typeSelect);
 
-    const move = el("div", "action-card-move");
+    const moveControls = el("div", "action-card-move");
     const upBtn = iconButton("icon-btn", "up", "Mover para cima");
     upBtn.disabled = index === 0;
     upBtn.addEventListener("click", () => {
@@ -2154,10 +2147,10 @@ function renderActionsList(container, draft) {
       draft.actions.splice(index, 1);
       renderActionsList(container, draft);
     });
-    move.appendChild(upBtn);
-    move.appendChild(downBtn);
-    move.appendChild(delBtn);
-    head.appendChild(move);
+    moveControls.appendChild(upBtn);
+    moveControls.appendChild(downBtn);
+    moveControls.appendChild(delBtn);
+    head.appendChild(moveControls);
     card.appendChild(head);
 
     const fields = el("div", "action-card-fields");
@@ -2218,8 +2211,6 @@ function openRuleDialog(existingRule) {
   eventRow.appendChild(eventSelect);
   eventSection.appendChild(eventRow);
 
-  // Seletor "Campo de correspondência" — visível só quando o evento tem
-  // matchFieldOptions (hoje, só notification_received).
   const matchFieldRow = el("div", "field-row");
   matchFieldRow.appendChild(el("label", null, "Campo"));
   const matchFieldSelect = document.createElement("select");
@@ -2352,9 +2343,6 @@ function openRuleDialog(existingRule) {
       action => allowedTypes.indexOf(action.type) !== -1
     );
 
-    // Normaliza configs de ai/translate que ficaram inválidas após a troca
-    // de evento (outputMode "replace_field" só vale para evento locked;
-    // inputVariable precisa apontar para uma variável ainda disponível).
     draft.actions.forEach((action, idx) => {
       if (action.type === "ai" || action.type === "translate") {
         if (!locked && action.config.outputMode === "replace_field") {
@@ -2417,7 +2405,7 @@ function openRuleDialog(existingRule) {
     const response = await performConfigMutation(
       () => {
         const persistedRule = {
-          id: isEdit ? existingRule.id : genId(),
+          id: isEdit ? existingRule.id : generateRuleId(),
           enabled: isEdit ? draft.enabled : true,
           name,
           event: deepClone(draft.event),
