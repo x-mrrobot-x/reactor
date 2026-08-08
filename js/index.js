@@ -928,7 +928,7 @@ const environment = selectEnvironment();
 
 const appState = {
   monitorActive: false,
-  providersBusy: false,
+  busyProviderIds: new Set(),
   config: {
     providers: {},
     rules_by_provider: {},
@@ -1024,7 +1024,17 @@ async function performAction(action, payload) {
   return response;
 }
 
-async function performConfigMutation(mutateFn, successMessage) {
+let configMutationQueue = Promise.resolve();
+
+function performConfigMutation(mutateFn, successMessage) {
+  const task = configMutationQueue.then(() =>
+    runConfigMutation(mutateFn, successMessage)
+  );
+  configMutationQueue = task.catch(() => {});
+  return task;
+}
+
+async function runConfigMutation(mutateFn, successMessage) {
   const beforeProviders = cloneProviders(appState.config.providers);
   const backup = deepClone(appState.config);
 
@@ -1055,8 +1065,9 @@ async function performConfigMutation(mutateFn, successMessage) {
 
   const feedback =
     response.error ||
-    response.message ||
-    (response.ok !== false ? successMessage : null);
+    (response.ok !== false
+      ? successMessage || response.message
+      : response.message);
   if (feedback) showToast(feedback, response.ok === false);
 
   return response;
@@ -1322,11 +1333,15 @@ function updateRulesPageStats() {
 }
 
 function toggleRule(rule) {
-  return performConfigMutation(() => {
-    const loc = findRuleLocation(rule.id);
-    if (!loc) throw new Error("Regra não encontrada");
-    loc.rule.enabled = !loc.rule.enabled;
-  }, "Regra atualizada");
+  const nextEnabled = !rule.enabled;
+  return performConfigMutation(
+    () => {
+      const loc = findRuleLocation(rule.id);
+      if (!loc) throw new Error("Regra não encontrada");
+      loc.rule.enabled = nextEnabled;
+    },
+    nextEnabled ? "Regra ativada" : "Regra desativada"
+  );
 }
 
 function duplicateRule(rule) {
@@ -1456,7 +1471,7 @@ function buildProviderRow(id) {
   const input = document.createElement("input");
   input.type = "checkbox";
   input.checked = enabled;
-  input.disabled = appState.providersBusy;
+  input.disabled = appState.busyProviderIds.has(id);
   switchLabel.appendChild(input);
   switchLabel.appendChild(el("span", "track"));
   switchLabel.appendChild(el("span", "knob"));
@@ -1482,7 +1497,7 @@ function updateProviderRow(row, id) {
 
   const input = qs('input[type="checkbox"]', row);
   if (input.checked !== enabled) input.checked = enabled;
-  input.disabled = appState.providersBusy;
+  input.disabled = appState.busyProviderIds.has(id);
 }
 
 function renderProviderList() {
@@ -1521,12 +1536,14 @@ function updateProvidersPageStats() {
 }
 
 function setProviderEnabled(id, enabled) {
-  appState.providersBusy = true;
+  appState.busyProviderIds.add(id);
   syncUI();
+  const providerName = (PROVIDER_REGISTRY[id] || {}).name || "Provider";
+  const successMessage = `${providerName} ${enabled ? "habilitado" : "desabilitado"}`;
   return performConfigMutation(() => {
     appState.config.providers[id].enabled = enabled;
-  }, "Provider atualizado").finally(() => {
-    appState.providersBusy = false;
+  }, successMessage).finally(() => {
+    appState.busyProviderIds.delete(id);
     syncUI();
   });
 }
