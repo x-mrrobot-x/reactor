@@ -944,6 +944,8 @@ const appState = {
 const dom = {};
 
 const DOM_SELECTORS = {
+  header: "header",
+  scrollContainer: ".app",
   masterSwitch: "#masterSwitch",
   masterLed: "#masterLed",
   masterState: "#masterState",
@@ -1081,6 +1083,7 @@ function switchTab(pageId) {
   dom.pages.forEach(page => {
     page.hidden = page.dataset.page !== pageId;
   });
+  resetContentScroll();
 }
 
 function bindTabs() {
@@ -1672,6 +1675,7 @@ function syncUI() {
 let dialogKeyHandler = null;
 
 function closeDialog() {
+  teardownDialogScrollbar();
   dom.dialogRoot.innerHTML = "";
   activeVariableDropdown = null;
   if (dialogKeyHandler) {
@@ -2473,7 +2477,168 @@ function openRuleDialog(existingRule) {
   document.addEventListener("keydown", dialogKeyHandler);
 
   dom.dialogRoot.appendChild(overlay);
+  attachDialogScrollbar(dialog);
   nameInput.focus();
+}
+
+const SCROLL_IDLE_MS = 1000;
+const SCROLL_THUMB_MIN_HEIGHT = 30;
+
+function createScrollbar({ extraClass, getTrackRect } = {}) {
+  const track = el(
+    "div",
+    ["custom-scrollbar", extraClass].filter(Boolean).join(" ")
+  );
+  const thumb = el("div", "custom-scrollbar-thumb");
+  track.appendChild(thumb);
+  document.body.appendChild(track);
+
+  let hideTimer = null;
+  let ticking = false;
+  let container = null;
+  let resizeObserver = null;
+
+  function updateThumb() {
+    if (!container) return;
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    if (scrollHeight <= clientHeight) {
+      thumb.style.display = "none";
+      return;
+    }
+    const trackHeight = track.clientHeight;
+    const thumbHeight = Math.max(
+      trackHeight * (clientHeight / scrollHeight),
+      SCROLL_THUMB_MIN_HEIGHT
+    );
+    const maxScrollTop = scrollHeight - clientHeight;
+    const thumbTop =
+      maxScrollTop > 0
+        ? (scrollTop / maxScrollTop) * (trackHeight - thumbHeight)
+        : 0;
+    thumb.style.display = "block";
+    thumb.style.height = `${thumbHeight}px`;
+    thumb.style.transform = `translate3d(0, ${thumbTop}px, 0)`;
+  }
+
+  function updatePosition() {
+    if (getTrackRect) {
+      const r = getTrackRect();
+      track.style.top = `${r.top}px`;
+      track.style.right = `${r.right}px`;
+      track.style.bottom = `${r.bottom}px`;
+    }
+    updateThumb();
+  }
+
+  function scheduleThumbUpdate() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      updateThumb();
+      ticking = false;
+    });
+  }
+
+  function onScroll() {
+    track.classList.add("is-visible");
+    scheduleThumbUpdate();
+    clearTimeout(hideTimer);
+    hideTimer = setTimeout(
+      () => track.classList.remove("is-visible"),
+      SCROLL_IDLE_MS
+    );
+  }
+
+  function attach(el) {
+    container = el;
+    updatePosition();
+    container.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("orientationchange", updatePosition);
+    if ("ResizeObserver" in window) {
+      resizeObserver = new ResizeObserver(updatePosition);
+      resizeObserver.observe(container);
+    }
+  }
+
+  function detach() {
+    if (!container) return;
+    container.removeEventListener("scroll", onScroll);
+    window.removeEventListener("resize", updatePosition);
+    window.removeEventListener("orientationchange", updatePosition);
+    resizeObserver?.disconnect();
+    clearTimeout(hideTimer);
+    track.remove();
+    container = null;
+  }
+
+  return { attach, detach, updatePosition, updateThumb };
+}
+
+function setCssVar(name, px) {
+  document.documentElement.style.setProperty(name, `${px}px`);
+}
+
+function updateHeaderHeightVar() {
+  if (!dom.header) return;
+  setCssVar("--header-height", dom.header.getBoundingClientRect().height);
+}
+
+let pageScrollbar = null;
+let headerResizeObserver = null;
+
+function updateScrollMetrics() {
+  updateHeaderHeightVar();
+  pageScrollbar?.updateThumb();
+}
+
+function resetContentScroll() {
+  dom.scrollContainer?.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  updateScrollMetrics();
+}
+
+function initCustomScrollbar() {
+  if (pageScrollbar) return;
+  pageScrollbar = createScrollbar();
+  updateHeaderHeightVar();
+
+  if (dom.header && "ResizeObserver" in window) {
+    headerResizeObserver = new ResizeObserver(updateScrollMetrics);
+    headerResizeObserver.observe(dom.header);
+  }
+
+  window.addEventListener("resize", updateScrollMetrics);
+  window.addEventListener("orientationchange", updateScrollMetrics);
+  pageScrollbar.attach(dom.scrollContainer);
+}
+
+const DIALOG_SCROLLBAR_INSET = 6;
+let dialogScrollbar = null;
+
+function teardownDialogScrollbar() {
+  dialogScrollbar?.detach();
+  dialogScrollbar = null;
+}
+
+function attachDialogScrollbar(container) {
+  teardownDialogScrollbar();
+  dialogScrollbar = createScrollbar({
+    extraClass: "dialog-scrollbar",
+    getTrackRect: () => {
+      const r = container.getBoundingClientRect();
+      return {
+        top: r.top + DIALOG_SCROLLBAR_INSET,
+        right: window.innerWidth - r.right + DIALOG_SCROLLBAR_INSET,
+        bottom: window.innerHeight - r.bottom + DIALOG_SCROLLBAR_INSET
+      };
+    }
+  });
+  container.addEventListener(
+    "animationend",
+    () => dialogScrollbar?.updatePosition(),
+    { once: true }
+  );
+  dialogScrollbar.attach(container);
 }
 
 function bindGlobalEvents() {
@@ -2487,6 +2652,7 @@ function bindGlobalEvents() {
 
 async function boot() {
   cacheDom();
+  initCustomScrollbar();
   bindGlobalEvents();
   switchTab(appState.activeTab);
   applyTheme(appState.config.settings.theme);
