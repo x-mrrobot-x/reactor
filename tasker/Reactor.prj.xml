@@ -2,11 +2,9 @@
 	<dmetric>1080.0,2307.0</dmetric>
 	<Profile sr="prof2020" ve="2">
 		<cdate>1785950121852</cdate>
-		<clp>true</clp>
-		<edate>1786176159968</edate>
+		<edate>1786617360188</edate>
 		<flags>40</flags>
 		<id>2020</id>
-		<limit>true</limit>
 		<mid0>2013</mid0>
 		<nme>RC - START EVENT MONITOR</nme>
 		<Event sr="con0" ve="2">
@@ -20,7 +18,7 @@
 		<name>REACTOR</name>
 		<pids>2020</pids>
 		<scenes>REACTOR</scenes>
-		<tids>2018,2014,2013,2016</tids>
+		<tids>2018,2016,2014,2013</tids>
 		<tsort>Alpha</tsort>
 	</Project>
 	<Scene sr="sceneREACTOR">
@@ -35,27 +33,37 @@
 	</Scene>
 	<Task sr="task2013">
 		<cdate>1745400000000</cdate>
-		<edate>1786176080287</edate>
+		<edate>1786617360188</edate>
 		<id>2013</id>
-		<pri>100</pri>
+		<pri>6</pri>
 		<Action sr="act0" ve="7">
+			<code>547</code>
+			<Str sr="arg0" ve="3">%action</Str>
+			<Str sr="arg1" ve="3">toggle_monitor</Str>
+			<Int sr="arg2" val="0"/>
+			<Int sr="arg3" val="0"/>
+			<Int sr="arg4" val="0"/>
+			<Int sr="arg5" val="3"/>
+			<Int sr="arg6" val="1"/>
+		</Action>
+		<Action sr="act1" ve="7">
 			<code>130</code>
 			<Str sr="arg0" ve="3">RC 02 - MONITOR CONTROL</Str>
 			<Int sr="arg1" val="10"/>
 			<Int sr="arg10" val="0"/>
-			<Str sr="arg2" ve="3">toggle_monitor</Str>
+			<Str sr="arg2" ve="3"/>
 			<Str sr="arg3" ve="3"/>
 			<Str sr="arg4" ve="3"/>
 			<Int sr="arg5" val="0"/>
-			<Int sr="arg6" val="0"/>
-			<Str sr="arg7" ve="3"/>
+			<Int sr="arg6" val="1"/>
+			<Str sr="arg7" ve="3">%action</Str>
 			<Int sr="arg8" val="0"/>
 			<Int sr="arg9" val="0"/>
 		</Action>
 	</Task>
 	<Task sr="task2014">
 		<cdate>1745400000000</cdate>
-		<edate>1786008281700</edate>
+		<edate>1786541870162</edate>
 		<id>2014</id>
 		<nme>RC 03 - COMMAND EXECUTOR</nme>
 		<pri>1000</pri>
@@ -276,7 +284,7 @@ Output resulting from the command. May be empty.&lt;/_array_net.dinglisch.androi
 	</Task>
 	<Task sr="task2018">
 		<cdate>1745400000000</cdate>
-		<edate>1786199472035</edate>
+		<edate>1786617370595</edate>
 		<id>2018</id>
 		<nme>RC 02 - MONITOR CONTROL</nme>
 		<pri>100</pri>
@@ -413,6 +421,7 @@ import android.os.VibrationEffect;
 import android.content.Intent;
 import android.content.Context;
 import android.content.ClipData;
+import android.content.ClipDescription;
 import android.content.ClipboardManager;
 import android.net.Uri;
 import android.app.Notification;
@@ -441,6 +450,7 @@ cfgRoot = (JSONObject) rawCfg;
 REACTOR_AI_ERROR_NOTIF_ID = 990001;
 APP_EVENT_DEDUPE_MS = 1200;
 MAX_REGEX_INPUT_LEN = 500;
+CLIPBOARD_SELF_WRITE_SUPPRESS_MS = 800;
 
 setFieldTextAndMark(node, text) {
     if (node == null) return false;
@@ -579,6 +589,331 @@ getCachedPattern(cv) {
     return pattern;
 }
 
+executeAction(actions, index, ctx, node, cfgRootArg, dispatchState) {
+    if (index &gt;= actions.length()) return;
+    actionObj = actions.getJSONObject(index);
+    actionType = actionObj.getString("type");
+    actionConfig = actionObj.has("config") ? actionObj.getJSONObject("config") : new JSONObject();
+
+    if (actionType.equals("text_replacer") || actionType.equals("ai") || actionType.equals("translate")) {
+        dispatchState.put("hasRewritingAction", Boolean.TRUE);
+    }
+
+    if (actionType.equals("ai") || actionType.equals("translate")) {
+        final HashMap finalContext = ctx;
+        final JSONArray finalActions = actions;
+        final int finalIndex = index;
+        final AccessibilityNodeInfo finalNode = node;
+        final JSONObject finalCfgRoot = cfgRootArg;
+        final JSONObject finalActionConfig = actionConfig;
+        final String finalActionType = actionType;
+        final HashMap finalDispatchState = dispatchState;
+
+        inputKey = finalActionConfig.optString("inputVariable", "");
+        final String inputText = finalContext.containsKey(inputKey) ? (String) finalContext.get(inputKey) : "";
+
+        new Thread(new Runnable() {
+            run() {
+                resultText = null;
+                failureReason = null;
+                try {
+                    client = new OkHttpClient.Builder()
+                        .connectTimeout(8, TimeUnit.SECONDS)
+                        .readTimeout(8, TimeUnit.SECONDS)
+                        .writeTimeout(8, TimeUnit.SECONDS)
+                        .build();
+
+                    if (finalActionType.equals("translate")) {
+                        lang = finalActionConfig.optString("language", "en");
+                        text = inputText.trim();
+                        if (text.length() &gt; 0) {
+                            url = "https://translate.googleapis.com/translate_a/single?client=gtx&amp;sl=auto&amp;dt=t&amp;q="
+                                + URLEncoder.encode(text, "UTF-8") + "&amp;tl=" + lang;
+                            req = new Request.Builder().url(url).build();
+                            resp = client.newCall(req).execute();
+                            if (resp.isSuccessful()) {
+                                root = new JSONArray(resp.body().string());
+                                sentences = root.getJSONArray(0);
+                                sb2 = new StringBuilder();
+                                for (si = 0; si &lt; sentences.length(); si++) sb2.append(sentences.getJSONArray(si).getString(0));
+                                resultText = sb2.toString();
+                            } else {
+                                failureReason = "Falha ao traduzir (erro do servidor).";
+                                tasker.log("Reactor Tradução: resposta HTTP " + resp.code());
+                            }
+                            resp.close();
+                        }
+                        // texto vazio: nada a traduzir, não é um erro.
+
+                    } else {
+                        text = inputText.trim();
+                        sysInstr = finalActionConfig.optString("systemInstructions", "");
+                        gemini = finalCfgRoot.getJSONObject("settings").getJSONObject("gemini");
+                        apiKey = gemini.optString("apiKey", "");
+                        model = gemini.optString("model", "");
+
+                        if (text.length() == 0) {
+                            // nada a processar, não é um erro.
+                        } else if (apiKey.length() == 0 || model.length() == 0) {
+                            failureReason = "Chave de API do Gemini não configurada. Abra o Reactor &gt; Configurações &gt; IA · Gemini.";
+                            tasker.log("Reactor IA: chave de API ou modelo não configurados em Configurações &gt; IA - Gemini.");
+                        } else {
+                            part = new JSONObject(); part.put("text", text);
+                            parts = new JSONArray(); parts.put(part);
+                            contentObj = new JSONObject(); contentObj.put("parts", parts);
+                            contents = new JSONArray(); contents.put(contentObj);
+                            geminiBody = new JSONObject();
+                            if (sysInstr.length() &gt; 0) {
+                                sp = new JSONObject(); sp.put("text", sysInstr);
+                                spArr = new JSONArray(); spArr.put(sp);
+                                siObj = new JSONObject(); siObj.put("parts", spArr);
+                                geminiBody.put("systemInstruction", siObj);
+                            }
+                            geminiBody.put("contents", contents);
+
+                            url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
+                            mediaType = MediaType.parse("application/json; charset=utf-8");
+                            reqBody = RequestBody.create(mediaType, geminiBody.toString());
+                            req = new Request.Builder().url(url).post(reqBody).build();
+                            resp = client.newCall(req).execute();
+                            if (resp.isSuccessful()) {
+                                root = new JSONObject(resp.body().string());
+                                cand = root.getJSONArray("candidates").getJSONObject(0);
+                                respParts = cand.getJSONObject("content").getJSONArray("parts");
+                                sb2 = new StringBuilder();
+                                for (pi = 0; pi &lt; respParts.length(); pi++) sb2.append(respParts.getJSONObject(pi).getString("text"));
+                                resultText = sb2.toString().trim();
+                            } else {
+                                failureReason = "Falha ao processar com IA (erro do servidor Gemini).";
+                                tasker.log("Reactor IA: resposta HTTP " + resp.code());
+                            }
+                            resp.close();
+                        }
+                    }
+                } catch (Exception e) {
+                    failureReason = "Falha ao processar com IA (erro inesperado).";
+                    tasker.log("Erro Reactor (" + finalActionType + "): " + e.toString());
+                }
+
+                resultKey = finalActionType.equals("translate") ? "translate_result" : "ai_result";
+                finalContext.put(resultKey, resultText != null ? resultText : "");
+
+                outputMode = finalActionConfig.optString("outputMode", "expose_variable");
+                if (outputMode.equals("replace_field")) {
+                    if (resultText != null &amp;&amp; resultText.length() &gt; 0) {
+                        setFieldTextAndMark(finalNode, resultText);
+                    } else if (failureReason != null) {
+                        // Falha real: restaura o texto original do usuário em vez de apagar o campo,
+                        // e avisa via notificação + vibração já que a WebView pode não estar em primeiro plano.
+                        originalInput = finalContext.containsKey("input") ? (String) finalContext.get("input") : "";
+                        setFieldTextAndMark(finalNode, originalInput);
+                        vibrateError();
+                        showSystemNotification(REACTOR_AI_ERROR_NOTIF_ID, "Reactor", failureReason);
+                    } else {
+                        // Sem resultado mas também sem erro (ex: nada a processar).
+                        clearLoadingIndicator(finalNode);
+                    }
+                }
+
+                executeAction(finalActions, finalIndex + 1, finalContext, finalNode, finalCfgRoot, finalDispatchState);
+            }
+        }).start();
+        return;
+    }
+
+    if (actionType.equals("text_replacer")) {
+        inputVal = ctx.containsKey("input") ? (String) ctx.get("input") : "";
+        replacement = applyTemplate(actionConfig.optString("text", ""), ctx);
+        setFieldTextAndMark(node, inputVal + replacement);
+
+    } else if (actionType.equals("clipboard")) {
+        clipText = applyTemplate(actionConfig.optString("text", ""), ctx);
+        // Marca o horário da escrita para o monitor de Clipboard ignorar o eco desta própria alteração.
+        tasker.setJavaVariable("reactorLastClipboardWriteTs", System.currentTimeMillis());
+        cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        if (cm != null) {
+            cm.setPrimaryClip(ClipData.newPlainText("reactor", clipText));
+        }
+
+    } else if (actionType.equals("run_task")) {
+        taskName = actionConfig.optString("task", "");
+        if (taskName.length() &gt; 0 &amp;&amp; taskName.equals("RC 02 - MONITOR CONTROL")) {
+            tasker.log("Reactor: regra tentou chamar a própria task de controle (RC 02 - MONITOR CONTROL) via run_task — ignorado para evitar dependência circular.");
+        } else if (taskName.length() &gt; 0) {
+            par1 = applyTemplate(actionConfig.optString("par1", ""), ctx);
+            par2 = applyTemplate(actionConfig.optString("par2", ""), ctx);
+            taskVars = new HashMap();
+            taskVars.put("par1", par1);
+            taskVars.put("par2", par2);
+            tasker.callTask(taskName, taskVars);
+        }
+
+    } else if (actionType.equals("open_app")) {
+        pkgName = actionConfig.optString("package", "");
+        if (pkgName.length() &gt; 0) {
+            pm = context.getPackageManager();
+            launchIntent = pm.getLaunchIntentForPackage(pkgName);
+            if (launchIntent != null) {
+                alreadyClearedField = launchExternalIntent(launchIntent, node);
+                dispatchState.put("alreadyClearedField", Boolean.valueOf(alreadyClearedField));
+            }
+        }
+
+    } else if (actionType.equals("open_url")) {
+        urlText = applyTemplate(actionConfig.optString("url", ""), ctx);
+        if (urlText.length() &gt; 0) {
+            alreadyClearedField = launchExternalIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(urlText)), node);
+            dispatchState.put("alreadyClearedField", Boolean.valueOf(alreadyClearedField));
+        }
+
+    } else if (actionType.equals("search")) {
+        engine = actionConfig.optString("engine", "google");
+        queryTemplate = actionConfig.optString("query", "{input}");
+        resolvedQuery = applyTemplate(queryTemplate, ctx).trim();
+        query = URLEncoder.encode(resolvedQuery, "UTF-8");
+        searchUrl = "https://www.google.com/search?q=" + query;
+        if (engine.equals("bing")) searchUrl = "https://www.bing.com/search?q=" + query;
+        else if (engine.equals("duckduckgo")) searchUrl = "https://duckduckgo.com/?q=" + query;
+        else if (engine.equals("youtube")) searchUrl = "https://www.youtube.com/results?search_query=" + query;
+        alreadyClearedField = launchExternalIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(searchUrl)), node);
+        dispatchState.put("alreadyClearedField", Boolean.valueOf(alreadyClearedField));
+
+    } else if (actionType.equals("notification")) {
+        notifTitleText = applyTemplate(actionConfig.optString("title", "Reactor"), ctx);
+        notifBodyText = applyTemplate(actionConfig.optString("body", ""), ctx);
+        ruleIdForNotif = ctx.containsKey("_rule_id") ? (String) ctx.get("_rule_id") : "";
+        notifId = (ruleIdForNotif + "#" + index).hashCode();
+        showSystemNotification(notifId, notifTitleText, notifBodyText);
+
+    } else if (actionType.equals("click")) {
+        cx = actionConfig.optDouble("x", -1);
+        cy = actionConfig.optDouble("y", -1);
+        svc = tasker.getAccessibilityService();
+        if (svc != null &amp;&amp; cx &gt;= 0 &amp;&amp; cy &gt;= 0 &amp;&amp; Build.VERSION.SDK_INT &gt;= 24) {
+            path = new Path();
+            path.moveTo((float) cx, (float) cy);
+            stroke = new GestureDescription.StrokeDescription(path, 0, 50);
+            gb = new GestureDescription.Builder();
+            gb.addStroke(stroke);
+            ((AccessibilityService) svc).dispatchGesture(gb.build(), null, null);
+        }
+    }
+
+    executeAction(actions, index + 1, ctx, node, cfgRootArg, dispatchState);
+}
+
+dispatchProviderEvent(provider, rawValue, eventContext, sourceNode, liveCfg) {
+    if (rawValue == null || rawValue.length() == 0) return;
+
+    providerRules = liveCfg.getJSONObject("rules_by_provider").optJSONArray(provider);
+    if (providerRules == null || providerRules.length() == 0) return;
+
+    anyRuleMatched = false;
+    loadingShown = false;
+    dispatchState = new HashMap();
+    dispatchState.put("hasRewritingAction", Boolean.FALSE);
+    dispatchState.put("alreadyClearedField", Boolean.FALSE);
+
+    
+
+    for (ri = 0; ri &lt; providerRules.length(); ri++) {
+        rule = providerRules.getJSONObject(ri);
+        if (!rule.optBoolean("enabled", false)) continue;
+
+        eventObj = rule.getJSONObject("event");
+
+        testValue = rawValue;
+        if (provider.equals("notification")) {
+            matchFieldKey = eventObj.optString("matchField", "body");
+            testValue = eventContext.containsKey(matchFieldKey) ? (String) eventContext.get(matchFieldKey) : "";
+            if (testValue == null) testValue = "";
+        }
+
+        conditions = rule.optJSONArray("conditions") != null ? rule.getJSONArray("conditions") : new JSONArray();
+        passed = true;
+        matchedEndsWithValue = null;
+        for (ci = 0; ci &lt; conditions.length(); ci++) {
+            cond = conditions.getJSONObject(ci);
+            op = cond.getString("operator");
+            cv = cond.optString("value", "");
+            ok = false;
+            if (op.equals("match")) {
+                ok = testValue.equalsIgnoreCase(cv);
+            } else if (op.equals("contains")) {
+                ok = testValue.toLowerCase().contains(cv.toLowerCase());
+            } else if (op.equals("starts_with")) {
+                ok = testValue.toLowerCase().startsWith(cv.toLowerCase());
+            } else if (op.equals("ends_with")) {
+                ok = testValue.toLowerCase().endsWith(cv.toLowerCase());
+            } else if (op.equals("regex")) {
+                try {
+                    regexPattern = getCachedPattern(cv);
+                    safeTestValue = testValue.length() &gt; MAX_REGEX_INPUT_LEN
+                        ? testValue.substring(0, MAX_REGEX_INPUT_LEN)
+                        : testValue;
+                    ok = regexPattern.matcher(safeTestValue).find();
+                } catch (Exception pe) {
+                    ok = false;
+                }
+            }
+            if (ok &amp;&amp; op.equals("ends_with")) matchedEndsWithValue = cv;
+            if (!ok) { passed = false; break; }
+        }
+        if (!passed) continue;
+
+        anyRuleMatched = true;
+
+        ruleContext = new HashMap(eventContext);
+        ruleContext.put("_rule_id", rule.optString("id", ""));
+        textBeforeTrigger = rawValue;
+        triggerText = "";
+        if (provider.equals("keyboard") &amp;&amp; matchedEndsWithValue != null) {
+            cutIndex = rawValue.length() - matchedEndsWithValue.length();
+            if (cutIndex &lt; 0) cutIndex = 0;
+            textBeforeTrigger = rawValue.substring(0, cutIndex);
+            triggerText = rawValue.substring(cutIndex);
+        }
+        if (provider.equals("keyboard")) {
+            ruleContext.put("input", textBeforeTrigger);
+            ruleContext.put("trigger", triggerText);
+        }
+        final String finalTextBeforeTrigger = textBeforeTrigger;
+
+        referencedVars = collectReferencedVariables(rule);
+        if (referencedVars.contains("app_name") &amp;&amp; ruleContext.containsKey("app_package")) {
+            ruleContext.put("app_name", resolveAppName((String) ruleContext.get("app_package")));
+        }
+
+        if (provider.equals("keyboard") &amp;&amp; !loadingShown) {
+            vibrateTriggerDetected();
+
+            ruleActionsPeek = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
+            ruleHasAsyncAction = false;
+            for (pk = 0; pk &lt; ruleActionsPeek.length(); pk++) {
+                peekType = ruleActionsPeek.getJSONObject(pk).getString("type");
+                if (peekType.equals("ai") || peekType.equals("translate")) {
+                    ruleHasAsyncAction = true;
+                    break;
+                }
+            }
+            if (ruleHasAsyncAction) {
+                showLoadingIndicator(sourceNode, finalTextBeforeTrigger);
+            }
+
+            loadingShown = true;
+        }
+
+        actions = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
+        executeAction(actions, 0, ruleContext, sourceNode, liveCfg, dispatchState);
+    }
+
+    if (provider.equals("keyboard") &amp;&amp; anyRuleMatched
+        &amp;&amp; !((Boolean) dispatchState.get("hasRewritingAction")).booleanValue()
+        &amp;&amp; !((Boolean) dispatchState.get("alreadyClearedField")).booleanValue()) {
+        setFieldTextAndMark(sourceNode, "");
+    }
+}
+
 sig = tasker.getJavaVariable("stopReactorMonitor");
 currentlyActive = (sig != null &amp;&amp; sig != void);
 
@@ -654,8 +989,16 @@ disposable = events.subscribe(new Consumer() {
                 eventContext.put("app_package", pkgObj != null ? pkgObj.toString() : "");
 
             } else if (type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
-                if (!liveProvidersObj.has("app") || !liveProvidersObj.getJSONObject("app").optBoolean("enabled", false)) return;
                 pkgObj = event.getPackageName();
+                if (pkgObj != null) {
+                    // Rastreamento leve e incondicional do app em primeiro plano — usado como
+                    // melhor esforço pelo provider Clipboard para identificar a origem de uma
+                    // alteração, independente do provider "app" estar habilitado.
+                    tasker.setJavaVariable("reactorLastForegroundPkg", pkgObj.toString());
+                    tasker.setJavaVariable("reactorLastForegroundTs", System.currentTimeMillis());
+                }
+
+                if (!liveProvidersObj.has("app") || !liveProvidersObj.getJSONObject("app").optBoolean("enabled", false)) return;
                 if (pkgObj == null) return;
                 rawPkg = pkgObj.toString();
 
@@ -703,321 +1046,8 @@ disposable = events.subscribe(new Consumer() {
                 return;
             }
 
-            if (rawValue == null || rawValue.length() == 0) return;
+            dispatchProviderEvent(provider, rawValue, eventContext, sourceNode, liveCfg);
 
-            providerRules = liveCfg.getJSONObject("rules_by_provider").optJSONArray(provider);
-            if (providerRules == null || providerRules.length() == 0) return;
-
-            final String finalValue = rawValue;
-            final String finalProvider = provider;
-            final AccessibilityNodeInfo finalSourceNode = sourceNode;
-            final HashMap finalEventContext = eventContext;
-            final JSONObject finalLiveCfg = liveCfg;
-
-            anyRuleMatched = false;
-            hasRewritingAction = false;
-            alreadyClearedField = false;
-            loadingShown = false;
-
-            executeAction(actions, index, ctx, node, cfgRootArg) {
-                if (index &gt;= actions.length()) return;
-                actionObj = actions.getJSONObject(index);
-                actionType = actionObj.getString("type");
-                actionConfig = actionObj.has("config") ? actionObj.getJSONObject("config") : new JSONObject();
-
-                if (actionType.equals("text_replacer") || actionType.equals("ai") || actionType.equals("translate")) {
-                    hasRewritingAction = true;
-                }
-
-                if (actionType.equals("ai") || actionType.equals("translate")) {
-                    final HashMap finalContext = ctx;
-                    final JSONArray finalActions = actions;
-                    final int finalIndex = index;
-                    final AccessibilityNodeInfo finalNode = node;
-                    final JSONObject finalCfgRoot = cfgRootArg;
-                    final JSONObject finalActionConfig = actionConfig;
-                    final String finalActionType = actionType;
-
-                    inputKey = finalActionConfig.optString("inputVariable", "");
-                    final String inputText = finalContext.containsKey(inputKey) ? (String) finalContext.get(inputKey) : "";
-
-                    new Thread(new Runnable() {
-                        run() {
-                            resultText = null;
-                            failureReason = null;
-                            try {
-                                client = new OkHttpClient.Builder()
-                                    .connectTimeout(8, TimeUnit.SECONDS)
-                                    .readTimeout(8, TimeUnit.SECONDS)
-                                    .writeTimeout(8, TimeUnit.SECONDS)
-                                    .build();
-
-                                if (finalActionType.equals("translate")) {
-                                    lang = finalActionConfig.optString("language", "en");
-                                    text = inputText.trim();
-                                    if (text.length() &gt; 0) {
-                                        url = "https://translate.googleapis.com/translate_a/single?client=gtx&amp;sl=auto&amp;dt=t&amp;q="
-                                            + URLEncoder.encode(text, "UTF-8") + "&amp;tl=" + lang;
-                                        req = new Request.Builder().url(url).build();
-                                        resp = client.newCall(req).execute();
-                                        if (resp.isSuccessful()) {
-                                            root = new JSONArray(resp.body().string());
-                                            sentences = root.getJSONArray(0);
-                                            sb2 = new StringBuilder();
-                                            for (si = 0; si &lt; sentences.length(); si++) sb2.append(sentences.getJSONArray(si).getString(0));
-                                            resultText = sb2.toString();
-                                        } else {
-                                            failureReason = "Falha ao traduzir (erro do servidor).";
-                                            tasker.log("Reactor Tradução: resposta HTTP " + resp.code());
-                                        }
-                                        resp.close();
-                                    }
-                                    // texto vazio: nada a traduzir, não é um erro.
-
-                                } else {
-                                    text = inputText.trim();
-                                    sysInstr = finalActionConfig.optString("systemInstructions", "");
-                                    gemini = finalCfgRoot.getJSONObject("settings").getJSONObject("gemini");
-                                    apiKey = gemini.optString("apiKey", "");
-                                    model = gemini.optString("model", "");
-
-                                    if (text.length() == 0) {
-                                        // nada a processar, não é um erro.
-                                    } else if (apiKey.length() == 0 || model.length() == 0) {
-                                        failureReason = "Chave de API do Gemini não configurada. Abra o Reactor &gt; Configurações &gt; IA · Gemini.";
-                                        tasker.log("Reactor IA: chave de API ou modelo não configurados em Configurações &gt; IA - Gemini.");
-                                    } else {
-                                        part = new JSONObject(); part.put("text", text);
-                                        parts = new JSONArray(); parts.put(part);
-                                        contentObj = new JSONObject(); contentObj.put("parts", parts);
-                                        contents = new JSONArray(); contents.put(contentObj);
-                                        geminiBody = new JSONObject();
-                                        if (sysInstr.length() &gt; 0) {
-                                            sp = new JSONObject(); sp.put("text", sysInstr);
-                                            spArr = new JSONArray(); spArr.put(sp);
-                                            siObj = new JSONObject(); siObj.put("parts", spArr);
-                                            geminiBody.put("systemInstruction", siObj);
-                                        }
-                                        geminiBody.put("contents", contents);
-
-                                        url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
-                                        mediaType = MediaType.parse("application/json; charset=utf-8");
-                                        reqBody = RequestBody.create(mediaType, geminiBody.toString());
-                                        req = new Request.Builder().url(url).post(reqBody).build();
-                                        resp = client.newCall(req).execute();
-                                        if (resp.isSuccessful()) {
-                                            root = new JSONObject(resp.body().string());
-                                            cand = root.getJSONArray("candidates").getJSONObject(0);
-                                            respParts = cand.getJSONObject("content").getJSONArray("parts");
-                                            sb2 = new StringBuilder();
-                                            for (pi = 0; pi &lt; respParts.length(); pi++) sb2.append(respParts.getJSONObject(pi).getString("text"));
-                                            resultText = sb2.toString().trim();
-                                        } else {
-                                            failureReason = "Falha ao processar com IA (erro do servidor Gemini).";
-                                            tasker.log("Reactor IA: resposta HTTP " + resp.code());
-                                        }
-                                        resp.close();
-                                    }
-                                }
-                            } catch (Exception e) {
-                                failureReason = "Falha ao processar com IA (erro inesperado).";
-                                tasker.log("Erro Reactor (" + finalActionType + "): " + e.toString());
-                            }
-
-                            resultKey = finalActionType.equals("translate") ? "translate_result" : "ai_result";
-                            finalContext.put(resultKey, resultText != null ? resultText : "");
-
-                            outputMode = finalActionConfig.optString("outputMode", "expose_variable");
-                            if (outputMode.equals("replace_field")) {
-                                if (resultText != null &amp;&amp; resultText.length() &gt; 0) {
-                                    setFieldTextAndMark(finalNode, resultText);
-                                } else if (failureReason != null) {
-                                    // Falha real: restaura o texto original do usuário em vez de apagar o campo,
-                                    // e avisa via notificação + vibração já que a WebView pode não estar em primeiro plano.
-                                    originalInput = finalContext.containsKey("input") ? (String) finalContext.get("input") : "";
-                                    setFieldTextAndMark(finalNode, originalInput);
-                                    vibrateError();
-                                    showSystemNotification(REACTOR_AI_ERROR_NOTIF_ID, "Reactor", failureReason);
-                                } else {
-                                    // Sem resultado mas também sem erro (ex: nada a processar).
-                                    clearLoadingIndicator(finalNode);
-                                }
-                            }
-
-                            executeAction(finalActions, finalIndex + 1, finalContext, finalNode, finalCfgRoot);
-                        }
-                    }).start();
-                    return;
-                }
-
-                if (actionType.equals("text_replacer")) {
-                    inputVal = ctx.containsKey("input") ? (String) ctx.get("input") : "";
-                    replacement = applyTemplate(actionConfig.optString("text", ""), ctx);
-                    setFieldTextAndMark(node, inputVal + replacement);
-
-                } else if (actionType.equals("clipboard")) {
-                    clipText = applyTemplate(actionConfig.optString("text", ""), ctx);
-                    cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                    cm.setPrimaryClip(ClipData.newPlainText("reactor", clipText));
-
-                } else if (actionType.equals("run_task")) {
-                    taskName = actionConfig.optString("task", "");
-                    if (taskName.length() &gt; 0 &amp;&amp; taskName.equals("RC 02 - MONITOR CONTROL")) {
-                        tasker.log("Reactor: regra tentou chamar a própria task de controle (RC 02 - MONITOR CONTROL) via run_task — ignorado para evitar dependência circular.");
-                    } else if (taskName.length() &gt; 0) {
-                        par1 = applyTemplate(actionConfig.optString("par1", ""), ctx);
-                        par2 = applyTemplate(actionConfig.optString("par2", ""), ctx);
-                        taskVars = new HashMap();
-                        taskVars.put("par1", par1);
-                        taskVars.put("par2", par2);
-                        tasker.callTask(taskName, taskVars);
-                    }
-
-                } else if (actionType.equals("open_app")) {
-                    pkgName = actionConfig.optString("package", "");
-                    if (pkgName.length() &gt; 0) {
-                        pm = context.getPackageManager();
-                        launchIntent = pm.getLaunchIntentForPackage(pkgName);
-                        if (launchIntent != null) {
-                            alreadyClearedField = launchExternalIntent(launchIntent, node);
-                        }
-                    }
-
-                } else if (actionType.equals("open_url")) {
-                    urlText = applyTemplate(actionConfig.optString("url", ""), ctx);
-                    if (urlText.length() &gt; 0) {
-                        alreadyClearedField = launchExternalIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(urlText)), node);
-                    }
-
-                } else if (actionType.equals("search")) {
-                    engine = actionConfig.optString("engine", "google");
-                    queryTemplate = actionConfig.optString("query", "{input}");
-                    resolvedQuery = applyTemplate(queryTemplate, ctx).trim();
-                    query = URLEncoder.encode(resolvedQuery, "UTF-8");
-                    searchUrl = "https://www.google.com/search?q=" + query;
-                    if (engine.equals("bing")) searchUrl = "https://www.bing.com/search?q=" + query;
-                    else if (engine.equals("duckduckgo")) searchUrl = "https://duckduckgo.com/?q=" + query;
-                    else if (engine.equals("youtube")) searchUrl = "https://www.youtube.com/results?search_query=" + query;
-                    alreadyClearedField = launchExternalIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(searchUrl)), node);
-
-                } else if (actionType.equals("notification")) {
-                    notifTitleText = applyTemplate(actionConfig.optString("title", "Reactor"), ctx);
-                    notifBodyText = applyTemplate(actionConfig.optString("body", ""), ctx);
-                    ruleIdForNotif = ctx.containsKey("_rule_id") ? (String) ctx.get("_rule_id") : "";
-                    notifId = (ruleIdForNotif + "#" + index).hashCode();
-                    showSystemNotification(notifId, notifTitleText, notifBodyText);
-
-                } else if (actionType.equals("click")) {
-                    cx = actionConfig.optDouble("x", -1);
-                    cy = actionConfig.optDouble("y", -1);
-                    svc = tasker.getAccessibilityService();
-                    if (svc != null &amp;&amp; cx &gt;= 0 &amp;&amp; cy &gt;= 0 &amp;&amp; Build.VERSION.SDK_INT &gt;= 24) {
-                        path = new Path();
-                        path.moveTo((float) cx, (float) cy);
-                        stroke = new GestureDescription.StrokeDescription(path, 0, 50);
-                        gb = new GestureDescription.Builder();
-                        gb.addStroke(stroke);
-                        ((AccessibilityService) svc).dispatchGesture(gb.build(), null, null);
-                    }
-                }
-
-                executeAction(actions, index + 1, ctx, node, cfgRootArg);
-            }
-
-            for (ri = 0; ri &lt; providerRules.length(); ri++) {
-                rule = providerRules.getJSONObject(ri);
-                if (!rule.optBoolean("enabled", false)) continue;
-
-                eventObj = rule.getJSONObject("event");
-
-                testValue = finalValue;
-                if (finalProvider.equals("notification")) {
-                    matchFieldKey = eventObj.optString("matchField", "body");
-                    testValue = finalEventContext.containsKey(matchFieldKey) ? (String) finalEventContext.get(matchFieldKey) : "";
-                    if (testValue == null) testValue = "";
-                }
-
-                conditions = rule.optJSONArray("conditions") != null ? rule.getJSONArray("conditions") : new JSONArray();
-                passed = true;
-                matchedEndsWithValue = null;
-                for (ci = 0; ci &lt; conditions.length(); ci++) {
-                    cond = conditions.getJSONObject(ci);
-                    op = cond.getString("operator");
-                    cv = cond.optString("value", "");
-                    ok = false;
-                    if (op.equals("match")) {
-                        ok = testValue.equalsIgnoreCase(cv);
-                    } else if (op.equals("contains")) {
-                        ok = testValue.toLowerCase().contains(cv.toLowerCase());
-                    } else if (op.equals("starts_with")) {
-                        ok = testValue.toLowerCase().startsWith(cv.toLowerCase());
-                    } else if (op.equals("ends_with")) {
-                        ok = testValue.toLowerCase().endsWith(cv.toLowerCase());
-                    } else if (op.equals("regex")) {
-                        try {
-                            regexPattern = getCachedPattern(cv);
-                            safeTestValue = testValue.length() &gt; MAX_REGEX_INPUT_LEN
-                                ? testValue.substring(0, MAX_REGEX_INPUT_LEN)
-                                : testValue;
-                            ok = regexPattern.matcher(safeTestValue).find();
-                        } catch (Exception pe) {
-                            ok = false;
-                        }
-                    }
-                    if (ok &amp;&amp; op.equals("ends_with")) matchedEndsWithValue = cv;
-                    if (!ok) { passed = false; break; }
-                }
-                if (!passed) continue;
-
-                anyRuleMatched = true;
-
-                ruleContext = new HashMap(finalEventContext);
-                ruleContext.put("_rule_id", rule.optString("id", ""));
-                textBeforeTrigger = finalValue;
-                triggerText = "";
-                if (finalProvider.equals("keyboard") &amp;&amp; matchedEndsWithValue != null) {
-                    cutIndex = finalValue.length() - matchedEndsWithValue.length();
-                    if (cutIndex &lt; 0) cutIndex = 0;
-                    textBeforeTrigger = finalValue.substring(0, cutIndex);
-                    triggerText = finalValue.substring(cutIndex);
-                }
-                if (finalProvider.equals("keyboard")) {
-                    ruleContext.put("input", textBeforeTrigger);
-                    ruleContext.put("trigger", triggerText);
-                }
-                final String finalTextBeforeTrigger = textBeforeTrigger;
-
-                referencedVars = collectReferencedVariables(rule);
-                if (referencedVars.contains("app_name") &amp;&amp; ruleContext.containsKey("app_package")) {
-                    ruleContext.put("app_name", resolveAppName((String) ruleContext.get("app_package")));
-                }
-
-                if (finalProvider.equals("keyboard") &amp;&amp; !loadingShown) {
-                    vibrateTriggerDetected();
-
-                    ruleActionsPeek = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
-                    ruleHasAsyncAction = false;
-                    for (pk = 0; pk &lt; ruleActionsPeek.length(); pk++) {
-                        peekType = ruleActionsPeek.getJSONObject(pk).getString("type");
-                        if (peekType.equals("ai") || peekType.equals("translate")) {
-                            ruleHasAsyncAction = true;
-                            break;
-                        }
-                    }
-                    if (ruleHasAsyncAction) {
-                        showLoadingIndicator(finalSourceNode, finalTextBeforeTrigger);
-                    }
-
-                    loadingShown = true;
-                }
-
-                actions = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
-                executeAction(actions, 0, ruleContext, finalSourceNode, finalLiveCfg);
-            }
-
-            if (finalProvider.equals("keyboard") &amp;&amp; anyRuleMatched &amp;&amp; !hasRewritingAction &amp;&amp; !alreadyClearedField) {
-                setFieldTextAndMark(finalSourceNode, "");
-            }
         } catch (Exception e) {
             tasker.log("Erro Reactor dispatcher: " + e.toString());
         }
@@ -1030,6 +1060,84 @@ disposable = events.subscribe(new Consumer() {
 
     tasker.setJavaVariable("reactorMonitorDisposable", disposable);
 
+    // --- Provider Clipboard: registro orientado a evento (sem polling) ---
+    clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+    if (clipboardManager != null) {
+        // Salvaguarda de lifecycle: se por algum motivo sobrou um listener de uma
+        // execução anterior mal finalizada, remove antes de registrar um novo.
+        staleClipboardListener = tasker.getJavaVariable("reactorClipboardListener");
+        if (staleClipboardListener != null &amp;&amp; staleClipboardListener != void) {
+            try {
+                clipboardManager.removePrimaryClipChangedListener((ClipboardManager.OnPrimaryClipChangedListener) staleClipboardListener);
+            } catch (Exception ignoredStaleListenerError) {
+                // Já não estava mais registrado — seguro ignorar.
+            }
+            tasker.setJavaVariable("reactorClipboardListener", null);
+        }
+
+        clipboardListener = new ClipboardManager.OnPrimaryClipChangedListener() {
+            onPrimaryClipChanged() {
+                try {
+                    liveCfgClip = (JSONObject) tasker.getJavaVariable("reactorConfig");
+                    if (liveCfgClip == null) return;
+
+                    liveProvidersClip = liveCfgClip.getJSONObject("providers");
+                    if (!liveProvidersClip.has("clipboard") || !liveProvidersClip.getJSONObject("clipboard").optBoolean("enabled", false)) return;
+
+                    // Ignora o eco de alterações feitas pela própria action "Definir Clipboard".
+                    lastSelfWriteObj = tasker.getJavaVariable("reactorLastClipboardWriteTs");
+                    if (lastSelfWriteObj != null &amp;&amp; lastSelfWriteObj != void) {
+                        elapsedSinceSelfWrite = System.currentTimeMillis() - ((Long) lastSelfWriteObj).longValue();
+                        if (elapsedSinceSelfWrite &lt; CLIPBOARD_SELF_WRITE_SUPPRESS_MS) return;
+                    }
+
+                    cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    if (cm == null || !cm.hasPrimaryClip()) return;
+
+                    clip = cm.getPrimaryClip();
+                    if (clip == null || clip.getItemCount() == 0) return;
+
+                    // Segunda camada de proteção contra eco: a action "Definir Clipboard" rotula
+                    // o ClipData como "reactor", então qualquer clip com esse rótulo é ignorado
+                    // mesmo que a janela de tempo acima já tenha passado.
+                    clipDesc = clip.getDescription();
+                    if (clipDesc != null &amp;&amp; "reactor".equals(String.valueOf(clipDesc.getLabel()))) return;
+
+                    item = clip.getItemAt(0);
+                    if (item == null) return;
+
+                    clipText = item.getText();
+                    if (clipText == null || clipText.length() == 0) return;
+
+                    text = clipText.toString();
+                    hash = Integer.valueOf(text.hashCode());
+
+                    lastHashObj = tasker.getJavaVariable("reactorLastClipboardHash");
+                    if (lastHashObj != null &amp;&amp; lastHashObj != void &amp;&amp; lastHashObj.equals(hash)) return;
+                    tasker.setJavaVariable("reactorLastClipboardHash", hash);
+
+                    // Origem do app: melhor esforço via último app em primeiro plano conhecido.
+                    // O Android não expõe uma API pública confiável para o app de origem de uma
+                    // alteração no clipboard, então quando não for possível identificar, o campo
+                    // fica vazio em vez de quebrar o monitor.
+                    eventContextClip = new HashMap();
+                    lastFgPkgObj = tasker.getJavaVariable("reactorLastForegroundPkg");
+                    eventContextClip.put("app_package", (lastFgPkgObj != null &amp;&amp; lastFgPkgObj != void) ? (String) lastFgPkgObj : "");
+                    eventContextClip.put("text", text);
+
+                    dispatchProviderEvent("clipboard", text, eventContextClip, null, liveCfgClip);
+                } catch (Exception clipboardDispatchError) {
+                    tasker.log("Erro Reactor monitor de Clipboard: " + clipboardDispatchError.toString());
+                }
+            }
+        };
+
+        clipboardManager.addPrimaryClipChangedListener(clipboardListener);
+        tasker.setJavaVariable("reactorClipboardListener", clipboardListener);
+    } else {
+        tasker.log("Reactor: ClipboardManager indisponível — monitor de Clipboard não será iniciado.");
+    }
+
     cleanupAction = new Action() {
         run() {
             globalDisp = tasker.getJavaVariable("reactorMonitorDisposable");
@@ -1037,11 +1145,29 @@ disposable = events.subscribe(new Consumer() {
                 d = (Disposable) globalDisp;
                 if (!d.isDisposed()) d.dispose();
             }
+
+            globalClipboardListener = tasker.getJavaVariable("reactorClipboardListener");
+            if (globalClipboardListener != null &amp;&amp; globalClipboardListener != void) {
+                globalClipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                if (globalClipboardManager != null) {
+                    try {
+                        globalClipboardManager.removePrimaryClipChangedListener((ClipboardManager.OnPrimaryClipChangedListener) globalClipboardListener);
+                    } catch (Exception ignoredStopListenerError) {
+                        // Já não estava mais registrado — seguro ignorar.
+                    }
+                }
+            }
+
             tasker.setJavaVariable("stopReactorMonitor", null);
             tasker.setJavaVariable("reactorMonitorDisposable", null);
             tasker.setJavaVariable("reactorLastFieldWriteTs", null);
             tasker.setJavaVariable("reactorLastAppPkg", null);
             tasker.setJavaVariable("reactorLastAppTs", null);
+            tasker.setJavaVariable("reactorLastForegroundPkg", null);
+            tasker.setJavaVariable("reactorLastForegroundTs", null);
+            tasker.setJavaVariable("reactorClipboardListener", null);
+            tasker.setJavaVariable("reactorLastClipboardHash", null);
+            tasker.setJavaVariable("reactorLastClipboardWriteTs", null);
         }
     };
     stopSignal.subscribe(cleanupAction);

@@ -128,7 +128,7 @@ const PROVIDER_REGISTRY = {
     name: "Clipboard",
     description: "Monitoramento da área de transferência",
     icon: "clipboard",
-    implemented: false,
+    implemented: true,
     events: {
       clipboard_changed: {
         label: "Clipboard alterado",
@@ -143,6 +143,16 @@ const PROVIDER_REGISTRY = {
         ],
         lockedCondition: false,
         variables: [
+          {
+            key: "app_package",
+            label: "Pacote do app de origem (quando identificável)",
+            example: "com.whatsapp"
+          },
+          {
+            key: "app_name",
+            label: "Nome amigável do app de origem",
+            example: "WhatsApp"
+          },
           { key: "text", label: "Conteúdo copiado", example: "https://..." }
         ]
       }
