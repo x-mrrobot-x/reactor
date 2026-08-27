@@ -1,0 +1,43 @@
+import org.json.JSONObject;
+import java.util.HashMap;
+
+String buildError(String message) {
+    JSONObject err = new JSONObject();
+    err.put("ok", false);
+    err.put("error", message);
+    return err.toString();
+}
+
+String CONFIG_PATH = workDir + "/reactor.json";
+String ENGINE_PATH = workDir + "/reactor_engine.bsh";
+
+source(workDir + "/sync_clipboard_profile.bsh");
+
+HashMap scripts = new HashMap();
+scripts.put("get_status", "get_status.bsh");
+scripts.put("toggle_monitor", "toggle_monitor.bsh");
+scripts.put("save_config", "save_config.bsh");
+scripts.put("clipboard_dispatch", "clipboard_dispatch.bsh");
+
+String actionResult = null;
+try {
+    String scriptFile = (String) scripts.get(action);
+
+    if (scriptFile != null) {
+        actionResult = source(workDir + "/" + scriptFile);
+    } else {
+        actionResult = buildError("ação desconhecida");
+    }
+} catch (Throwable e) {
+    actionResult = buildError("Falha ao rotear ação '" + action + "': " + e.toString());
+}
+
+try {
+    if (action.equals("save_config") || action.equals("toggle_monitor") || action.equals("get_status")) {
+        syncClipboardProfile();
+    }
+} catch (Throwable e) {
+    tasker.log("Reactor: falha ao sincronizar perfil do clipboard: " + e.toString());
+}
+
+return actionResult;

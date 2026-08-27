@@ -1,0 +1,196 @@
+import io.reactivex.subjects.CompletableSubject;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Predicate;
+import io.reactivex.Observable;
+import org.json.JSONObject;
+import android.view.accessibility.AccessibilityEvent;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.os.Build;
+
+try {
+
+Object rawCfg = tasker.getJavaVariable("reactorConfig");
+if (rawCfg == null || rawCfg == void) {
+    throw new JavaCodeException("Configuração não carregada. Abra o painel primeiro.");
+}
+JSONObject cfgRoot = (JSONObject) rawCfg;
+
+int APP_EVENT_DEDUPE_MS = 1200;
+
+source(ENGINE_PATH);
+
+Object sig = tasker.getJavaVariable("stopReactorMonitor");
+boolean currentlyActive = (sig != null && sig != void);
+
+if (currentlyActive) {
+    CompletableSubject s = (CompletableSubject) sig;
+    s.onComplete();
+    tasker.setJavaVariable("stopReactorMonitor", null);
+
+    return buildResult(false, "Monitor parado");
+}
+
+if (tasker.getAccessibilityService() == null) {
+    throw new JavaCodeException("Acessibilidade do Tasker está desligada.");
+}
+
+if (Build.VERSION.SDK_INT >= 26) {
+    NotificationManager nmSetup = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    nmSetup.createNotificationChannel(new NotificationChannel("reactor_channel", "Reactor", NotificationManager.IMPORTANCE_DEFAULT));
+}
+
+CompletableSubject stopSignal = CompletableSubject.create();
+tasker.setJavaVariable("stopReactorMonitor", stopSignal);
+
+Observable events = tasker.getAccessibilityEvents();
+
+int KEYBOARD_DEBOUNCE_MS = 150;
+
+Observable keyboardTextEvents = events.filter(new Predicate() {
+    boolean test(Object o) {
+        return ((AccessibilityEvent) o).getEventType() == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
+    }
+}).debounce(KEYBOARD_DEBOUNCE_MS, TimeUnit.MILLISECONDS);
+
+Observable otherProviderEvents = events.filter(new Predicate() {
+    boolean test(Object o) {
+        return ((AccessibilityEvent) o).getEventType() != AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
+    }
+});
+
+events = Observable.merge(keyboardTextEvents, otherProviderEvents);
+
+Disposable disposable = events.subscribe(new Consumer() {
+    void accept(Object eventObject) {
+        try {
+            AccessibilityEvent event = (AccessibilityEvent) eventObject;
+            int type = event.getEventType();
+
+            String provider = null;
+            AccessibilityNodeInfo sourceNode = null;
+            String rawValue = null;
+            HashMap eventContext = new HashMap();
+
+            JSONObject liveCfg = (JSONObject) tasker.getJavaVariable("reactorConfig");
+            if (liveCfg == null) return;
+
+            JSONObject liveProvidersObj = liveCfg.getJSONObject("providers");
+
+            if (type == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
+                if (!liveProvidersObj.has("keyboard") || !liveProvidersObj.getJSONObject("keyboard").optBoolean("enabled", false)) return;
+
+                Object lastWriteObj = tasker.getJavaVariable("reactorLastFieldWriteTs");
+                if (lastWriteObj != null && lastWriteObj != void) {
+                    long elapsedSinceWrite = System.currentTimeMillis() - ((Long) lastWriteObj).longValue();
+                    if (elapsedSinceWrite < 600) return;
+                }
+
+                sourceNode = event.getSource();
+                if (sourceNode == null || sourceNode.getText() == null) return;
+                provider = "keyboard";
+                rawValue = sourceNode.getText().toString();
+
+                CharSequence pkgObj = event.getPackageName();
+                eventContext.put("app_package", pkgObj != null ? pkgObj.toString() : "");
+
+            } else if (type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
+                CharSequence pkgObj = event.getPackageName();
+                if (pkgObj != null) {
+                    tasker.setJavaVariable("reactorLastForegroundPkg", pkgObj.toString());
+                    tasker.setJavaVariable("reactorLastForegroundTs", System.currentTimeMillis());
+                }
+
+                if (!liveProvidersObj.has("app") || !liveProvidersObj.getJSONObject("app").optBoolean("enabled", false)) return;
+                if (pkgObj == null) return;
+                String rawPkg = pkgObj.toString();
+
+                Object lastAppPkgObj = tasker.getJavaVariable("reactorLastAppPkg");
+                Object lastAppTsObj = tasker.getJavaVariable("reactorLastAppTs");
+                if (lastAppPkgObj != null && lastAppPkgObj != void && lastAppTsObj != null && lastAppTsObj != void) {
+                    long elapsedSinceAppEvent = System.currentTimeMillis() - ((Long) lastAppTsObj).longValue();
+                    if (rawPkg.equals((String) lastAppPkgObj) && elapsedSinceAppEvent < APP_EVENT_DEDUPE_MS) return;
+                }
+                tasker.setJavaVariable("reactorLastAppPkg", rawPkg);
+                tasker.setJavaVariable("reactorLastAppTs", System.currentTimeMillis());
+
+                provider = "app";
+                rawValue = rawPkg;
+                eventContext.put("app_package", rawValue);
+
+            } else if (type == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
+                if (!liveProvidersObj.has("notification") || !liveProvidersObj.getJSONObject("notification").optBoolean("enabled", false)) return;
+                List texts = event.getText();
+                if (texts == null || texts.isEmpty()) return;
+
+                String notifTitle = texts.get(0).toString();
+                StringBuilder sbBody = new StringBuilder();
+                for (int ti = 1; ti < texts.size(); ti++) {
+                    if (ti > 1) sbBody.append(" ");
+                    sbBody.append(texts.get(ti).toString());
+                }
+                StringBuilder sbFull = new StringBuilder();
+                for (int ti = 0; ti < texts.size(); ti++) {
+                    if (ti > 0) sbFull.append(" ");
+                    sbFull.append(texts.get(ti).toString());
+                }
+
+                CharSequence pkgObj = event.getPackageName();
+
+                provider = "notification";
+                rawValue = sbFull.toString();
+
+                eventContext.put("app_package", pkgObj != null ? pkgObj.toString() : "");
+                eventContext.put("title", notifTitle);
+                eventContext.put("body", sbBody.toString());
+                eventContext.put("full_text", sbFull.toString());
+
+            } else {
+                return;
+            }
+
+            dispatchProviderEvent(provider, rawValue, eventContext, sourceNode, liveCfg);
+
+        } catch (Exception e) {
+            tasker.log("Erro Reactor dispatcher: " + e.toString());
+        }
+    }
+}, new Consumer() {
+    void accept(Object errorObject) {
+        tasker.log("Erro fatal no monitor Reactor: " + errorObject.toString());
+    }
+});
+
+    tasker.setJavaVariable("reactorMonitorDisposable", disposable);
+
+    Action cleanupAction = new Action() {
+        void run() {
+            Object globalDisp = tasker.getJavaVariable("reactorMonitorDisposable");
+            if (globalDisp != null && globalDisp != void) {
+                Disposable d = (Disposable) globalDisp;
+                if (!d.isDisposed()) d.dispose();
+            }
+
+            tasker.setJavaVariable("stopReactorMonitor", null);
+            tasker.setJavaVariable("reactorMonitorDisposable", null);
+            tasker.setJavaVariable("reactorLastFieldWriteTs", null);
+            tasker.setJavaVariable("reactorLastAppPkg", null);
+            tasker.setJavaVariable("reactorLastAppTs", null);
+            tasker.setJavaVariable("reactorLastForegroundPkg", null);
+            tasker.setJavaVariable("reactorLastForegroundTs", null);
+            tasker.setJavaVariable("reactorLastClipboardHash", null);
+        }
+    };
+    stopSignal.subscribe(cleanupAction);
+
+    return buildResult(true, "Monitor iniciado");
+} catch (Throwable e) {
+    JSONObject err = new JSONObject();
+    err.put("ok", false);
+    err.put("error", "Java Error: " + e.toString());
+    return err.toString();
+}

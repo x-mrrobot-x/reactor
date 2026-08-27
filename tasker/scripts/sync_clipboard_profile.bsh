@@ -1,0 +1,28 @@
+import org.json.JSONObject;
+
+String CLIPBOARD_PROFILE_NAME = "RC 02 - CLIPBOARD WATCHER";
+
+boolean isProfileEnabled(String name) {
+    String penabled = tasker.getVariable("PENABLED");
+    if (penabled == null) return false;
+    return penabled.contains(name);
+}
+
+void syncClipboardProfile() {
+    Object rawCfg = tasker.getJavaVariable("reactorConfig");
+    if (rawCfg == null || rawCfg == void) return;
+    JSONObject cfgRoot = (JSONObject) rawCfg;
+    if (!cfgRoot.has("providers")) return;
+    JSONObject providersObj = cfgRoot.getJSONObject("providers");
+    boolean clipboardEnabled = providersObj.has("clipboard") && providersObj.getJSONObject("clipboard").optBoolean("enabled", false);
+
+    Object monStatus = tasker.getJavaVariable("stopReactorMonitor");
+    boolean monitorActive = (monStatus != null && monStatus != void);
+
+    boolean desiredEnabled = monitorActive && clipboardEnabled;
+    boolean currentlyEnabled = isProfileEnabled(CLIPBOARD_PROFILE_NAME);
+
+    if (desiredEnabled != currentlyEnabled) {
+        tasker.setProfileEnabled(CLIPBOARD_PROFILE_NAME, desiredEnabled);
+    }
+}

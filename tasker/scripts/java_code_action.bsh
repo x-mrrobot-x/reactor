@@ -1,0 +1,21 @@
+import org.json.JSONObject;
+import android.util.Base64;
+
+String action = tasker.getVariable("action");
+String callId = tasker.getVariable("call_id");
+String workDir = tasker.getVariable("work_dir");
+
+String routerPayload = null;
+try {
+    routerPayload = source(workDir + "/reactor_router.bsh");
+} catch (Throwable e) {
+    JSONObject err = new JSONObject();
+    err.put("ok", false);
+    err.put("error", "Falha ao carregar o router: " + e.toString());
+    routerPayload = err.toString();
+}
+
+String envelopeJson = "{\"id\":\"" + callId + "\",\"payload\":" + routerPayload + "}";
+
+byte[] bytes = envelopeJson.getBytes("UTF-8");
+return Base64.encodeToString(bytes, Base64.NO_WRAP);

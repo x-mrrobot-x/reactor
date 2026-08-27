@@ -1,0 +1,49 @@
+import org.json.JSONObject;
+import java.util.HashMap;
+
+try {
+
+source(ENGINE_PATH);
+
+Object monitorStateObj = tasker.getJavaVariable("stopReactorMonitor");
+if (monitorStateObj == null || monitorStateObj == void) {
+    return buildResult(false, "Monitor inativo");
+}
+
+JSONObject liveCfg = (JSONObject) tasker.getJavaVariable("reactorConfig");
+if (liveCfg == null) {
+    return buildResult(false, "Configuração não carregada");
+}
+
+JSONObject liveProvidersObj = liveCfg.getJSONObject("providers");
+if (!liveProvidersObj.has("clipboard") || !liveProvidersObj.getJSONObject("clipboard").optBoolean("enabled", false)) {
+    return buildResult(false, "Provider Clipboard desabilitado");
+}
+
+String text = tasker.getVariable("cliptext");
+if (text == null || text.length() == 0) {
+    return buildResult(false, "Texto do clipboard vazio");
+}
+
+Integer hash = Integer.valueOf(text.hashCode());
+Object lastHashObj = tasker.getJavaVariable("reactorLastClipboardHash");
+if (lastHashObj != null && lastHashObj != void && lastHashObj.equals(hash)) {
+    return buildResult(true, "Conteúdo repetido, ignorado");
+}
+tasker.setJavaVariable("reactorLastClipboardHash", hash);
+
+HashMap eventContext = new HashMap();
+Object lastFgPkgObj = tasker.getJavaVariable("reactorLastForegroundPkg");
+eventContext.put("app_package", (lastFgPkgObj != null && lastFgPkgObj != void) ? (String) lastFgPkgObj : "");
+eventContext.put("text", text);
+
+dispatchProviderEvent("clipboard", text, eventContext, null, liveCfg);
+
+return buildResult(true, "Clipboard processado");
+
+} catch (Throwable e) {
+    JSONObject err = new JSONObject();
+    err.put("ok", false);
+    err.put("error", "Java Error: " + e.toString());
+    return err.toString();
+}
