@@ -14,12 +14,10 @@ const PROVIDER_REGISTRY = {
     name: "Keyboard",
     description: "Eventos relacionados à digitação",
     icon: "keyboard",
-    implemented: true,
     events: {
       typed_text: {
         label: "Texto digitado",
         matchField: null,
-        matchFieldOptions: null,
         allowedOperators: ["ends_with"],
         lockedCondition: true,
         variables: [
@@ -47,12 +45,10 @@ const PROVIDER_REGISTRY = {
     name: "App",
     description: "Eventos relacionados aos aplicativos",
     icon: "app",
-    implemented: true,
     events: {
       app_opened: {
         label: "Aplicativo aberto",
-        matchField: null,
-        matchFieldOptions: null,
+        matchField: "app_package",
         allowedOperators: [
           "match",
           "contains",
@@ -80,12 +76,10 @@ const PROVIDER_REGISTRY = {
     name: "Notification",
     description: "Eventos de notificações",
     icon: "bell",
-    implemented: true,
     events: {
       notification_received: {
         label: "Notificação recebida",
         matchField: "body",
-        matchFieldOptions: ["title", "body", "full_text", "app_package"],
         allowedOperators: [
           "match",
           "contains",
@@ -128,12 +122,10 @@ const PROVIDER_REGISTRY = {
     name: "Clipboard",
     description: "Monitoramento da área de transferência",
     icon: "clipboard",
-    implemented: true,
     events: {
       clipboard_changed: {
         label: "Clipboard alterado",
-        matchField: null,
-        matchFieldOptions: null,
+        matchField: "text",
         allowedOperators: [
           "match",
           "contains",
@@ -154,35 +146,6 @@ const PROVIDER_REGISTRY = {
             example: "WhatsApp"
           },
           { key: "text", label: "Conteúdo copiado", example: "https://..." }
-        ]
-      }
-    }
-  },
-  screen: {
-    name: "Screen",
-    description: "Monitoramento de texto na tela via Acessibilidade",
-    icon: "eye",
-    implemented: false,
-    events: {
-      screen_text_detected: {
-        label: "Texto apareceu na tela",
-        matchField: null,
-        matchFieldOptions: null,
-        allowedOperators: [
-          "match",
-          "contains",
-          "starts_with",
-          "ends_with",
-          "regex"
-        ],
-        lockedCondition: false,
-        variables: [
-          { key: "text", label: "Texto detectado na tela", example: "..." },
-          {
-            key: "app_package",
-            label: "Pacote do app em primeiro plano",
-            example: "..."
-          }
         ]
       }
     }
@@ -213,12 +176,10 @@ function variablesOfEvent(eventType) {
   return eventDef(eventType).variables || [];
 }
 
-function hasMatchFieldChoice(eventType) {
-  return !!eventDef(eventType).matchFieldOptions;
-}
-
-function isUnimplementedProvider(providerId) {
-  return !PROVIDER_REGISTRY[providerId].implemented;
+function defaultConditionField(eventType) {
+  const def = eventDef(eventType);
+  if (def.lockedCondition) return null;
+  return def.matchField || (variablesOfEvent(eventType)[0] || {}).key || "";
 }
 
 const ACTION_REGISTRY = {
@@ -264,11 +225,6 @@ const ACTION_REGISTRY = {
     archetype: "selector",
     defaultConfig: () => ({ package: "" })
   },
-  click: {
-    label: "Clicar na Tela",
-    archetype: "selector",
-    defaultConfig: () => ({ x: 0, y: 0 })
-  },
   ai: {
     label: "Processar com IA",
     archetype: "processor",
@@ -276,9 +232,7 @@ const ACTION_REGISTRY = {
     defaultConfig: eventType => ({
       inputVariable: eventDef(eventType).lockedCondition
         ? "input"
-        : eventDef(eventType).matchField ||
-          (variablesOfEvent(eventType)[0] || {}).key ||
-          "",
+        : defaultConditionField(eventType),
       systemInstructions: "",
       outputMode: eventDef(eventType).lockedCondition
         ? "replace_field"
@@ -292,9 +246,7 @@ const ACTION_REGISTRY = {
     defaultConfig: eventType => ({
       inputVariable: eventDef(eventType).lockedCondition
         ? "input"
-        : eventDef(eventType).matchField ||
-          (variablesOfEvent(eventType)[0] || {}).key ||
-          "",
+        : defaultConditionField(eventType),
       language: "en",
       outputMode: eventDef(eventType).lockedCondition
         ? "replace_field"
@@ -396,8 +348,7 @@ const ICONS = {
   chevron:
     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
   alert:
-    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>',
-  eye: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>'
+    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>'
 };
 
 const DEFAULT_CONFIG = {
@@ -405,8 +356,7 @@ const DEFAULT_CONFIG = {
     keyboard: { enabled: true },
     app: { enabled: true },
     clipboard: { enabled: false },
-    notification: { enabled: false },
-    screen: { enabled: false }
+    notification: { enabled: false }
   },
   rules_by_provider: {
     keyboard: [
@@ -591,15 +541,14 @@ const DEFAULT_CONFIG = {
         id: "rule_seed3",
         enabled: false,
         name: "Alerta de promoção",
-        event: { type: "notification_received", matchField: "body" },
-        conditions: [{ operator: "contains", value: "promoção" }],
+        event: { type: "notification_received" },
+        conditions: [{ field: "body", operator: "contains", value: "promoção" }],
         actions: [
           { type: "run_task", config: { task: "TK_DismissNotification" } }
         ]
       }
     ],
-    clipboard: [],
-    screen: []
+    clipboard: []
   },
   settings: {
     theme: "dark",
@@ -620,9 +569,6 @@ function normalizeConfig(config) {
     ) {
       normalized.providers[id] = { enabled: false };
     }
-    if (isUnimplementedProvider(id)) {
-      normalized.providers[id].enabled = false;
-    }
   });
   if (
     !normalized.rules_by_provider ||
@@ -634,6 +580,18 @@ function normalizeConfig(config) {
     if (!Array.isArray(normalized.rules_by_provider[id])) {
       normalized.rules_by_provider[id] = [];
     }
+    normalized.rules_by_provider[id].forEach(rule => {
+      if (!rule || !rule.event || !Array.isArray(rule.conditions)) return;
+      if (!eventDef(rule.event.type)) return;
+      if (isLockedConditionEvent(rule.event.type)) return;
+      const legacyMatchField = rule.event.matchField;
+      delete rule.event.matchField;
+      rule.conditions.forEach(cond => {
+        if (!cond.field) {
+          cond.field = legacyMatchField || defaultConditionField(rule.event.type);
+        }
+      });
+    });
   });
   if (!normalized.settings || typeof normalized.settings !== "object") {
     normalized.settings = deepClone(DEFAULT_CONFIG.settings);
@@ -882,6 +840,7 @@ function createWebEnvironment() {
         return {
           ok: true,
           monitorActive,
+          clipboardOverlayPermission: true,
           config: store ? deepClone(store) : null
         };
 
@@ -938,6 +897,7 @@ const environment = selectEnvironment();
 
 const appState = {
   monitorActive: false,
+  clipboardOverlayPermission: true,
   busyProviderIds: new Set(),
   config: {
     providers: {},
@@ -1167,16 +1127,20 @@ function actionSummary(action) {
   else if (cfg.package) detail = cfg.package;
   else if (cfg.language) detail = `para ${cfg.language}`;
   else if (cfg.systemInstructions) detail = cfg.systemInstructions;
-  else if (cfg.x != null && cfg.y != null && action.type === "click")
-    detail = `${cfg.x}, ${cfg.y}`;
   if (detail.length > 60) detail = `${detail.slice(0, 60)}…`;
   return { label, detail };
 }
 
-function conditionSummary(cond) {
+function conditionSummary(cond, eventType) {
   const op = CONDITION_OPERATORS[cond.operator] || cond.operator;
-  const field = cond.field ? `${cond.field} ` : "";
-  return `${field}${op} “${cond.value || ""}”`;
+  let fieldLabel = "";
+  if (cond.field) {
+    const varMeta = (variablesOfEvent(eventType) || []).find(
+      v => v.key === cond.field
+    );
+    fieldLabel = `${varMeta ? varMeta.label : cond.field} `;
+  }
+  return `${fieldLabel}${op} “${cond.value || ""}”`;
 }
 
 function ruleSearchText(rule) {
@@ -1187,7 +1151,10 @@ function ruleSearchText(rule) {
     def ? def.label : rule.event.type,
     meta ? meta.name : rule.providerId
   ];
-  (rule.conditions || []).forEach(c => parts.push(c.value));
+  (rule.conditions || []).forEach(c => {
+    parts.push(c.value);
+    if (c.field) parts.push(c.field);
+  });
   (rule.actions || []).forEach(a => {
     const s = actionSummary(a);
     parts.push(s.label, s.detail);
@@ -1214,7 +1181,6 @@ function buildRuleDetails(rule) {
       ? PROVIDER_REGISTRY[rule.providerId].name
       : rule.providerId
   );
-  if (rule.event.matchField) metaItem("Campo avaliado", rule.event.matchField);
   details.appendChild(metaGrid);
 
   const condBlock = el("div", "rule-block");
@@ -1227,7 +1193,9 @@ function buildRuleDetails(rule) {
     );
   } else {
     rule.conditions.forEach(cond => {
-      condBlock.appendChild(el("div", "rule-line", conditionSummary(cond)));
+      condBlock.appendChild(
+        el("div", "rule-line", conditionSummary(cond, rule.event.type))
+      );
     });
   }
   details.appendChild(condBlock);
@@ -1567,16 +1535,12 @@ function handleProviderListChange(event) {
   if (!input || !row) return;
 
   const id = row.dataset.providerId;
-  const meta = PROVIDER_REGISTRY[id];
 
-  if (isUnimplementedProvider(id)) {
-    const triedToEnable = input.checked;
-    input.checked = false;
-    setProviderEnabled(id, false).then(() => {
-      if (triedToEnable)
-        showToast(`${meta.name} ainda não foi implementado`, true);
-    });
-    return;
+  if (id === "clipboard" && input.checked && !appState.clipboardOverlayPermission) {
+    showToast(
+      'Clipboard habilitado, mas sem a permissão "Exibir sobre outros apps" a leitura pode falhar em segundo plano. Ative em Ajustes > Apps > Tasker > Acesso especial.',
+      true
+    );
   }
 
   setProviderEnabled(id, input.checked);
@@ -1710,19 +1674,6 @@ function createBoundTextRow(label, obj, key, placeholder) {
   if (placeholder) input.placeholder = placeholder;
   input.addEventListener("input", () => {
     obj[key] = input.value;
-  });
-  row.appendChild(input);
-  return row;
-}
-
-function createBoundNumberRow(label, obj, key) {
-  const row = el("div", "field-row");
-  row.appendChild(el("label", null, label));
-  const input = document.createElement("input");
-  input.type = "number";
-  input.value = obj[key] != null ? obj[key] : 0;
-  input.addEventListener("input", () => {
-    obj[key] = Number(input.value) || 0;
   });
   row.appendChild(input);
   return row;
@@ -2033,11 +1984,6 @@ function buildNotificationFields(container, action, config, vars) {
   );
 }
 
-function buildClickFields(container, action, config) {
-  container.appendChild(createBoundNumberRow("X", config, "x"));
-  container.appendChild(createBoundNumberRow("Y", config, "y"));
-}
-
 const ACTION_FIELD_BUILDERS = {
   text_replacer: buildTemplateTextareaFields,
   clipboard: buildTemplateTextareaFields,
@@ -2047,8 +1993,7 @@ const ACTION_FIELD_BUILDERS = {
   translate: buildTranslateFields,
   search: buildSearchFields,
   open_url: buildOpenUrlFields,
-  notification: buildNotificationFields,
-  click: buildClickFields
+  notification: buildNotificationFields
 };
 
 function buildActionConfigFields(container, action, draft, actionIndex) {
@@ -2076,49 +2021,83 @@ function renderConditionsList(container, draft) {
     );
   }
 
-  draft.conditions.forEach((cond, index) => {
+  if (locked) {
+    const cond = draft.conditions[0];
+    cond.operator = "ends_with";
     const row = el("div", "condition-row");
-
-    if (locked) {
-      cond.operator = "ends_with";
-      row.appendChild(
-        el("span", "condition-op-label", CONDITION_OPERATORS.ends_with)
-      );
-    } else {
-      const opSelect = document.createElement("select");
-      populateSelectOptions(
-        opSelect,
-        allowedOperatorsForEvent(draft.event.type).map(op => [
-          op,
-          CONDITION_OPERATORS[op]
-        ])
-      );
-      opSelect.value = cond.operator;
-      opSelect.addEventListener("change", () => {
-        cond.operator = opSelect.value;
-      });
-      row.appendChild(opSelect);
-    }
-
+    row.appendChild(
+      el("span", "condition-op-label", CONDITION_OPERATORS.ends_with)
+    );
     const valInput = document.createElement("input");
     valInput.type = "text";
     valInput.value = cond.value;
-    valInput.placeholder = locked ? "texto do gatilho" : "valor";
+    valInput.placeholder = "texto do gatilho";
     valInput.addEventListener("input", () => {
       cond.value = valInput.value;
     });
     row.appendChild(valInput);
-
-    if (!locked) {
-      const delBtn = iconButton("icon-btn danger", "trash", "Remover condição");
-      delBtn.addEventListener("click", () => {
-        draft.conditions.splice(index, 1);
-        renderConditionsList(container, draft);
-      });
-      row.appendChild(delBtn);
-    }
-
     container.appendChild(row);
+    return;
+  }
+
+  const vars = variablesOfEvent(draft.event.type);
+
+  draft.conditions.forEach((cond, index) => {
+    const card = el("div", "action-card");
+    const head = el("div", "action-card-head");
+
+    const fieldSelect = document.createElement("select");
+    populateSelectOptions(
+      fieldSelect,
+      vars.map(v => [v.key, `${v.key} - ${v.label}`])
+    );
+    fieldSelect.value = cond.field || vars[0].key;
+    fieldSelect.addEventListener("change", () => {
+      cond.field = fieldSelect.value;
+    });
+    head.appendChild(fieldSelect);
+
+    const delBtn = iconButton("icon-btn danger", "trash", "Remover condição");
+    delBtn.addEventListener("click", () => {
+      draft.conditions.splice(index, 1);
+      renderConditionsList(container, draft);
+    });
+    head.appendChild(delBtn);
+    card.appendChild(head);
+
+    const fields = el("div", "action-card-fields");
+
+    const opRow = el("div", "field-row");
+    opRow.appendChild(el("label", null, "Operador"));
+    const opSelect = document.createElement("select");
+    populateSelectOptions(
+      opSelect,
+      allowedOperatorsForEvent(draft.event.type).map(op => [
+        op,
+        CONDITION_OPERATORS[op]
+      ])
+    );
+    opSelect.value = cond.operator;
+    opSelect.addEventListener("change", () => {
+      cond.operator = opSelect.value;
+    });
+    opRow.appendChild(opSelect);
+    fields.appendChild(opRow);
+
+    const valRow = el("div", "field-row");
+    valRow.appendChild(el("label", null, "Valor"));
+    const valInput = document.createElement("input");
+    valInput.type = "text";
+    valInput.value = cond.value;
+    valInput.placeholder = "valor";
+    valInput.addEventListener("input", () => {
+      cond.value = valInput.value;
+    });
+    valRow.appendChild(valInput);
+    fields.appendChild(valRow);
+
+    card.appendChild(fields);
+    container.appendChild(card);
   });
 }
 
@@ -2242,57 +2221,14 @@ function openRuleDialog(existingRule) {
   eventRow.appendChild(eventSelect);
   eventSection.appendChild(eventRow);
 
-  const matchFieldRow = el("div", "field-row");
-  matchFieldRow.appendChild(el("label", null, "Campo"));
-  const matchFieldSelect = document.createElement("select");
-  matchFieldRow.appendChild(matchFieldSelect);
-  eventSection.appendChild(matchFieldRow);
-  matchFieldSelect.addEventListener("change", () => {
-    draft.event.matchField = matchFieldSelect.value;
-    updateCondHint();
-  });
-
   const condHint = el("div", "hint");
   body.appendChild(eventSection);
 
-  function refreshMatchFieldRow() {
-    const hasChoice = hasMatchFieldChoice(draft.event.type);
-    matchFieldRow.style.display = hasChoice ? "" : "none";
-    if (!hasChoice) {
-      delete draft.event.matchField;
-      return;
-    }
-    const def = eventDef(draft.event.type);
-    populateSelectOptions(
-      matchFieldSelect,
-      def.matchFieldOptions.map(key => {
-        const varMeta = def.variables.find(v => v.key === key);
-        return [key, varMeta ? `${varMeta.label} (${key})` : key];
-      })
-    );
-    if (
-      !draft.event.matchField ||
-      def.matchFieldOptions.indexOf(draft.event.matchField) === -1
-    ) {
-      draft.event.matchField = def.matchField || def.matchFieldOptions[0];
-    }
-    matchFieldSelect.value = draft.event.matchField;
-  }
-
   function updateCondHint() {
     const def = eventDef(draft.event.type);
-    if (def.lockedCondition) {
-      condHint.textContent =
-        "Condição fixa: a regra dispara quando o texto digitado termina com o valor abaixo.";
-    } else if (hasMatchFieldChoice(draft.event.type)) {
-      const fieldKey = draft.event.matchField || def.matchField;
-      const varMeta = def.variables.find(v => v.key === fieldKey);
-      condHint.textContent = `As condições abaixo são testadas contra: ${
-        varMeta ? varMeta.label : fieldKey
-      }.`;
-    } else {
-      condHint.textContent = "";
-    }
+    condHint.textContent = def.lockedCondition
+      ? "Condição fixa: a regra dispara quando o texto digitado termina com o valor abaixo."
+      : "";
   }
 
   function refreshEventOptions() {
@@ -2322,7 +2258,11 @@ function openRuleDialog(existingRule) {
   addCondBtn.type = "button";
   addCondBtn.innerHTML = `${ICONS.plus}<span>Adicionar condição</span>`;
   addCondBtn.addEventListener("click", () => {
-    draft.conditions.push({ operator: "contains", value: "" });
+    draft.conditions.push({
+      field: defaultConditionField(draft.event.type),
+      operator: "contains",
+      value: ""
+    });
     renderConditionsList(condList, draft);
   });
   condSection.appendChild(addCondBtn);
@@ -2351,6 +2291,7 @@ function openRuleDialog(existingRule) {
   body.appendChild(actSection);
 
   function refreshEventDependents() {
+    delete draft.event.matchField;
     const locked = isLockedConditionEvent(draft.event.type);
 
     if (locked) {
@@ -2362,8 +2303,14 @@ function openRuleDialog(existingRule) {
       ) {
         draft.conditions = [{ operator: "ends_with", value: preservedValue }];
       }
+    } else {
+      const validKeys = variablesOfEvent(draft.event.type).map(v => v.key);
+      draft.conditions.forEach(cond => {
+        if (!cond.field || validKeys.indexOf(cond.field) === -1) {
+          cond.field = defaultConditionField(draft.event.type);
+        }
+      });
     }
-    refreshMatchFieldRow();
     updateCondHint();
     renderConditionsList(condList, draft);
     addCondBtn.style.display = locked ? "none" : "flex";
@@ -2675,6 +2622,7 @@ async function boot() {
     return;
   }
   appState.monitorActive = !!status.monitorActive;
+  appState.clipboardOverlayPermission = status.clipboardOverlayPermission !== false;
 
   if (status.config) {
     appState.config = normalizeConfig(status.config);
