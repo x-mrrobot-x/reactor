@@ -46,6 +46,7 @@ if (Build.VERSION.SDK_INT >= 26) {
 
 CompletableSubject stopSignal = CompletableSubject.create();
 tasker.setJavaVariable("stopReactorMonitor", stopSignal);
+tasker.setJavaVariable("reactorMonitorStartedAt", System.currentTimeMillis());
 
 Observable events = tasker.getAccessibilityEvents();
 
@@ -176,6 +177,7 @@ Disposable disposable = events.subscribe(new Consumer() {
             }
 
             tasker.setJavaVariable("stopReactorMonitor", null);
+            tasker.setJavaVariable("reactorMonitorStartedAt", null);
             tasker.setJavaVariable("reactorMonitorDisposable", null);
             tasker.setJavaVariable("reactorLastFieldWriteTs", null);
             tasker.setJavaVariable("reactorLastAppPkg", null);

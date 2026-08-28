@@ -9,6 +9,14 @@ try {
     if (!payload.has("config")) throw new JavaCodeException("Config ausente no payload.");
     JSONObject cfgRoot = payload.getJSONObject("config");
 
+    Object rawCfg = tasker.getJavaVariable("reactorConfig");
+    if (rawCfg != null && rawCfg != void) {
+        JSONObject currentCfg = (JSONObject) rawCfg;
+        if (currentCfg.has("stats")) {
+            cfgRoot.put("stats", currentCfg.getJSONObject("stats"));
+        }
+    }
+
     File file = new File(CONFIG_PATH);
     file.getParentFile().mkdirs();
     FileWriter writer = null;
@@ -24,9 +32,13 @@ try {
     Object monStatus = tasker.getJavaVariable("stopReactorMonitor");
     boolean monitorActive = (monStatus != null && monStatus != void);
 
+    Object startedAtObj = tasker.getJavaVariable("reactorMonitorStartedAt");
+    long monitorStartedAt = (startedAtObj != null && startedAtObj != void) ? ((Long) startedAtObj).longValue() : 0;
+
     JSONObject result = new JSONObject();
     result.put("ok", true);
     result.put("monitorActive", monitorActive);
+    result.put("monitorStartedAt", monitorStartedAt > 0 ? monitorStartedAt : JSONObject.NULL);
     result.put("message", "Configuração salva");
     return result.toString();
 

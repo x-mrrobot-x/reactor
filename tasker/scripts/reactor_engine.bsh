@@ -1,5 +1,7 @@
 import org.json.JSONObject;
 import org.json.JSONArray;
+import java.io.File;
+import java.io.FileWriter;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.os.Bundle;
 import android.os.Build;
@@ -91,7 +93,34 @@ String buildResult(boolean active, String message) {
     result.put("ok", true);
     result.put("monitorActive", active);
     result.put("message", message);
+
+    Object startedAtObj = tasker.getJavaVariable("reactorMonitorStartedAt");
+    long startedAt = (startedAtObj != null && startedAtObj != void) ? ((Long) startedAtObj).longValue() : 0;
+    result.put("monitorStartedAt", startedAt > 0 ? startedAt : JSONObject.NULL);
+
     return result.toString();
+}
+
+void recordRuleExecution(JSONObject liveCfg, String ruleId, String provider) {
+    try {
+        JSONObject stats = liveCfg.has("stats") ? liveCfg.getJSONObject("stats") : new JSONObject();
+        stats.put("rulesExecutedCount", stats.optLong("rulesExecutedCount", 0) + 1);
+        stats.put("lastExecutedRuleId", ruleId != null ? ruleId : "");
+        stats.put("lastExecutedProvider", provider != null ? provider : "");
+        stats.put("lastExecutedAt", System.currentTimeMillis());
+        liveCfg.put("stats", stats);
+
+        File file = new File(CONFIG_PATH);
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file, false);
+            writer.write(liveCfg.toString(2));
+        } finally {
+            if (writer != null) writer.close();
+        }
+    } catch (Throwable e) {
+        tasker.log("Reactor: falha ao registrar execução da regra '" + ruleId + "': " + e.toString());
+    }
 }
 
 String applyTemplate(String template, HashMap ctx) {
@@ -427,6 +456,7 @@ void dispatchProviderEvent(String provider, String rawValue, HashMap eventContex
         if (!passed) continue;
 
         anyRuleMatched = true;
+        recordRuleExecution(liveCfg, rule.optString("id", ""), provider);
 
         HashMap ruleContext = new HashMap(eventContext);
         ruleContext.put("_rule_id", rule.optString("id", ""));

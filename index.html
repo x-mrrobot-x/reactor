@@ -45,7 +45,7 @@
             <div class="led off" id="masterLed"></div>
             <div class="power-info">
               <b>Monitor do Reactor</b>
-              <span id="masterState">PARADO</span>
+              <span id="masterState">Nenhum evento está sendo observado.</span>
             </div>
             <label class="switch">
               <input type="checkbox" id="masterSwitch" />
@@ -158,33 +158,8 @@
             </p>
           </div>
 
-          <div class="card hero-card">
-            <div class="hero-top">
-              <div class="hero-icon">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z" />
-                </svg>
-              </div>
-              <div class="hero-body">
-                <b>Automação sempre pronta</b>
-                <span
-                  >Escute o teclado, apps e notificações e responda na
-                  hora.</span
-                >
-              </div>
-            </div>
-            <div class="hero-bar"><i></i></div>
-          </div>
-
           <div class="stat-grid">
-            <div class="card stat-card">
+            <div class="card stat-card stat-card-split">
               <div class="stat-card-top">
                 <svg
                   viewBox="0 0 24 24"
@@ -197,25 +172,17 @@
                 </svg>
                 <span>Regras</span>
               </div>
-              <div class="stat-value" id="statRulesTotal">0</div>
-              <div class="stat-label">Regras cadastradas</div>
-            </div>
-            <div class="card stat-card">
-              <div class="stat-card-top">
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="m5 13 4 4L19 7" />
-                </svg>
-                <span>Ativas</span>
+              <div class="stat-split-row">
+                <div class="stat-split-item">
+                  <div class="stat-value" id="statRulesTotal">0</div>
+                  <div class="stat-label">Cadastradas</div>
+                </div>
+                <div class="stat-split-divider"></div>
+                <div class="stat-split-item">
+                  <div class="stat-value" id="statRulesActive">0</div>
+                  <div class="stat-label">Ativas</div>
+                </div>
               </div>
-              <div class="stat-value" id="statRulesActive">0</div>
-              <div class="stat-label">Regras em execução</div>
             </div>
             <div class="card stat-card">
               <div class="stat-card-top">
@@ -243,44 +210,111 @@
                   stroke="currentColor"
                   stroke-width="1.8"
                   stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z" />
+                </svg>
+                <span>Execuções</span>
+              </div>
+              <div class="stat-value" id="statRulesExecuted">0</div>
+              <div class="stat-label">Regras executadas</div>
+            </div>
+            <div class="card stat-card">
+              <div class="stat-card-top">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
                 >
                   <circle cx="12" cy="12" r="8" />
                   <path d="M12 8v4l3 2" />
                 </svg>
-                <span>Monitor</span>
+                <span>Tempo de execução</span>
               </div>
-              <div class="stat-value" id="statMonitorState">Desligado</div>
-              <div class="stat-label">Estado do serviço</div>
+              <div class="stat-value" id="statMonitorUptime">--</div>
+              <div class="stat-label">Desde que o monitor iniciou</div>
             </div>
-          </div>
-
-          <div class="card power-card">
-            <div class="power-card-label">
-              <b id="powerCardTitle">Monitor parado</b>
-              <span id="powerCardSubtitle"
-                >Nenhum evento está sendo observado.</span
-              >
-            </div>
-            <button
-              class="power-toggle-btn"
-              type="button"
-              id="powerToggleBtn"
-              data-action="toggle-monitor"
-            >
-              Iniciar
-            </button>
           </div>
 
           <div class="flow-diagram">
             <div class="section-label">Fluxo de execução</div>
-            <div class="flow-track" id="flowTrack">
-              <div class="flow-node">Provider</div>
-              <div class="flow-arrow">›</div>
-              <div class="flow-node">Evento</div>
-              <div class="flow-arrow">›</div>
-              <div class="flow-node">Condições</div>
-              <div class="flow-arrow">›</div>
-              <div class="flow-node">Ações</div>
+            <div class="flow-pipeline" id="flowTrack">
+              <div class="flow-step">
+                <div class="flow-step-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M4 11a9 9 0 0 1 9 9" />
+                    <path d="M4 4a16 16 0 0 1 16 16" />
+                    <circle cx="5" cy="19" r="1" />
+                  </svg>
+                </div>
+                <div class="flow-step-body">
+                  <b>Provider</b>
+                  <span>Teclado, apps, notificações, clipboard e mais</span>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                  </svg>
+                </div>
+                <div class="flow-step-body">
+                  <b>Evento</b>
+                  <span>Texto digitado, app aberto, notificação e mais</span>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+                  </svg>
+                </div>
+                <div class="flow-step-body">
+                  <b>Condições</b>
+                  <span>Contém, termina com, regex e mais</span>
+                </div>
+              </div>
+              <div class="flow-step">
+                <div class="flow-step-icon">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z" />
+                  </svg>
+                </div>
+                <div class="flow-step-body">
+                  <b>Ações</b>
+                  <span>Substitui texto, abre app, executa tarefa, IA e mais</span>
+                </div>
+              </div>
             </div>
           </div>
 

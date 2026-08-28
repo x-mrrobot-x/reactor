@@ -596,6 +596,9 @@ function normalizeConfig(config) {
   if (!normalized.settings || typeof normalized.settings !== "object") {
     normalized.settings = deepClone(DEFAULT_CONFIG.settings);
   }
+  if (!normalized.stats || typeof normalized.stats !== "object") {
+    normalized.stats = { rulesExecutedCount: 0 };
+  }
   return normalized;
 }
 
@@ -634,6 +637,19 @@ function deepClone(value) {
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function formatUptime(startedAt) {
+  if (!startedAt) return "--";
+  const elapsedMs = Date.now() - startedAt;
+  if (elapsedMs < 1000) return "0s";
+  const totalSeconds = Math.floor(elapsedMs / 1000);
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  if (hours > 0) return `${hours}h ${String(minutes).padStart(2, "0")}m`;
+  if (minutes > 0) return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
+  return `${seconds}s`;
 }
 
 function el(tag, className, text) {
@@ -832,6 +848,7 @@ function createTaskerEnvironment() {
 function createWebEnvironment() {
   let store = null;
   let monitorActive = false;
+  let monitorStartedAt = null;
 
   async function runAction(action, payload) {
     payload = payload || {};
@@ -840,15 +857,18 @@ function createWebEnvironment() {
         return {
           ok: true,
           monitorActive,
+          monitorStartedAt,
           clipboardOverlayPermission: true,
           config: store ? deepClone(store) : null
         };
 
       case "toggle_monitor":
         monitorActive = !monitorActive;
+        monitorStartedAt = monitorActive ? Date.now() : null;
         return {
           ok: true,
           monitorActive,
+          monitorStartedAt,
           message: monitorActive ? "Monitor iniciado" : "Monitor parado"
         };
 
@@ -897,6 +917,7 @@ const environment = selectEnvironment();
 
 const appState = {
   monitorActive: false,
+  monitorStartedAt: null,
   clipboardOverlayPermission: true,
   busyProviderIds: new Set(),
   config: {
@@ -923,11 +944,9 @@ const DOM_SELECTORS = {
   statRulesTotal: "#statRulesTotal",
   statRulesActive: "#statRulesActive",
   statProvidersActive: "#statProvidersActive",
-  statMonitorState: "#statMonitorState",
+  statRulesExecuted: "#statRulesExecuted",
+  statMonitorUptime: "#statMonitorUptime",
   flowTrack: "#flowTrack",
-  powerCardTitle: "#powerCardTitle",
-  powerCardSubtitle: "#powerCardSubtitle",
-  powerToggleBtn: "#powerToggleBtn",
 
   addRuleBtn: "#addRuleBtn",
   rulesCountLabel: "#rulesCountLabel",
@@ -988,6 +1007,9 @@ async function performAction(action, payload) {
   if (typeof response.monitorActive === "boolean") {
     appState.monitorActive = response.monitorActive;
   }
+  if (Object.prototype.hasOwnProperty.call(response, "monitorStartedAt")) {
+    appState.monitorStartedAt = response.monitorStartedAt || null;
+  }
   syncUI();
 
   const feedback = response.error || response.message;
@@ -1033,6 +1055,9 @@ async function runConfigMutation(mutateFn, successMessage) {
   if (typeof response.monitorActive === "boolean") {
     appState.monitorActive = response.monitorActive;
   }
+  if (Object.prototype.hasOwnProperty.call(response, "monitorStartedAt")) {
+    appState.monitorStartedAt = response.monitorStartedAt || null;
+  }
   syncUI();
 
   const feedback =
@@ -1065,22 +1090,13 @@ function bindTabs() {
 function updateMasterPower() {
   dom.masterSwitch.checked = appState.monitorActive;
   dom.masterLed.className = `led ${appState.monitorActive ? "on" : "off"}`;
-  dom.masterState.textContent = appState.monitorActive ? "ATIVO" : "PARADO";
+  dom.masterState.textContent = appState.monitorActive
+    ? "Reagindo a eventos em tempo real."
+    : "Nenhum evento está sendo observado.";
 }
 
 function handleMonitorToggleRequest() {
   performAction("toggle_monitor", {});
-}
-
-function updatePowerCard() {
-  const active = appState.monitorActive;
-
-  dom.powerCardTitle.textContent = active ? "Monitor ativo" : "Monitor parado";
-  dom.powerCardSubtitle.textContent = active
-    ? "Reagindo a eventos em tempo real."
-    : "Nenhum evento está sendo observado.";
-  dom.powerToggleBtn.textContent = active ? "Parar" : "Iniciar";
-  dom.powerToggleBtn.classList.toggle("on", active);
 }
 
 function updateDashboardCards() {
@@ -1095,13 +1111,14 @@ function updateDashboardCards() {
   dom.statRulesTotal.textContent = String(rules.length);
   dom.statRulesActive.textContent = String(activeRules);
   dom.statProvidersActive.textContent = `${activeProviders}/${providerIds.length}`;
-  dom.statMonitorState.textContent = appState.monitorActive
-    ? "Ligado"
-    : "Desligado";
+  dom.statRulesExecuted.textContent = String(
+    (appState.config.stats && appState.config.stats.rulesExecutedCount) || 0
+  );
+  dom.statMonitorUptime.textContent = appState.monitorActive
+    ? formatUptime(appState.monitorStartedAt)
+    : "--";
 
   dom.flowTrack.classList.toggle("live", appState.monitorActive);
-
-  updatePowerCard();
 }
 
 function providerBadge(providerId) {
@@ -2598,10 +2615,20 @@ function attachDialogScrollbar(container) {
   dialogScrollbar.attach(container);
 }
 
+let uptimeTickTimer = null;
+function startUptimeTicker() {
+  clearInterval(uptimeTickTimer);
+  uptimeTickTimer = setInterval(() => {
+    if (appState.activeTab !== "dashboard") return;
+    dom.statMonitorUptime.textContent = appState.monitorActive
+      ? formatUptime(appState.monitorStartedAt)
+      : "--";
+  }, 1000);
+}
+
 function bindGlobalEvents() {
   bindTabs();
   dom.masterSwitch.addEventListener("change", handleMonitorToggleRequest);
-  dom.powerToggleBtn.addEventListener("click", handleMonitorToggleRequest);
   bindRulesPage();
   bindProvidersPage();
   bindSettingsPage();
@@ -2615,6 +2642,7 @@ async function boot() {
   applyTheme(appState.config.settings.theme);
   syncUI();
   applySettingsToForm();
+  startUptimeTicker();
 
   const status = await environment.runAction("get_status", {});
   if (status.ok === false) {
@@ -2622,6 +2650,7 @@ async function boot() {
     return;
   }
   appState.monitorActive = !!status.monitorActive;
+  appState.monitorStartedAt = status.monitorStartedAt || null;
   appState.clipboardOverlayPermission = status.clipboardOverlayPermission !== false;
 
   if (status.config) {
