@@ -159,7 +159,7 @@
           </div>
 
           <div class="stat-grid">
-            <div class="card stat-card stat-card-split">
+            <div class="card stat-card">
               <div class="stat-card-top">
                 <svg
                   viewBox="0 0 24 24"
@@ -172,17 +172,8 @@
                 </svg>
                 <span>Regras</span>
               </div>
-              <div class="stat-split-row">
-                <div class="stat-split-item">
-                  <div class="stat-value" id="statRulesTotal">0</div>
-                  <div class="stat-label">Cadastradas</div>
-                </div>
-                <div class="stat-split-divider"></div>
-                <div class="stat-split-item">
-                  <div class="stat-value" id="statRulesActive">0</div>
-                  <div class="stat-label">Ativas</div>
-                </div>
-              </div>
+              <div class="stat-value" id="statRulesActive">0/0</div>
+              <div class="stat-label">Regras ativas</div>
             </div>
             <div class="card stat-card">
               <div class="stat-card-top">
@@ -312,7 +303,9 @@
                 </div>
                 <div class="flow-step-body">
                   <b>Ações</b>
-                  <span>Substitui texto, abre app, executa tarefa, IA e mais</span>
+                  <span
+                    >Substitui texto, abre app, executa tarefa, IA e mais</span
+                  >
                 </div>
               </div>
             </div>
@@ -385,27 +378,155 @@
                   >0 regras · 0 ativas</span
                 >
               </div>
-            </div>
-            <div class="card search-field">
-              <svg
-                viewBox="0 0 24 24"
-                width="15"
-                height="15"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.9"
-                stroke-linecap="round"
-                aria-hidden="true"
+              <div
+                class="view-switch"
+                id="ruleViewSwitch"
+                role="group"
+                aria-label="Modo de visualização"
               >
-                <circle cx="11" cy="11" r="7" />
-                <path d="m20 20-3.2-3.2" />
-              </svg>
-              <input
-                type="text"
-                id="ruleSearchInput"
-                placeholder="Buscar regras…"
-                autocomplete="off"
-              />
+                <button
+                  class="view-switch-btn active"
+                  type="button"
+                  data-view="list"
+                  title="Lista"
+                  aria-label="Visualização em lista"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                  >
+                    <path
+                      d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"
+                    />
+                  </svg>
+                </button>
+                <button
+                  class="view-switch-btn"
+                  type="button"
+                  data-view="grouped"
+                  title="Grupos"
+                  aria-label="Visualização agrupada por provider"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path
+                      d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  class="view-switch-btn"
+                  type="button"
+                  data-view="compact"
+                  title="Compacto"
+                  aria-label="Visualização compacta"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                  >
+                    <path d="M4 5h16M4 10h16M4 15h16M4 20h16" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <div class="card search-filter-card" id="ruleSearchFilter">
+              <div class="search-filter-bar">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="15"
+                  height="15"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.9"
+                  stroke-linecap="round"
+                  aria-hidden="true"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.2-3.2" />
+                </svg>
+                <input
+                  type="text"
+                  id="ruleSearchInput"
+                  placeholder="Buscar regras…"
+                  autocomplete="off"
+                />
+                <span class="search-filter-divider"></span>
+                <button
+                  type="button"
+                  class="icon-btn filter-toggle-btn"
+                  id="ruleFilterToggle"
+                  aria-expanded="false"
+                  aria-controls="ruleFilterPanel"
+                  aria-label="Filtros"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    width="15"
+                    height="15"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.9"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M22 3H2l8 9.46V19l4 2v-8.54L22 3z" />
+                  </svg>
+                  <span
+                    class="filter-toggle-dot"
+                    id="ruleFilterDot"
+                    hidden
+                  ></span>
+                </button>
+              </div>
+              <div class="filter-panel" id="ruleFilterPanel">
+                <div class="filter-panel-inner">
+                  <div class="filter-grid">
+                    <div class="field-block">
+                      <label class="block-label" for="ruleFilterProvider"
+                        >Provider</label
+                      >
+                      <select id="ruleFilterProvider"></select>
+                    </div>
+                    <div class="field-block">
+                      <label class="block-label" for="ruleFilterStatus"
+                        >Status</label
+                      >
+                      <select id="ruleFilterStatus"></select>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-ghost filter-clear-btn"
+                    id="ruleFilterClear"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="12"
+                      height="12"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.8"
+                      stroke-linecap="round"
+                    >
+                      <path d="M18 6 6 18M6 6l12 12" />
+                    </svg>
+                    Limpar filtros
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 

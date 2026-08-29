@@ -9,6 +9,14 @@ const CONDITION_OPERATORS = {
   regex: "Regex"
 };
 
+const CONDITION_OPERATOR_SYMBOLS = {
+  match: "=",
+  contains: "~",
+  starts_with: "^",
+  ends_with: "$",
+  regex: "®"
+};
+
 const PROVIDER_REGISTRY = {
   keyboard: {
     name: "Keyboard",
@@ -542,7 +550,9 @@ const DEFAULT_CONFIG = {
         enabled: false,
         name: "Alerta de promoção",
         event: { type: "notification_received" },
-        conditions: [{ field: "body", operator: "contains", value: "promoção" }],
+        conditions: [
+          { field: "body", operator: "contains", value: "promoção" }
+        ],
         actions: [
           { type: "run_task", config: { task: "TK_DismissNotification" } }
         ]
@@ -553,6 +563,7 @@ const DEFAULT_CONFIG = {
   settings: {
     theme: "dark",
     language: "pt",
+    ruleViewMode: "list",
     gemini: { model: "gemini-2.5-flash", apiKey: "" }
   }
 };
@@ -588,7 +599,8 @@ function normalizeConfig(config) {
       delete rule.event.matchField;
       rule.conditions.forEach(cond => {
         if (!cond.field) {
-          cond.field = legacyMatchField || defaultConditionField(rule.event.type);
+          cond.field =
+            legacyMatchField || defaultConditionField(rule.event.type);
         }
       });
     });
@@ -926,6 +938,7 @@ const appState = {
     settings: {
       theme: "dark",
       language: "pt",
+      ruleViewMode: "list",
       gemini: { model: "gemini-2.5-flash", apiKey: "" }
     }
   },
@@ -941,7 +954,6 @@ const DOM_SELECTORS = {
   masterLed: "#masterLed",
   masterState: "#masterState",
 
-  statRulesTotal: "#statRulesTotal",
   statRulesActive: "#statRulesActive",
   statProvidersActive: "#statProvidersActive",
   statRulesExecuted: "#statRulesExecuted",
@@ -952,6 +964,14 @@ const DOM_SELECTORS = {
   rulesCountLabel: "#rulesCountLabel",
   ruleList: "#ruleList",
   ruleSearchInput: "#ruleSearchInput",
+  ruleViewSwitch: "#ruleViewSwitch",
+  ruleSearchFilter: "#ruleSearchFilter",
+  ruleFilterToggle: "#ruleFilterToggle",
+  ruleFilterDot: "#ruleFilterDot",
+  ruleFilterPanel: "#ruleFilterPanel",
+  ruleFilterProvider: "#ruleFilterProvider",
+  ruleFilterStatus: "#ruleFilterStatus",
+  ruleFilterClear: "#ruleFilterClear",
 
   providersCountLabel: "#providersCountLabel",
   providerList: "#providerList",
@@ -1108,8 +1128,7 @@ function updateDashboardCards() {
     id => providers[id] && providers[id].enabled
   ).length;
 
-  dom.statRulesTotal.textContent = String(rules.length);
-  dom.statRulesActive.textContent = String(activeRules);
+  dom.statRulesActive.textContent = `${activeRules}/${rules.length}`;
   dom.statProvidersActive.textContent = `${activeProviders}/${providerIds.length}`;
   dom.statRulesExecuted.textContent = String(
     (appState.config.stats && appState.config.stats.rulesExecutedCount) || 0
@@ -1125,7 +1144,7 @@ function providerBadge(providerId) {
   const meta = PROVIDER_REGISTRY[providerId];
   const badge = el("span", "provider-badge");
   badge.innerHTML = ICONS[meta.icon] || "";
-  badge.appendChild(document.createTextNode(meta.name));
+  badge.appendChild(el("span", "provider-badge-label", meta.name));
   return badge;
 }
 
@@ -1148,15 +1167,9 @@ function actionSummary(action) {
   return { label, detail };
 }
 
-function conditionSummary(cond, eventType) {
-  const op = CONDITION_OPERATORS[cond.operator] || cond.operator;
-  let fieldLabel = "";
-  if (cond.field) {
-    const varMeta = (variablesOfEvent(eventType) || []).find(
-      v => v.key === cond.field
-    );
-    fieldLabel = `${varMeta ? varMeta.label : cond.field} `;
-  }
+function conditionSummary(cond) {
+  const op = CONDITION_OPERATOR_SYMBOLS[cond.operator] || cond.operator;
+  const fieldLabel = cond.field ? `${cond.field} ` : "";
   return `${fieldLabel}${op} “${cond.value || ""}”`;
 }
 
@@ -1210,9 +1223,7 @@ function buildRuleDetails(rule) {
     );
   } else {
     rule.conditions.forEach(cond => {
-      condBlock.appendChild(
-        el("div", "rule-line", conditionSummary(cond, rule.event.type))
-      );
+      condBlock.appendChild(el("div", "rule-line", conditionSummary(cond)));
     });
   }
   details.appendChild(condBlock);
@@ -1261,17 +1272,20 @@ function buildRuleDetails(rule) {
 
 function buildRuleRow(rule) {
   const expanded = expandedRules.has(rule.id);
+  const compact = ruleViewMode === "compact";
   const row = el(
     "div",
-    `card rule-row${rule.enabled ? "" : " off"}${expanded ? " expanded" : ""}`
+    `card rule-row${rule.enabled ? "" : " off"}${expanded ? " expanded" : ""}${compact ? " compact" : ""}`
   );
   row.dataset.ruleId = rule.id;
 
   const head = el("div", "rule-head");
   head.dataset.action = "expand";
 
-  const dot = el("span", "rule-dot");
-  head.appendChild(dot);
+  const statusBar = el("span", "rule-status-bar");
+  statusBar.dataset.action = "toggle";
+  statusBar.title = rule.enabled ? "Desativar regra" : "Ativar regra";
+  head.appendChild(statusBar);
 
   const info = el("div", "rule-info");
   const top = el("div", "rule-top");
@@ -1284,6 +1298,14 @@ function buildRuleRow(rule) {
   flow.appendChild(el("span", "flow-part", def ? def.label : rule.event.type));
   flow.appendChild(el("span", "flow-sep", "›"));
   flow.appendChild(
+    el(
+      "span",
+      "flow-part",
+      countLabel((rule.conditions || []).length, "condição", "condições")
+    )
+  );
+  flow.appendChild(el("span", "flow-sep", "›"));
+  flow.appendChild(
     el("span", "flow-part", countLabel(rule.actions.length, "ação", "ações"))
   );
   info.appendChild(flow);
@@ -1294,30 +1316,111 @@ function buildRuleRow(rule) {
   head.appendChild(chevron);
   row.appendChild(head);
 
-  if (expanded) row.appendChild(buildRuleDetails(rule));
+  const detailsWrap = el("div", "rule-details-wrap");
+  detailsWrap.appendChild(buildRuleDetails(rule));
+  row.appendChild(detailsWrap);
 
   return row;
 }
 
 let ruleSearchQuery = "";
+let ruleFilters = { provider: "", status: "" };
+let ruleViewMode = "list";
+let ruleFilterPanelOpen = false;
+
+function hasActiveRuleFilters() {
+  return !!(ruleFilters.provider || ruleFilters.status);
+}
 
 function filteredRules() {
   const q = ruleSearchQuery.trim().toLowerCase();
-  const rules = allRules();
-  if (!q) return rules;
-  return rules.filter(rule => ruleSearchText(rule).includes(q));
+  let rules = allRules();
+  if (ruleFilters.provider) {
+    rules = rules.filter(rule => rule.providerId === ruleFilters.provider);
+  }
+  if (ruleFilters.status === "active") {
+    rules = rules.filter(rule => rule.enabled);
+  } else if (ruleFilters.status === "inactive") {
+    rules = rules.filter(rule => !rule.enabled);
+  }
+  if (q) {
+    rules = rules.filter(rule => ruleSearchText(rule).includes(q));
+  }
+  return rules;
+}
+
+function ruleListEmptyMessage() {
+  const hasQuery = !!ruleSearchQuery.trim();
+  const hasFilters = hasActiveRuleFilters();
+  if (hasQuery && hasFilters)
+    return "Nenhuma regra encontrada para esta busca e os filtros aplicados.";
+  if (hasQuery) return "Nenhuma regra encontrada para esta busca.";
+  if (hasFilters) return "Nenhuma regra encontrada para os filtros aplicados.";
+  return "Nenhuma regra cadastrada ainda.";
+}
+
+function renderGroupedRuleList(rules, emptyMessage) {
+  dom.ruleList.innerHTML = "";
+  if (!rules.length) {
+    dom.ruleList.appendChild(el("div", "empty-hint", emptyMessage));
+    return;
+  }
+  Object.keys(PROVIDER_REGISTRY).forEach(providerId => {
+    const groupRules = rules.filter(rule => rule.providerId === providerId);
+    if (!groupRules.length) return;
+    const meta = PROVIDER_REGISTRY[providerId];
+
+    const group = el("div", "rule-group");
+    const header = el("div", "rule-group-header");
+    const iconWrap = el("span", "rule-group-icon");
+    iconWrap.innerHTML = ICONS[meta.icon] || "";
+    header.appendChild(iconWrap);
+    header.appendChild(el("span", "rule-group-name", meta.name));
+    header.appendChild(
+      el(
+        "span",
+        "rule-group-count",
+        countLabel(groupRules.length, "regra", "regras")
+      )
+    );
+    group.appendChild(header);
+
+    const list = el("div", "rule-group-list");
+    groupRules.forEach(rule => list.appendChild(buildRuleRow(rule)));
+    group.appendChild(list);
+
+    dom.ruleList.appendChild(group);
+  });
 }
 
 function renderRuleList() {
   const rules = filteredRules();
-  renderCollection(
-    dom.ruleList,
-    rules,
-    ruleSearchQuery.trim()
-      ? "Nenhuma regra encontrada para esta busca."
-      : "Nenhuma regra cadastrada ainda.",
-    buildRuleRow
-  );
+  const emptyMessage = ruleListEmptyMessage();
+
+  if (ruleViewMode === "grouped") {
+    renderGroupedRuleList(rules, emptyMessage);
+  } else {
+    renderCollection(dom.ruleList, rules, emptyMessage, buildRuleRow);
+  }
+  syncExpandedRuleHeights();
+}
+
+function syncExpandedRuleHeights() {
+  qsa(".rule-row.expanded .rule-details-wrap", dom.ruleList).forEach(wrap => {
+    wrap.style.maxHeight = `${wrap.scrollHeight}px`;
+  });
+}
+
+function animateRuleRowExpansion(row, expand) {
+  const wrap = qs(".rule-details-wrap", row);
+  if (!wrap) return;
+  if (expand) {
+    row.classList.add("expanded");
+    wrap.style.maxHeight = `${wrap.scrollHeight}px`;
+  } else {
+    wrap.style.maxHeight = "0px";
+    row.classList.remove("expanded");
+  }
 }
 
 function updateRulesPageStats() {
@@ -1425,12 +1528,76 @@ function handleRuleListClick(event) {
     case "delete":
       confirmDeleteRule(rule);
       break;
-    case "expand":
-      if (expandedRules.has(rule.id)) expandedRules.delete(rule.id);
-      else expandedRules.add(rule.id);
-      renderRuleList();
+    case "expand": {
+      const willExpand = !expandedRules.has(rule.id);
+      if (willExpand) expandedRules.add(rule.id);
+      else expandedRules.delete(rule.id);
+      animateRuleRowExpansion(row, willExpand);
       break;
+    }
   }
+}
+
+function populateRuleFilterSelects() {
+  populateSelectOptions(dom.ruleFilterProvider, [
+    ["", "Todos"],
+    ...Object.keys(PROVIDER_REGISTRY).map(id => [
+      id,
+      PROVIDER_REGISTRY[id].name
+    ])
+  ]);
+  populateSelectOptions(dom.ruleFilterStatus, [
+    ["", "Todos"],
+    ["active", "Ativas"],
+    ["inactive", "Inativas"]
+  ]);
+}
+
+function updateRuleFilterIndicator() {
+  const active = hasActiveRuleFilters();
+  dom.ruleFilterToggle.classList.toggle("active", active);
+  if (dom.ruleFilterDot) dom.ruleFilterDot.hidden = !active;
+}
+
+function openRuleFilterPanel() {
+  ruleFilterPanelOpen = true;
+  dom.ruleSearchFilter.classList.add("filter-open");
+  dom.ruleFilterToggle.setAttribute("aria-expanded", "true");
+  dom.ruleFilterPanel.style.maxHeight = `${dom.ruleFilterPanel.scrollHeight}px`;
+}
+
+function closeRuleFilterPanel() {
+  if (!ruleFilterPanelOpen) return;
+  ruleFilterPanelOpen = false;
+  dom.ruleSearchFilter.classList.remove("filter-open");
+  dom.ruleFilterToggle.setAttribute("aria-expanded", "false");
+  dom.ruleFilterPanel.style.maxHeight = "0px";
+}
+
+function toggleRuleFilterPanel() {
+  if (ruleFilterPanelOpen) closeRuleFilterPanel();
+  else openRuleFilterPanel();
+}
+
+function setRuleViewMode(mode) {
+  if (ruleViewMode === mode) return;
+  ruleViewMode = mode;
+  qsa(".view-switch-btn", dom.ruleViewSwitch).forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.view === mode);
+  });
+  renderRuleList();
+  performConfigMutation(() => {
+    appState.config.settings.ruleViewMode = mode;
+  });
+}
+
+function syncRuleViewModeFromConfig() {
+  const saved = appState.config.settings.ruleViewMode;
+  if (!saved || !dom.ruleViewSwitch || saved === ruleViewMode) return;
+  ruleViewMode = saved;
+  qsa(".view-switch-btn", dom.ruleViewSwitch).forEach(btn => {
+    btn.classList.toggle("active", btn.dataset.view === saved);
+  });
 }
 
 function bindRulesPage() {
@@ -1440,6 +1607,43 @@ function bindRulesPage() {
     dom.ruleSearchInput.addEventListener("input", () => {
       ruleSearchQuery = dom.ruleSearchInput.value;
       renderRuleList();
+    });
+  }
+
+  populateRuleFilterSelects();
+  updateRuleFilterIndicator();
+
+  if (dom.ruleFilterToggle) {
+    dom.ruleFilterToggle.addEventListener("click", toggleRuleFilterPanel);
+  }
+  if (dom.ruleFilterProvider) {
+    dom.ruleFilterProvider.addEventListener("change", () => {
+      ruleFilters.provider = dom.ruleFilterProvider.value;
+      updateRuleFilterIndicator();
+      renderRuleList();
+    });
+  }
+  if (dom.ruleFilterStatus) {
+    dom.ruleFilterStatus.addEventListener("change", () => {
+      ruleFilters.status = dom.ruleFilterStatus.value;
+      updateRuleFilterIndicator();
+      renderRuleList();
+    });
+  }
+  if (dom.ruleFilterClear) {
+    dom.ruleFilterClear.addEventListener("click", () => {
+      ruleFilters = { provider: "", status: "" };
+      dom.ruleFilterProvider.value = "";
+      dom.ruleFilterStatus.value = "";
+      updateRuleFilterIndicator();
+      renderRuleList();
+    });
+  }
+  if (dom.ruleViewSwitch) {
+    dom.ruleViewSwitch.addEventListener("click", event => {
+      const btn = event.target.closest(".view-switch-btn");
+      if (!btn) return;
+      setRuleViewMode(btn.dataset.view);
     });
   }
 }
@@ -1553,7 +1757,11 @@ function handleProviderListChange(event) {
 
   const id = row.dataset.providerId;
 
-  if (id === "clipboard" && input.checked && !appState.clipboardOverlayPermission) {
+  if (
+    id === "clipboard" &&
+    input.checked &&
+    !appState.clipboardOverlayPermission
+  ) {
     showToast(
       'Clipboard habilitado, mas sem a permissão "Exibir sobre outros apps" a leitura pode falhar em segundo plano. Ative em Ajustes > Apps > Tasker > Acesso especial.',
       true
@@ -1657,6 +1865,7 @@ function bindSettingsPage() {
 function syncUI() {
   updateMasterPower();
   updateDashboardCards();
+  syncRuleViewModeFromConfig();
   renderRuleList();
   updateRulesPageStats();
   renderProviderList();
@@ -1786,6 +1995,16 @@ document.addEventListener("pointerdown", event => {
     !activeVariableDropdown.wrap.contains(event.target)
   ) {
     closeActiveVariableDropdown();
+  }
+});
+
+document.addEventListener("pointerdown", event => {
+  if (
+    ruleFilterPanelOpen &&
+    dom.ruleSearchFilter &&
+    !dom.ruleSearchFilter.contains(event.target)
+  ) {
+    closeRuleFilterPanel();
   }
 });
 
@@ -2651,7 +2870,8 @@ async function boot() {
   }
   appState.monitorActive = !!status.monitorActive;
   appState.monitorStartedAt = status.monitorStartedAt || null;
-  appState.clipboardOverlayPermission = status.clipboardOverlayPermission !== false;
+  appState.clipboardOverlayPermission =
+    status.clipboardOverlayPermission !== false;
 
   if (status.config) {
     appState.config = normalizeConfig(status.config);
