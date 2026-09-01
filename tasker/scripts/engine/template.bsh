@@ -1,0 +1,44 @@
+import org.json.JSONObject;
+import org.json.JSONArray;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+String applyTemplate(String template, HashMap ctx) {
+    if (template == null) return "";
+    String result = template;
+    Iterator it = ctx.keySet().iterator();
+    while (it.hasNext()) {
+        String key = (String) it.next();
+        Object val = ctx.get(key);
+        result = result.replace("{" + key + "}", val != null ? (String) val : "");
+    }
+    return result;
+}
+
+HashSet collectReferencedVariables(JSONObject rule) {
+    HashSet refs = new HashSet();
+    JSONArray actions = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
+    Pattern varPattern = Pattern.compile("\\{(\\w+)\\}");
+    for (int i = 0; i < actions.length(); i++) {
+        JSONObject action = actions.getJSONObject(i);
+        String actType = action.getString("type");
+        JSONObject config = action.has("config") ? action.getJSONObject("config") : new JSONObject();
+        if (actType.equals("ai") || actType.equals("translate")) {
+            String iv = config.optString("inputVariable", "");
+            if (iv.length() > 0) refs.add(iv);
+        } else {
+            Iterator keys = config.keys();
+            while (keys.hasNext()) {
+                String fieldKey = (String) keys.next();
+                Object fieldVal = config.opt(fieldKey);
+                if (fieldVal instanceof String) {
+                    Matcher m = varPattern.matcher((String) fieldVal);
+                    while (m.find()) refs.add(m.group(1));
+                }
+            }
+        }
+    }
+    return refs;
+}

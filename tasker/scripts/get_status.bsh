@@ -24,11 +24,9 @@ if (rawCfg != null && rawCfg != void) {
     }
 }
 
-Object monStatus = tasker.getJavaVariable("stopReactorMonitor");
-boolean monitorActive = (monStatus != null && monStatus != void);
-
-Object startedAtObj = tasker.getJavaVariable("reactorMonitorStartedAt");
-long monitorStartedAt = (startedAtObj != null && startedAtObj != void) ? ((Long) startedAtObj).longValue() : 0;
+Object reactorObj = tasker.getJavaVariable("reactorInstance");
+boolean monitorActive = (reactorObj != null && reactorObj != void);
+long monitorStartedAt = monitorActive ? ((Object) reactorObj).monitorStartedAt : 0;
 
 JSONObject result = new JSONObject();
 result.put("ok", true);

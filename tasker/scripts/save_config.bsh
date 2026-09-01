@@ -4,7 +4,6 @@ import java.io.FileWriter;
 import com.joaomgcd.taskerm.action.java.JavaCodeException;
 
 try {
-
     JSONObject payload = new JSONObject(tasker.getVariable("config"));
     if (!payload.has("config")) throw new JavaCodeException("Config ausente no payload.");
     JSONObject cfgRoot = payload.getJSONObject("config");
@@ -29,11 +28,16 @@ try {
 
     tasker.setJavaVariable("reactorConfig", cfgRoot);
 
-    Object monStatus = tasker.getJavaVariable("stopReactorMonitor");
-    boolean monitorActive = (monStatus != null && monStatus != void);
+    Object reactorObj = tasker.getJavaVariable("reactorInstance");
+    boolean monitorActive = (reactorObj != null && reactorObj != void);
+    long monitorStartedAt = 0;
+    if (monitorActive) {
+        Object reactor = (Object) reactorObj;
+        monitorStartedAt = reactor.monitorStartedAt;
 
-    Object startedAtObj = tasker.getJavaVariable("reactorMonitorStartedAt");
-    long monitorStartedAt = (startedAtObj != null && startedAtObj != void) ? ((Long) startedAtObj).longValue() : 0;
+        reactor.config = cfgRoot;
+        reactor.invalidateCache();
+    }
 
     JSONObject result = new JSONObject();
     result.put("ok", true);
@@ -41,7 +45,6 @@ try {
     result.put("monitorStartedAt", monitorStartedAt > 0 ? monitorStartedAt : JSONObject.NULL);
     result.put("message", "Configuração salva");
     return result.toString();
-
 } catch (Throwable e) {
     JSONObject err = new JSONObject();
     err.put("ok", false);

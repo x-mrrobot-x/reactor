@@ -2,13 +2,11 @@ import org.json.JSONObject;
 import java.util.HashMap;
 
 try {
-
-source(ENGINE_PATH);
-
-Object monitorStateObj = tasker.getJavaVariable("stopReactorMonitor");
-if (monitorStateObj == null || monitorStateObj == void) {
+Object reactorObj = tasker.getJavaVariable("reactorInstance");
+if (reactorObj == null || reactorObj == void) {
     return buildResult(false, "Monitor inativo");
 }
+Object reactor = (Object) reactorObj;
 
 JSONObject liveCfg = (JSONObject) tasker.getJavaVariable("reactorConfig");
 if (liveCfg == null) {
@@ -26,21 +24,18 @@ if (text == null || text.length() == 0) {
 }
 
 Integer hash = Integer.valueOf(text.hashCode());
-Object lastHashObj = tasker.getJavaVariable("reactorLastClipboardHash");
-if (lastHashObj != null && lastHashObj != void && lastHashObj.equals(hash)) {
+if (reactor.lastClipboardHash != null && reactor.lastClipboardHash.equals(hash)) {
     return buildResult(true, "Conteúdo repetido, ignorado");
 }
-tasker.setJavaVariable("reactorLastClipboardHash", hash);
+reactor.lastClipboardHash = hash;
 
 HashMap eventContext = new HashMap();
-Object lastFgPkgObj = tasker.getJavaVariable("reactorLastForegroundPkg");
-eventContext.put("app_package", (lastFgPkgObj != null && lastFgPkgObj != void) ? (String) lastFgPkgObj : "");
+eventContext.put("app_package", reactor.lastForegroundPkg != null ? reactor.lastForegroundPkg : "");
 eventContext.put("text", text);
 
-dispatchProviderEvent("clipboard", text, eventContext, null, liveCfg);
+reactor.dispatchProviderEvent("clipboard", text, eventContext, null, liveCfg);
 
 return buildResult(true, "Clipboard processado");
-
 } catch (Throwable e) {
     JSONObject err = new JSONObject();
     err.put("ok", false);

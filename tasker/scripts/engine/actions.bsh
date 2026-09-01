@@ -1,0 +1,234 @@
+import org.json.JSONObject;
+import org.json.JSONArray;
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.content.Intent;
+import android.content.Context;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import java.util.HashMap;
+import java.net.URLEncoder;
+
+int REACTOR_AI_ERROR_NOTIF_ID = 990001;
+
+// Action handler registry
+HashMap actionHandlers = new HashMap();
+
+void registerAction(String type, Object handler) {
+    actionHandlers.put(type, handler);
+}
+
+// Text replacer action: rewrites the field with a templated string
+Object textReplacerHandler() {
+    boolean execute(JSONObject cfg, JSONArray actions, int index, HashMap ctx, AccessibilityNodeInfo node, JSONObject cfgRoot, HashMap dispatchState) {
+        String inputVal = ctx.containsKey("input") ? (String) ctx.get("input") : "";
+        String replacement = applyTemplate(cfg.optString("text", ""), ctx);
+        setFieldTextAndMark(node, inputVal + replacement);
+        return false;
+    }
+    return this;
+}
+
+// Clipboard action: copies a templated string to the system clipboard
+Object clipboardHandler() {
+    boolean execute(JSONObject cfg, JSONArray actions, int index, HashMap ctx, AccessibilityNodeInfo node, JSONObject cfgRoot, HashMap dispatchState) {
+        String clipText = applyTemplate(cfg.optString("text", ""), ctx);
+        ClipboardManager cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+        if (cm != null) {
+            cm.setPrimaryClip(ClipData.newPlainText("reactor", clipText));
+        }
+        return false;
+    }
+    return this;
+}
+
+// Run task action: calls another Tasker task with par1/par2
+Object runTaskHandler() {
+    boolean execute(JSONObject cfg, JSONArray actions, int index, HashMap ctx, AccessibilityNodeInfo node, JSONObject cfgRoot, HashMap dispatchState) {
+        String taskName = cfg.optString("task", "");
+        if (taskName.length() > 0 && taskName.equals("RC 02 - MONITOR CONTROL")) {
+            tasker.log("Reactor: regra tentou chamar a própria task de controle (RC 02 - MONITOR CONTROL) via run_task — ignorado para evitar dependência circular.");
+        } else if (taskName.length() > 0) {
+            String par1 = applyTemplate(cfg.optString("par1", ""), ctx);
+            String par2 = applyTemplate(cfg.optString("par2", ""), ctx);
+            HashMap taskVars = new HashMap();
+            taskVars.put("par1", par1);
+            taskVars.put("par2", par2);
+            tasker.callTask(taskName, taskVars);
+        }
+        return false;
+    }
+    return this;
+}
+
+// Open app action: launches another app by package name
+Object openAppHandler() {
+    boolean execute(JSONObject cfg, JSONArray actions, int index, HashMap ctx, AccessibilityNodeInfo node, JSONObject cfgRoot, HashMap dispatchState) {
+        String pkgName = cfg.optString("package", "");
+        if (pkgName.length() > 0) {
+            PackageManager pm = context.getPackageManager();
+            Intent launchIntent = pm.getLaunchIntentForPackage(pkgName);
+            if (launchIntent != null) {
+                boolean alreadyClearedField = launchExternalIntent(launchIntent, node);
+                dispatchState.put("alreadyClearedField", Boolean.valueOf(alreadyClearedField));
+            }
+        }
+        return false;
+    }
+    return this;
+}
+
+// Open URL action: launches a browser intent for a templated URL
+Object openUrlHandler() {
+    boolean execute(JSONObject cfg, JSONArray actions, int index, HashMap ctx, AccessibilityNodeInfo node, JSONObject cfgRoot, HashMap dispatchState) {
+        String urlText = applyTemplate(cfg.optString("url", ""), ctx);
+        if (urlText.length() > 0) {
+            boolean alreadyClearedField = launchExternalIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(urlText)), node);
+            dispatchState.put("alreadyClearedField", Boolean.valueOf(alreadyClearedField));
+        }
+        return false;
+    }
+    return this;
+}
+
+// Search action: opens a web search engine with the templated query
+Object searchHandler() {
+    boolean execute(JSONObject cfg, JSONArray actions, int index, HashMap ctx, AccessibilityNodeInfo node, JSONObject cfgRoot, HashMap dispatchState) {
+        String engine = cfg.optString("engine", "google");
+        String queryTemplate = cfg.optString("query", "{input}");
+        String resolvedQuery = applyTemplate(queryTemplate, ctx).trim();
+        String query = URLEncoder.encode(resolvedQuery, "UTF-8");
+        String searchUrl = "https://www.google.com/search?q=" + query;
+        if (engine.equals("bing")) searchUrl = "https://www.bing.com/search?q=" + query;
+        else if (engine.equals("duckduckgo")) searchUrl = "https://duckduckgo.com/?q=" + query;
+        else if (engine.equals("youtube")) searchUrl = "https://www.youtube.com/results?search_query=" + query;
+        boolean alreadyClearedField = launchExternalIntent(new Intent(Intent.ACTION_VIEW, Uri.parse(searchUrl)), node);
+        dispatchState.put("alreadyClearedField", Boolean.valueOf(alreadyClearedField));
+        return false;
+    }
+    return this;
+}
+
+// Notification action: posts a system notification
+Object notificationHandler() {
+    boolean execute(JSONObject cfg, JSONArray actions, int index, HashMap ctx, AccessibilityNodeInfo node, JSONObject cfgRoot, HashMap dispatchState) {
+        String notifTitleText = applyTemplate(cfg.optString("title", "Reactor"), ctx);
+        String notifBodyText = applyTemplate(cfg.optString("body", ""), ctx);
+        String ruleIdForNotif = ctx.containsKey("_rule_id") ? (String) ctx.get("_rule_id") : "";
+        int notifId = (ruleIdForNotif + "#" + index).hashCode();
+        showSystemNotification(notifId, notifTitleText, notifBodyText);
+        return false;
+    }
+    return this;
+}
+
+// AI/translate action: async network call (Gemini or Google Translate) on the background executor
+Object aiTranslateHandler() {
+    boolean execute(JSONObject cfg, JSONArray actions, int index, HashMap ctx, AccessibilityNodeInfo node, JSONObject cfgRoot, HashMap dispatchState) {
+        final String actionType = actions.getJSONObject(index).getString("type");
+        final JSONObject finalCfg = cfg;
+        final HashMap finalCtx = ctx;
+        final JSONArray finalActions = actions;
+        final int finalIndex = index;
+        final AccessibilityNodeInfo finalNode = node;
+        final JSONObject finalCfgRoot = cfgRoot;
+        final HashMap finalDispatchState = dispatchState;
+
+        String inputKey = finalCfg.optString("inputVariable", "");
+        final String inputText = finalCtx.containsKey(inputKey) ? (String) finalCtx.get(inputKey) : "";
+
+        executor.execute(new Runnable() {
+            void run() {
+                String resultText = null;
+                String failureReason = null;
+                try {
+                    try {
+                        String text = inputText.trim();
+                        if (text.length() > 0) {
+                            HashMap callResult;
+                            if (actionType.equals("translate")) {
+                                String lang = finalCfg.optString("language", "en");
+                                callResult = callGoogleTranslate(text, lang);
+                            } else {
+                                String sysInstr = finalCfg.optString("systemInstructions", "");
+                                callResult = callGemini(text, sysInstr, finalCfgRoot);
+                            }
+
+                            resultText = (String) callResult.get("resultText");
+                            failureReason = (String) callResult.get("failureReason");
+                        }
+                    } catch (Exception networkError) {
+                        failureReason = "Falha ao processar com IA (erro inesperado).";
+                        tasker.log("Erro Reactor (" + actionType + "): " + networkError.toString());
+                    }
+
+                    String resultKey = actionType.equals("translate") ? "translate_result" : "ai_result";
+                    finalCtx.put(resultKey, resultText != null ? resultText : "");
+
+                    String outputMode = finalCfg.optString("outputMode", "expose_variable");
+                    if (outputMode.equals("replace_field")) {
+                        if (resultText != null && resultText.length() > 0) {
+                            setFieldTextAndMark(finalNode, resultText);
+                        } else if (failureReason != null) {
+                            String originalInput = finalCtx.containsKey("input") ? (String) finalCtx.get("input") : "";
+                            setFieldTextAndMark(finalNode, originalInput);
+                            vibrateError();
+                            showSystemNotification(REACTOR_AI_ERROR_NOTIF_ID, "Reactor", failureReason);
+                        } else {
+                            clearLoadingIndicator(finalNode);
+                        }
+                    }
+                } catch (Throwable unexpectedError) {
+                    tasker.log("Reactor: erro inesperado no handler '" + actionType + "': " + unexpectedError.toString());
+                } finally {
+                    executeAction(finalActions, finalIndex + 1, finalCtx, finalNode, finalCfgRoot, finalDispatchState);
+                }
+            }
+        });
+
+        return true;
+    }
+    return this;
+}
+
+// Register each handler under its action type
+registerAction("text_replacer", textReplacerHandler());
+registerAction("clipboard", clipboardHandler());
+registerAction("run_task", runTaskHandler());
+registerAction("open_app", openAppHandler());
+registerAction("open_url", openUrlHandler());
+registerAction("search", searchHandler());
+registerAction("notification", notificationHandler());
+
+Object aiTranslateHandlerInstance = aiTranslateHandler();
+registerAction("ai", aiTranslateHandlerInstance);
+registerAction("translate", aiTranslateHandlerInstance);
+
+// Action pipeline: runs each configured action in sequence for a matched rule
+void executeAction(JSONArray actions, int index, HashMap ctx, AccessibilityNodeInfo node, JSONObject cfgRootArg, HashMap dispatchState) {
+    if (index >= actions.length()) return;
+    JSONObject actionObj = actions.getJSONObject(index);
+    String actionType = actionObj.getString("type");
+    JSONObject actionConfig = actionObj.has("config") ? actionObj.getJSONObject("config") : new JSONObject();
+
+    if (actionType.equals("text_replacer") || actionType.equals("ai") || actionType.equals("translate")) {
+        dispatchState.put("hasRewritingAction", Boolean.TRUE);
+    }
+
+    boolean handledAsync = false;
+    Object handler = (Object) actionHandlers.get(actionType);
+    if (handler != null) {
+        try {
+            handledAsync = handler.execute(actionConfig, actions, index, ctx, node, cfgRootArg, dispatchState);
+        } catch (Throwable actionError) {
+            tasker.log("Reactor: erro ao executar ação '" + actionType + "' (índice " + index + "): " + actionError.toString());
+        }
+    } else {
+        tasker.log("Reactor: tipo de ação desconhecido: '" + actionType + "'");
+    }
+
+    if (!handledAsync) {
+        executeAction(actions, index + 1, ctx, node, cfgRootArg, dispatchState);
+    }
+}

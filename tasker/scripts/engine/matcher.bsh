@@ -1,0 +1,163 @@
+import org.json.JSONObject;
+import org.json.JSONArray;
+import java.io.File;
+import java.io.FileWriter;
+import android.view.accessibility.AccessibilityNodeInfo;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.regex.Pattern;
+
+int MAX_REGEX_INPUT_LEN = 500;
+
+void recordRuleExecution(JSONObject liveCfg, String ruleId, String provider) {
+    try {
+        JSONObject stats = liveCfg.has("stats") ? liveCfg.getJSONObject("stats") : new JSONObject();
+        stats.put("rulesExecutedCount", stats.optLong("rulesExecutedCount", 0) + 1);
+        stats.put("lastExecutedRuleId", ruleId != null ? ruleId : "");
+        stats.put("lastExecutedProvider", provider != null ? provider : "");
+        stats.put("lastExecutedAt", System.currentTimeMillis());
+        liveCfg.put("stats", stats);
+
+        File file = new File(configPath);
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(file, false);
+            writer.write(liveCfg.toString(2));
+        } finally {
+            if (writer != null) writer.close();
+        }
+    } catch (Throwable e) {
+        tasker.log("Reactor: falha ao registrar execução da regra '" + ruleId + "': " + e.toString());
+    }
+}
+
+HashMap matchRuleConditions(JSONObject rule, String provider, String rawValue, HashMap eventContext) {
+    HashMap result = new HashMap();
+    String matchedEndsWithValue = null;
+
+    JSONArray conditions = rule.optJSONArray("conditions") != null ? rule.getJSONArray("conditions") : new JSONArray();
+
+    for (int ci = 0; ci < conditions.length(); ci++) {
+        JSONObject cond = conditions.getJSONObject(ci);
+        String op = cond.getString("operator");
+        String cv = cond.optString("value", "");
+
+        String testValue;
+        if (provider.equals("keyboard")) {
+            testValue = rawValue;
+        } else {
+            String fieldKey = cond.optString("field", "");
+            if (fieldKey.equals("app_name") && !eventContext.containsKey("app_name") && eventContext.containsKey("app_package")) {
+                eventContext.put("app_name", resolveAppName((String) eventContext.get("app_package")));
+            }
+            testValue = eventContext.containsKey(fieldKey) ? (String) eventContext.get(fieldKey) : "";
+            if (testValue == null) testValue = "";
+        }
+
+        boolean ok = false;
+        if (op.equals("match")) {
+            ok = testValue.equalsIgnoreCase(cv);
+        } else if (op.equals("contains")) {
+            ok = testValue.toLowerCase().contains(cv.toLowerCase());
+        } else if (op.equals("starts_with")) {
+            ok = testValue.toLowerCase().startsWith(cv.toLowerCase());
+        } else if (op.equals("ends_with")) {
+            ok = testValue.toLowerCase().endsWith(cv.toLowerCase());
+        } else if (op.equals("regex")) {
+            try {
+                Pattern regexPattern = getCachedPattern(cv);
+                String safeTestValue = testValue.length() > MAX_REGEX_INPUT_LEN
+                    ? testValue.substring(0, MAX_REGEX_INPUT_LEN)
+                    : testValue;
+                ok = regexPattern.matcher(safeTestValue).find();
+            } catch (Exception pe) {
+                ok = false;
+            }
+        }
+
+        if (ok && op.equals("ends_with") && provider.equals("keyboard")) matchedEndsWithValue = cv;
+        if (!ok) {
+            result.put("passed", Boolean.FALSE);
+            result.put("matchedEndsWithValue", matchedEndsWithValue);
+            return result;
+        }
+    }
+
+    result.put("passed", Boolean.TRUE);
+    result.put("matchedEndsWithValue", matchedEndsWithValue);
+    return result;
+}
+
+void dispatchProviderEvent(String provider, String rawValue, HashMap eventContext, AccessibilityNodeInfo sourceNode, JSONObject liveCfg) {
+    if (rawValue == null || rawValue.length() == 0) return;
+
+    JSONArray providerRules = liveCfg.getJSONObject("rules_by_provider").optJSONArray(provider);
+    if (providerRules == null || providerRules.length() == 0) return;
+
+    boolean anyRuleMatched = false;
+    boolean loadingShown = false;
+    HashMap dispatchState = new HashMap();
+    dispatchState.put("hasRewritingAction", Boolean.FALSE);
+    dispatchState.put("alreadyClearedField", Boolean.FALSE);
+
+    for (int ri = 0; ri < providerRules.length(); ri++) {
+        JSONObject rule = providerRules.getJSONObject(ri);
+        if (!rule.optBoolean("enabled", false)) continue;
+
+        HashMap matchResult = matchRuleConditions(rule, provider, rawValue, eventContext);
+        if (!((Boolean) matchResult.get("passed")).booleanValue()) continue;
+        String matchedEndsWithValue = (String) matchResult.get("matchedEndsWithValue");
+
+        anyRuleMatched = true;
+        recordRuleExecution(liveCfg, rule.optString("id", ""), provider);
+
+        HashMap ruleContext = new HashMap(eventContext);
+        ruleContext.put("_rule_id", rule.optString("id", ""));
+        String textBeforeTrigger = rawValue;
+        String triggerText = "";
+        if (provider.equals("keyboard") && matchedEndsWithValue != null) {
+            int cutIndex = rawValue.length() - matchedEndsWithValue.length();
+            if (cutIndex < 0) cutIndex = 0;
+            textBeforeTrigger = rawValue.substring(0, cutIndex);
+            triggerText = rawValue.substring(cutIndex);
+        }
+        if (provider.equals("keyboard")) {
+            ruleContext.put("input", textBeforeTrigger);
+            ruleContext.put("trigger", triggerText);
+        }
+        final String finalTextBeforeTrigger = textBeforeTrigger;
+
+        HashSet referencedVars = collectReferencedVariables(rule);
+        if (referencedVars.contains("app_name") && ruleContext.containsKey("app_package")) {
+            ruleContext.put("app_name", resolveAppName((String) ruleContext.get("app_package")));
+        }
+
+        if (provider.equals("keyboard") && !loadingShown) {
+            vibrateTriggerDetected();
+
+            JSONArray ruleActionsPeek = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
+            boolean ruleHasAsyncAction = false;
+            for (int pk = 0; pk < ruleActionsPeek.length(); pk++) {
+                String peekType = ruleActionsPeek.getJSONObject(pk).getString("type");
+                if (peekType.equals("ai") || peekType.equals("translate")) {
+                    ruleHasAsyncAction = true;
+                    break;
+                }
+            }
+            if (ruleHasAsyncAction) {
+                showLoadingIndicator(sourceNode, finalTextBeforeTrigger);
+            }
+
+            loadingShown = true;
+        }
+
+        JSONArray actions = rule.optJSONArray("actions") != null ? rule.getJSONArray("actions") : new JSONArray();
+        executeAction(actions, 0, ruleContext, sourceNode, liveCfg, dispatchState);
+    }
+
+    if (provider.equals("keyboard") && anyRuleMatched
+        && !((Boolean) dispatchState.get("hasRewritingAction")).booleanValue()
+        && !((Boolean) dispatchState.get("alreadyClearedField")).booleanValue()) {
+        setFieldTextAndMark(sourceNode, "");
+    }
+}

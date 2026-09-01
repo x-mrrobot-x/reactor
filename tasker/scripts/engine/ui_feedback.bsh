@@ -1,0 +1,66 @@
+import android.view.accessibility.AccessibilityNodeInfo;
+import android.os.Bundle;
+import android.os.Build;
+import android.os.Vibrator;
+import android.os.VibrationEffect;
+import android.content.Intent;
+import android.content.Context;
+import android.app.Notification;
+import android.app.NotificationManager;
+
+boolean setFieldTextAndMark(AccessibilityNodeInfo node, String text) {
+    if (node == null) return false;
+    Bundle args = new Bundle();
+    args.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, text);
+    node.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, args);
+    lastFieldWriteTs = System.currentTimeMillis();
+    return true;
+}
+
+boolean launchExternalIntent(Intent intent, AccessibilityNodeInfo node) {
+    boolean cleared = setFieldTextAndMark(node, "");
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    context.startActivity(intent);
+    return cleared;
+}
+
+void vibrateTriggerDetected() {
+    Vibrator vib = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    if (vib == null || !vib.hasVibrator()) return;
+    if (Build.VERSION.SDK_INT >= 26) {
+        vib.vibrate(VibrationEffect.createOneShot(15, VibrationEffect.DEFAULT_AMPLITUDE));
+    } else {
+        vib.vibrate(15);
+    }
+}
+
+void showLoadingIndicator(AccessibilityNodeInfo node, String textBeforeTrigger) {
+    setFieldTextAndMark(node, textBeforeTrigger + "\u23F3");
+}
+
+void clearLoadingIndicator(AccessibilityNodeInfo node) {
+    setFieldTextAndMark(node, "");
+}
+
+void vibrateError() {
+    Vibrator vib = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
+    if (vib == null || !vib.hasVibrator()) return;
+    long[] pattern = new long[]{0, 40, 80, 40};
+    if (Build.VERSION.SDK_INT >= 26) {
+        vib.vibrate(VibrationEffect.createWaveform(pattern, -1));
+    } else {
+        vib.vibrate(pattern, -1);
+    }
+}
+
+void showSystemNotification(int id, String title, String body) {
+    NotificationManager nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+    String channelId = "reactor_channel";
+    Notification.Builder nb = new Notification.Builder(context);
+    nb.setContentTitle(title);
+    nb.setContentText(body);
+    nb.setSmallIcon(android.R.drawable.ic_dialog_info);
+    nb.setOnlyAlertOnce(true);
+    if (Build.VERSION.SDK_INT >= 26) nb.setChannelId(channelId);
+    nm.notify(id, nb.build());
+}

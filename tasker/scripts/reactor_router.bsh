@@ -8,8 +8,22 @@ String buildError(String message) {
     return err.toString();
 }
 
+String buildResult(boolean active, String message) {
+    JSONObject result = new JSONObject();
+    result.put("ok", true);
+    result.put("monitorActive", active);
+    result.put("message", message);
+
+    long startedAt = 0;
+    Object reactorObj = tasker.getJavaVariable("reactorInstance");
+    if (reactorObj != null && reactorObj != void) {
+        startedAt = ((Object) reactorObj).monitorStartedAt;
+    }
+    result.put("monitorStartedAt", startedAt > 0 ? startedAt : JSONObject.NULL);
+    return result.toString();
+}
+
 String CONFIG_PATH = workDir + "/reactor.json";
-String ENGINE_PATH = workDir + "/reactor_engine.bsh";
 
 source(workDir + "/sync_clipboard_profile.bsh");
 

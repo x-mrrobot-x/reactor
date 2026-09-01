@@ -16,8 +16,8 @@ void syncClipboardProfile() {
     JSONObject providersObj = cfgRoot.getJSONObject("providers");
     boolean clipboardEnabled = providersObj.has("clipboard") && providersObj.getJSONObject("clipboard").optBoolean("enabled", false);
 
-    Object monStatus = tasker.getJavaVariable("stopReactorMonitor");
-    boolean monitorActive = (monStatus != null && monStatus != void);
+    Object reactorObj = tasker.getJavaVariable("reactorInstance");
+    boolean monitorActive = (reactorObj != null && reactorObj != void);
 
     boolean desiredEnabled = monitorActive && clipboardEnabled;
     boolean currentlyEnabled = isProfileEnabled(CLIPBOARD_PROFILE_NAME);

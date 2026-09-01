@@ -1,0 +1,158 @@
+import org.json.JSONObject;
+import java.util.HashMap;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
+import android.content.pm.PackageManager;
+import android.content.pm.ApplicationInfo;
+import io.reactivex.subjects.CompletableSubject;
+import io.reactivex.disposables.Disposable;
+import okhttp3.OkHttpClient;
+
+Reactor(String baseDir) {
+    Object previous = tasker.getJavaVariable("reactorInstance");
+    if (previous != null && previous != void) {
+        try {
+            previous.remove();
+        } catch (Throwable teardownError) {
+            tasker.log("Reactor: falha ao limpar instância anterior: " + teardownError.toString());
+        }
+    }
+
+    JSONObject config;
+    CompletableSubject stopSignal;
+    Disposable disposable;
+    long monitorStartedAt = 0;
+    long lastFieldWriteTs = 0;
+    String lastAppPkg;
+    long lastAppTs = 0;
+    String lastForegroundPkg;
+    long lastForegroundTs = 0;
+    Integer lastClipboardHash;
+    String configPath = baseDir + "/reactor.json";
+
+    HashMap appNameCache = new HashMap();
+    HashMap regexCache = new HashMap();
+
+    ThreadFactory reactorThreadFactory = new ThreadFactory() {
+        private AtomicInteger count = new AtomicInteger(0);
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r, "reactor_" + count.incrementAndGet());
+            t.setPriority(Thread.MAX_PRIORITY);
+            return t;
+        }
+    };
+
+    // Background executor: AI/translate network calls
+    ThreadPoolExecutor executor = new ThreadPoolExecutor(
+        2,
+        2,
+        30, TimeUnit.SECONDS,
+        new ArrayBlockingQueue(3),
+        reactorThreadFactory,
+        new ThreadPoolExecutor.DiscardOldestPolicy()
+    );
+
+    ThreadFactory eventThreadFactory = new ThreadFactory() {
+        private AtomicInteger count = new AtomicInteger(0);
+        public Thread newThread(Runnable r) {
+            Thread t = new Thread(r, "reactor_event_" + count.incrementAndGet());
+            t.setPriority(Thread.MAX_PRIORITY);
+            return t;
+        }
+    };
+
+    // Dedicated executor: accessibility event matching/dispatch, off the service thread
+    ThreadPoolExecutor eventExecutor = new ThreadPoolExecutor(
+        1,
+        1,
+        30, TimeUnit.SECONDS,
+        new ArrayBlockingQueue(8),
+        eventThreadFactory,
+        new ThreadPoolExecutor.DiscardOldestPolicy()
+    );
+
+    OkHttpClient httpClient = new OkHttpClient.Builder()
+        .connectTimeout(8, TimeUnit.SECONDS)
+        .readTimeout(15, TimeUnit.SECONDS)
+        .writeTimeout(8, TimeUnit.SECONDS)
+        .build();
+
+    Pattern getCachedPattern(String cv) {
+        Pattern pattern = (Pattern) regexCache.get(cv);
+        if (pattern == null) {
+            pattern = Pattern.compile(cv, Pattern.CASE_INSENSITIVE);
+            regexCache.put(cv, pattern);
+        }
+        return pattern;
+    }
+
+    String resolveAppName(String pkg) {
+        if (pkg == null || pkg.length() == 0) return "";
+        if (appNameCache.containsKey(pkg)) return (String) appNameCache.get(pkg);
+        String name = pkg;
+        try {
+            PackageManager pm = context.getPackageManager();
+            ApplicationInfo appInfo = pm.getApplicationInfo(pkg, 0);
+            name = pm.getApplicationLabel(appInfo).toString();
+        } catch (Exception e) {
+            name = pkg;
+        }
+        appNameCache.put(pkg, name);
+        return name;
+    }
+
+    void invalidateCache() {
+        regexCache.clear();
+        appNameCache.clear();
+    }
+
+    source(baseDir + "/reactor_engine.bsh");
+
+    void reload() {
+        final Object self = this;
+        executor.execute(new Runnable() {
+            void run() {
+                try {
+                    self.interpreter.source(baseDir + "/reactor_engine.bsh");
+                    tasker.log("Reactor: engine recarregado via reload().");
+                } catch (Throwable reloadError) {
+                    tasker.log("Reactor: falha ao recarregar engine: " + reloadError.toString());
+                }
+            }
+        });
+    }
+
+    void remove() {
+        if (disposable != null && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
+        if (stopSignal != null) {
+            stopSignal.onComplete();
+        }
+        if (executor != null) {
+            executor.shutdownNow();
+        }
+        if (eventExecutor != null) {
+            eventExecutor.shutdownNow();
+        }
+        if (httpClient != null) {
+            httpClient.dispatcher().executorService().shutdown();
+            httpClient.connectionPool().evictAll();
+        }
+        invalidateCache();
+
+        monitorStartedAt = 0;
+        lastFieldWriteTs = 0;
+        lastAppPkg = null;
+        lastAppTs = 0;
+        lastForegroundPkg = null;
+        lastForegroundTs = 0;
+        lastClipboardHash = null;
+    }
+
+    return this;
+}

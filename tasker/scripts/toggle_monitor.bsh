@@ -1,9 +1,9 @@
 import io.reactivex.subjects.CompletableSubject;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Predicate;
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import org.json.JSONObject;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -11,27 +11,24 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Build;
+import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
 
 try {
-
 Object rawCfg = tasker.getJavaVariable("reactorConfig");
 if (rawCfg == null || rawCfg == void) {
     throw new JavaCodeException("Configuração não carregada. Abra o painel primeiro.");
 }
-JSONObject cfgRoot = (JSONObject) rawCfg;
 
 int APP_EVENT_DEDUPE_MS = 1200;
 
-source(ENGINE_PATH);
-
-Object sig = tasker.getJavaVariable("stopReactorMonitor");
-boolean currentlyActive = (sig != null && sig != void);
+Object existingReactor = tasker.getJavaVariable("reactorInstance");
+boolean currentlyActive = (existingReactor != null && existingReactor != void);
 
 if (currentlyActive) {
-    CompletableSubject s = (CompletableSubject) sig;
-    s.onComplete();
-    tasker.setJavaVariable("stopReactorMonitor", null);
-
+    Object reactor = (Object) existingReactor;
+    reactor.remove();
+    tasker.setJavaVariable("reactorInstance", null);
     return buildResult(false, "Monitor parado");
 }
 
@@ -44,9 +41,12 @@ if (Build.VERSION.SDK_INT >= 26) {
     nmSetup.createNotificationChannel(new NotificationChannel("reactor_channel", "Reactor", NotificationManager.IMPORTANCE_DEFAULT));
 }
 
+source(workDir + "/reactor_object.bsh");
+Object reactor = Reactor(workDir);
+
 CompletableSubject stopSignal = CompletableSubject.create();
-tasker.setJavaVariable("stopReactorMonitor", stopSignal);
-tasker.setJavaVariable("reactorMonitorStartedAt", System.currentTimeMillis());
+reactor.stopSignal = stopSignal;
+reactor.monitorStartedAt = System.currentTimeMillis();
 
 Observable events = tasker.getAccessibilityEvents();
 
@@ -66,7 +66,7 @@ Observable otherProviderEvents = events.filter(new Predicate() {
 
 events = Observable.merge(keyboardTextEvents, otherProviderEvents);
 
-Disposable disposable = events.subscribe(new Consumer() {
+Disposable disposable = events.observeOn(Schedulers.from(reactor.eventExecutor)).subscribe(new Consumer() {
     void accept(Object eventObject) {
         try {
             AccessibilityEvent event = (AccessibilityEvent) eventObject;
@@ -85,9 +85,8 @@ Disposable disposable = events.subscribe(new Consumer() {
             if (type == AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED) {
                 if (!liveProvidersObj.has("keyboard") || !liveProvidersObj.getJSONObject("keyboard").optBoolean("enabled", false)) return;
 
-                Object lastWriteObj = tasker.getJavaVariable("reactorLastFieldWriteTs");
-                if (lastWriteObj != null && lastWriteObj != void) {
-                    long elapsedSinceWrite = System.currentTimeMillis() - ((Long) lastWriteObj).longValue();
+                if (reactor.lastFieldWriteTs > 0) {
+                    long elapsedSinceWrite = System.currentTimeMillis() - reactor.lastFieldWriteTs;
                     if (elapsedSinceWrite < 600) return;
                 }
 
@@ -98,31 +97,27 @@ Disposable disposable = events.subscribe(new Consumer() {
 
                 CharSequence pkgObj = event.getPackageName();
                 eventContext.put("app_package", pkgObj != null ? pkgObj.toString() : "");
-
             } else if (type == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED) {
                 CharSequence pkgObj = event.getPackageName();
                 if (pkgObj != null) {
-                    tasker.setJavaVariable("reactorLastForegroundPkg", pkgObj.toString());
-                    tasker.setJavaVariable("reactorLastForegroundTs", System.currentTimeMillis());
+                    reactor.lastForegroundPkg = pkgObj.toString();
+                    reactor.lastForegroundTs = System.currentTimeMillis();
                 }
 
                 if (!liveProvidersObj.has("app") || !liveProvidersObj.getJSONObject("app").optBoolean("enabled", false)) return;
                 if (pkgObj == null) return;
                 String rawPkg = pkgObj.toString();
 
-                Object lastAppPkgObj = tasker.getJavaVariable("reactorLastAppPkg");
-                Object lastAppTsObj = tasker.getJavaVariable("reactorLastAppTs");
-                if (lastAppPkgObj != null && lastAppPkgObj != void && lastAppTsObj != null && lastAppTsObj != void) {
-                    long elapsedSinceAppEvent = System.currentTimeMillis() - ((Long) lastAppTsObj).longValue();
-                    if (rawPkg.equals((String) lastAppPkgObj) && elapsedSinceAppEvent < APP_EVENT_DEDUPE_MS) return;
+                if (reactor.lastAppPkg != null && rawPkg.equals(reactor.lastAppPkg)) {
+                    long elapsedSinceAppEvent = System.currentTimeMillis() - reactor.lastAppTs;
+                    if (elapsedSinceAppEvent < APP_EVENT_DEDUPE_MS) return;
                 }
-                tasker.setJavaVariable("reactorLastAppPkg", rawPkg);
-                tasker.setJavaVariable("reactorLastAppTs", System.currentTimeMillis());
+                reactor.lastAppPkg = rawPkg;
+                reactor.lastAppTs = System.currentTimeMillis();
 
                 provider = "app";
                 rawValue = rawPkg;
                 eventContext.put("app_package", rawValue);
-
             } else if (type == AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED) {
                 if (!liveProvidersObj.has("notification") || !liveProvidersObj.getJSONObject("notification").optBoolean("enabled", false)) return;
                 List texts = event.getText();
@@ -149,13 +144,11 @@ Disposable disposable = events.subscribe(new Consumer() {
                 eventContext.put("title", notifTitle);
                 eventContext.put("body", sbBody.toString());
                 eventContext.put("full_text", sbFull.toString());
-
             } else {
                 return;
             }
 
-            dispatchProviderEvent(provider, rawValue, eventContext, sourceNode, liveCfg);
-
+            reactor.dispatchProviderEvent(provider, rawValue, eventContext, sourceNode, liveCfg);
         } catch (Exception e) {
             tasker.log("Erro Reactor dispatcher: " + e.toString());
         }
@@ -163,33 +156,16 @@ Disposable disposable = events.subscribe(new Consumer() {
 }, new Consumer() {
     void accept(Object errorObject) {
         tasker.log("Erro fatal no monitor Reactor: " + errorObject.toString());
+
+        reactor.remove();
+        tasker.setJavaVariable("reactorInstance", null);
     }
 });
 
-    tasker.setJavaVariable("reactorMonitorDisposable", disposable);
+reactor.disposable = disposable;
+tasker.setJavaVariable("reactorInstance", reactor);
 
-    Action cleanupAction = new Action() {
-        void run() {
-            Object globalDisp = tasker.getJavaVariable("reactorMonitorDisposable");
-            if (globalDisp != null && globalDisp != void) {
-                Disposable d = (Disposable) globalDisp;
-                if (!d.isDisposed()) d.dispose();
-            }
-
-            tasker.setJavaVariable("stopReactorMonitor", null);
-            tasker.setJavaVariable("reactorMonitorStartedAt", null);
-            tasker.setJavaVariable("reactorMonitorDisposable", null);
-            tasker.setJavaVariable("reactorLastFieldWriteTs", null);
-            tasker.setJavaVariable("reactorLastAppPkg", null);
-            tasker.setJavaVariable("reactorLastAppTs", null);
-            tasker.setJavaVariable("reactorLastForegroundPkg", null);
-            tasker.setJavaVariable("reactorLastForegroundTs", null);
-            tasker.setJavaVariable("reactorLastClipboardHash", null);
-        }
-    };
-    stopSignal.subscribe(cleanupAction);
-
-    return buildResult(true, "Monitor iniciado");
+return buildResult(true, "Monitor iniciado");
 } catch (Throwable e) {
     JSONObject err = new JSONObject();
     err.put("ok", false);

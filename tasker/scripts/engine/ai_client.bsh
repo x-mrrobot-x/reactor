@@ -1,0 +1,80 @@
+import org.json.JSONObject;
+import org.json.JSONArray;
+import java.util.HashMap;
+import java.net.URLEncoder;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+
+HashMap callGoogleTranslate(String text, String targetLang) {
+    HashMap result = new HashMap();
+    String url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&dt=t&q="
+        + URLEncoder.encode(text, "UTF-8") + "&tl=" + targetLang;
+    Request req = new Request.Builder().url(url).build();
+    Response resp = httpClient.newCall(req).execute();
+    try {
+        if (!resp.isSuccessful()) {
+            tasker.log("Reactor Tradução: resposta HTTP " + resp.code());
+            result.put("failureReason", "Falha ao traduzir (erro do servidor).");
+            return result;
+        }
+        JSONArray root = new JSONArray(resp.body().string());
+        JSONArray sentences = root.getJSONArray(0);
+        StringBuilder sb = new StringBuilder();
+        for (int si = 0; si < sentences.length(); si++) sb.append(sentences.getJSONArray(si).getString(0));
+        result.put("resultText", sb.toString());
+        return result;
+    } finally {
+        resp.close();
+    }
+}
+
+HashMap callGemini(String text, String systemInstructions, JSONObject cfgRoot) {
+    HashMap result = new HashMap();
+
+    JSONObject gemini = cfgRoot.getJSONObject("settings").getJSONObject("gemini");
+    String apiKey = gemini.optString("apiKey", "");
+    String model = gemini.optString("model", "");
+
+    if (apiKey.length() == 0 || model.length() == 0) {
+        tasker.log("Reactor IA: chave de API ou modelo não configurados em Configurações > IA - Gemini.");
+        result.put("failureReason", "Chave de API do Gemini não configurada. Abra o Reactor > Configurações > IA · Gemini.");
+        return result;
+    }
+
+    JSONObject part = new JSONObject(); part.put("text", text);
+    JSONArray parts = new JSONArray(); parts.put(part);
+    JSONObject contentObj = new JSONObject(); contentObj.put("parts", parts);
+    JSONArray contents = new JSONArray(); contents.put(contentObj);
+    JSONObject geminiBody = new JSONObject();
+    if (systemInstructions != null && systemInstructions.length() > 0) {
+        JSONObject sp = new JSONObject(); sp.put("text", systemInstructions);
+        JSONArray spArr = new JSONArray(); spArr.put(sp);
+        JSONObject siObj = new JSONObject(); siObj.put("parts", spArr);
+        geminiBody.put("systemInstruction", siObj);
+    }
+    geminiBody.put("contents", contents);
+
+    String url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
+    MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+    RequestBody reqBody = RequestBody.create(mediaType, geminiBody.toString());
+    Request req = new Request.Builder().url(url).post(reqBody).build();
+    Response resp = httpClient.newCall(req).execute();
+    try {
+        if (!resp.isSuccessful()) {
+            tasker.log("Reactor IA: resposta HTTP " + resp.code());
+            result.put("failureReason", "Falha ao processar com IA (erro do servidor Gemini).");
+            return result;
+        }
+        JSONObject root = new JSONObject(resp.body().string());
+        JSONObject cand = root.getJSONArray("candidates").getJSONObject(0);
+        JSONArray respParts = cand.getJSONObject("content").getJSONArray("parts");
+        StringBuilder sb = new StringBuilder();
+        for (int pi = 0; pi < respParts.length(); pi++) sb.append(respParts.getJSONObject(pi).getString("text"));
+        result.put("resultText", sb.toString().trim());
+        return result;
+    } finally {
+        resp.close();
+    }
+}
