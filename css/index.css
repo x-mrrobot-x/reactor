@@ -411,6 +411,10 @@ header::after {
   width: 38px;
   height: 22px;
 }
+.field-row .switch:not(.sm) {
+  width: 46px;
+  flex-shrink: 0;
+}
 .switch input {
   position: absolute;
   opacity: 0;
@@ -631,6 +635,7 @@ main {
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
 }
 .field-row label {

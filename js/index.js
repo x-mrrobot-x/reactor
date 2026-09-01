@@ -362,7 +362,7 @@ const ICONS = {
 const DEFAULT_CONFIG = {
   providers: {
     keyboard: { enabled: true },
-    app: { enabled: true },
+    app: { enabled: false },
     clipboard: { enabled: false },
     notification: { enabled: false }
   },
@@ -564,7 +564,8 @@ const DEFAULT_CONFIG = {
     theme: "dark",
     language: "pt",
     ruleViewMode: "list",
-    gemini: { model: "gemini-2.5-flash", apiKey: "" }
+    gemini: { model: "gemini-2.5-flash", apiKey: "" },
+    fileLoggingEnabled: false
   }
 };
 
@@ -939,7 +940,8 @@ const appState = {
       theme: "dark",
       language: "pt",
       ruleViewMode: "list",
-      gemini: { model: "gemini-2.5-flash", apiKey: "" }
+      gemini: { model: "gemini-2.5-flash", apiKey: "" },
+      fileLoggingEnabled: false
     }
   },
   activeTab: "dashboard"
@@ -981,6 +983,7 @@ const DOM_SELECTORS = {
   geminiModelSelect: "#geminiModelSelect",
   geminiApiKeyInput: "#geminiApiKeyInput",
   geminiApiKeyWarning: "#geminiApiKeyWarning",
+  fileLoggingToggle: "#fileLoggingToggle",
   exportConfigBtn: "#exportConfigBtn",
   importConfigBtn: "#importConfigBtn",
   importFileInput: "#importFileInput",
@@ -1508,6 +1511,64 @@ function confirmDeleteRule(rule) {
   document.addEventListener("keydown", dialogKeyHandler);
 }
 
+function confirmActivateProvider(providerId, ruleName) {
+  const provider = PROVIDER_REGISTRY[providerId] || {};
+  const providerName = provider.name || "Provider";
+
+  const overlay = el("div", "dialog-overlay");
+  const dialog = el("div", "dialog confirm-dialog");
+
+  const iconWrap = el("div", "confirm-icon");
+  iconWrap.innerHTML = ICONS[provider.icon] || ICONS.alert;
+  dialog.appendChild(iconWrap);
+
+  dialog.appendChild(el("h3", "confirm-title", "Provider desativado"));
+  dialog.appendChild(
+    el(
+      "p",
+      "confirm-text",
+      `Para esta regra funcionar, é necessário habilitar o provider "${providerName}". Ativar agora?`
+    )
+  );
+
+  const foot = el("div", "dialog-foot");
+  const laterBtn = el("button", "btn btn-ghost", "Agora não");
+  laterBtn.type = "button";
+  laterBtn.addEventListener("click", closeDialog);
+  const activateBtn = el("button", "btn btn-accent", "Ativar");
+  activateBtn.type = "button";
+  activateBtn.addEventListener("click", () => {
+    closeDialog();
+    if (providerId === "clipboard" && !appState.clipboardOverlayPermission) {
+      showToast(
+        'Clipboard habilitado, mas sem a permissão "Exibir sobre outros apps" a leitura pode falhar em segundo plano. Ative em Ajustes > Apps > Tasker > Acesso especial.',
+        true
+      );
+    }
+    setProviderEnabled(providerId, true);
+  });
+  foot.appendChild(laterBtn);
+  foot.appendChild(activateBtn);
+  dialog.appendChild(foot);
+
+  overlay.appendChild(dialog);
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) closeDialog();
+  });
+  dom.dialogRoot.innerHTML = "";
+  dom.dialogRoot.appendChild(overlay);
+  dialogKeyHandler = event => {
+    if (event.key === "Escape") closeDialog();
+  };
+  document.addEventListener("keydown", dialogKeyHandler);
+}
+
+function maybePromptActivateProvider(providerId, ruleName) {
+  const provider = appState.config.providers[providerId];
+  if (provider && provider.enabled) return;
+  confirmActivateProvider(providerId, ruleName);
+}
+
 function handleRuleListClick(event) {
   const target = event.target.closest("[data-action]");
   const row = event.target.closest("[data-rule-id]");
@@ -1782,6 +1843,7 @@ function applySettingsToForm() {
   dom.langSelect.value = settings.language || "pt";
   dom.geminiModelSelect.value = gemini.model || "gemini-2.5-flash";
   dom.geminiApiKeyInput.value = gemini.apiKey || "";
+  dom.fileLoggingToggle.checked = !!settings.fileLoggingEnabled;
   updateGeminiWarning();
 }
 
@@ -1808,6 +1870,12 @@ function saveThemeSetting() {
 function saveLanguageSetting() {
   performConfigMutation(() => {
     appState.config.settings.language = dom.langSelect.value;
+  }, "Preferências salvas");
+}
+
+function saveFileLoggingSetting() {
+  performConfigMutation(() => {
+    appState.config.settings.fileLoggingEnabled = dom.fileLoggingToggle.checked;
   }, "Preferências salvas");
 }
 
@@ -1853,6 +1921,7 @@ function bindSettingsPage() {
   dom.langSelect.addEventListener("change", saveLanguageSetting);
   dom.geminiModelSelect.addEventListener("change", saveGeminiSettings);
   dom.geminiApiKeyInput.addEventListener("change", saveGeminiSettings);
+  dom.fileLoggingToggle.addEventListener("change", saveFileLoggingSetting);
   dom.exportConfigBtn.addEventListener("click", () =>
     performAction("export_config", { config: appState.config })
   );
@@ -2654,7 +2723,10 @@ function openRuleDialog(existingRule) {
       },
       isEdit ? "Regra atualizada" : "Regra criada"
     );
-    if (response.ok !== false) closeDialog();
+    if (response.ok !== false) {
+      closeDialog();
+      maybePromptActivateProvider(draft.provider, name);
+    }
   });
   foot.appendChild(cancelBtn);
   foot.appendChild(saveBtn);
