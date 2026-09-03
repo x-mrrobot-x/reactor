@@ -395,7 +395,13 @@ const ICONS = {
     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
   alert:
     '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>',
-  lock: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
+  lock: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  power:
+    '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"/><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/></svg>',
+  zap: '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/></svg>',
+  filter:
+    '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>',
+  play: '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>'
 };
 
 const DEFAULT_CONFIG = {
@@ -612,7 +618,7 @@ const DEFAULT_CONFIG = {
   settings: {
     theme: "dark",
     language: "pt",
-    ruleViewMode: "list",
+    ruleViewMode: "grouped",
     gemini: { model: "gemini-2.5-flash", apiKey: "" },
     fileLoggingEnabled: false
   }
@@ -975,7 +981,7 @@ const appState = {
     settings: {
       theme: "dark",
       language: "pt",
-      ruleViewMode: "list",
+      ruleViewMode: "grouped",
       gemini: { model: "gemini-2.5-flash", apiKey: "" },
       fileLoggingEnabled: false
     }
@@ -1187,8 +1193,6 @@ function providerBadge(providerId) {
   return badge;
 }
 
-const expandedRules = new Set();
-
 function actionSummary(action) {
   const meta = ACTION_REGISTRY[action.type];
   const label = meta ? meta.label : action.type;
@@ -1234,27 +1238,40 @@ function ruleSearchText(rule) {
 function buildRuleDetails(rule) {
   const details = el("div", "rule-details");
   const def = eventDef(rule.event.type);
+  const providerMeta = PROVIDER_REGISTRY[rule.providerId];
 
   const metaGrid = el("div", "rule-meta-grid");
-  function metaItem(label, value) {
+  function metaItem(iconName, label, value) {
     const item = el("div", "rule-meta-item");
-    item.appendChild(el("span", "rule-meta-label", label));
+    const top = el("div", "rule-meta-top");
+    const icon = el("span", "rule-meta-icon");
+    icon.innerHTML = ICONS[iconName] || "";
+    top.appendChild(icon);
+    top.appendChild(el("span", "rule-meta-label", label));
+    item.appendChild(top);
     item.appendChild(el("span", "rule-meta-value", value));
     metaGrid.appendChild(item);
   }
-  metaItem("Status", rule.enabled ? "Ativa" : "Inativa");
-  metaItem("Evento", def ? def.label : rule.event.type);
   metaItem(
+    providerMeta ? providerMeta.icon : "app",
     "Provider",
-    PROVIDER_REGISTRY[rule.providerId]
-      ? PROVIDER_REGISTRY[rule.providerId].name
-      : rule.providerId
+    providerMeta ? providerMeta.name : rule.providerId
   );
+  metaItem("zap", "Evento", def ? def.label : rule.event.type);
   details.appendChild(metaGrid);
+
+  function blockTitle(iconName, text) {
+    const title = el("div", "rule-block-title");
+    const icon = el("span", "rule-block-title-icon");
+    icon.innerHTML = ICONS[iconName] || "";
+    title.appendChild(icon);
+    title.appendChild(el("span", null, text));
+    return title;
+  }
 
   const condBlock = el("div", "rule-block");
   condBlock.appendChild(
-    el("div", "rule-block-title", `Condições (${rule.conditions.length})`)
+    blockTitle("filter", `Condições (${rule.conditions.length})`)
   );
   if (!rule.conditions.length) {
     condBlock.appendChild(
@@ -1268,9 +1285,7 @@ function buildRuleDetails(rule) {
   details.appendChild(condBlock);
 
   const actBlock = el("div", "rule-block");
-  actBlock.appendChild(
-    el("div", "rule-block-title", `Ações (${rule.actions.length})`)
-  );
+  actBlock.appendChild(blockTitle("play", `Ações (${rule.actions.length})`));
   if (!rule.actions.length) {
     actBlock.appendChild(el("div", "rule-block-empty", "Nenhuma ação."));
   } else {
@@ -1287,39 +1302,51 @@ function buildRuleDetails(rule) {
   details.appendChild(actBlock);
 
   const actions = el("div", "rule-actions");
-  const toggleBtn = el(
-    "button",
-    "btn-ghost-sm",
-    rule.enabled ? "Desativar" : "Ativar"
-  );
+
+  const toggleBtn = el("button", "rule-toggle-btn");
   toggleBtn.type = "button";
   toggleBtn.dataset.action = "toggle";
-  const editBtn = iconButton("icon-btn", "edit", "Editar");
-  editBtn.dataset.action = "edit";
-  const dupBtn = iconButton("icon-btn", "copy", "Duplicar");
-  dupBtn.dataset.action = "duplicate";
-  const delBtn = iconButton("icon-btn danger", "trash", "Excluir");
-  delBtn.dataset.action = "delete";
+  toggleBtn.innerHTML = `${ICONS.power}<span>${
+    rule.enabled ? "Desativar regra" : "Ativar regra"
+  }</span>`;
   actions.appendChild(toggleBtn);
-  actions.appendChild(editBtn);
-  actions.appendChild(dupBtn);
-  actions.appendChild(delBtn);
+
+  const secondary = el("div", "rule-actions-secondary");
+
+  const editBtn = el("button", "rule-action-btn");
+  editBtn.type = "button";
+  editBtn.dataset.action = "edit";
+  editBtn.innerHTML = `${ICONS.edit}<span>Editar</span>`;
+
+  const dupBtn = el("button", "rule-action-btn");
+  dupBtn.type = "button";
+  dupBtn.dataset.action = "duplicate";
+  dupBtn.innerHTML = `${ICONS.copy}<span>Clonar</span>`;
+
+  const delBtn = el("button", "rule-action-btn danger");
+  delBtn.type = "button";
+  delBtn.dataset.action = "delete";
+  delBtn.innerHTML = `${ICONS.trash}<span>Excluir</span>`;
+
+  secondary.appendChild(editBtn);
+  secondary.appendChild(dupBtn);
+  secondary.appendChild(delBtn);
+  actions.appendChild(secondary);
   details.appendChild(actions);
 
   return details;
 }
 
 function buildRuleRow(rule) {
-  const expanded = expandedRules.has(rule.id);
   const compact = ruleViewMode === "compact";
   const row = el(
     "div",
-    `card rule-row${rule.enabled ? "" : " off"}${expanded ? " expanded" : ""}${compact ? " compact" : ""}`
+    `card rule-row${rule.enabled ? "" : " off"}${compact ? " compact" : ""}`
   );
   row.dataset.ruleId = rule.id;
 
   const head = el("div", "rule-head");
-  head.dataset.action = "expand";
+  head.dataset.action = "details";
 
   const statusBar = el("span", "rule-status-bar");
   statusBar.dataset.action = "toggle";
@@ -1355,16 +1382,12 @@ function buildRuleRow(rule) {
   head.appendChild(chevron);
   row.appendChild(head);
 
-  const detailsWrap = el("div", "rule-details-wrap");
-  detailsWrap.appendChild(buildRuleDetails(rule));
-  row.appendChild(detailsWrap);
-
   return row;
 }
 
 let ruleSearchQuery = "";
 let ruleFilters = { provider: "", status: "" };
-let ruleViewMode = "list";
+let ruleViewMode = "grouped";
 let ruleFilterPanelOpen = false;
 
 function hasActiveRuleFilters() {
@@ -1441,25 +1464,6 @@ function renderRuleList() {
   } else {
     renderCollection(dom.ruleList, rules, emptyMessage, buildRuleRow);
   }
-  syncExpandedRuleHeights();
-}
-
-function syncExpandedRuleHeights() {
-  qsa(".rule-row.expanded .rule-details-wrap", dom.ruleList).forEach(wrap => {
-    wrap.style.maxHeight = `${wrap.scrollHeight}px`;
-  });
-}
-
-function animateRuleRowExpansion(row, expand) {
-  const wrap = qs(".rule-details-wrap", row);
-  if (!wrap) return;
-  if (expand) {
-    row.classList.add("expanded");
-    wrap.style.maxHeight = `${wrap.scrollHeight}px`;
-  } else {
-    wrap.style.maxHeight = "0px";
-    row.classList.remove("expanded");
-  }
 }
 
 function updateRulesPageStats() {
@@ -1470,6 +1474,23 @@ function updateRulesPageStats() {
     "ativa",
     "ativas"
   )}`;
+}
+
+function scrollToAndHighlightRule(ruleId) {
+  if (!ruleId) return;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      const row = dom.ruleList.querySelector(`[data-rule-id="${ruleId}"]`);
+      if (!row) return;
+
+      row.classList.remove("rule-row-highlight");
+      void row.offsetWidth;
+
+      row.scrollIntoView({ behavior: "smooth", block: "center" });
+      row.classList.add("rule-row-highlight");
+      setTimeout(() => row.classList.remove("rule-row-highlight"), 3000);
+    });
+  });
 }
 
 function toggleRule(rule) {
@@ -1485,6 +1506,7 @@ function toggleRule(rule) {
 }
 
 function duplicateRule(rule) {
+  let newRuleId = null;
   return performConfigMutation(() => {
     const loc = findRuleLocation(rule.id);
     if (!loc) throw new Error("Regra não encontrada");
@@ -1492,7 +1514,11 @@ function duplicateRule(rule) {
     clone.id = generateRuleId();
     clone.name = `${clone.name} (cópia)`;
     loc.arr.splice(loc.index + 1, 0, clone);
-  }, "Regra duplicada");
+    newRuleId = clone.id;
+  }, "Regra clonada").then(response => {
+    if (response.ok !== false) scrollToAndHighlightRule(newRuleId);
+    return response;
+  });
 }
 
 function deleteRule(rule) {
@@ -1528,7 +1554,6 @@ function confirmDeleteRule(rule) {
   confirmBtn.type = "button";
   confirmBtn.addEventListener("click", () => {
     closeDialog();
-    expandedRules.delete(rule.id);
     deleteRule(rule);
   });
   foot.appendChild(cancelBtn);
@@ -1605,6 +1630,191 @@ function maybePromptActivateProvider(providerId, ruleName) {
   confirmActivateProvider(providerId, ruleName);
 }
 
+function prefersReducedMotion() {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function playCardMaximizeIn(shell, content, originRect) {
+  if (prefersReducedMotion() || !originRect || !originRect.width) return;
+
+  const targetRect = shell.getBoundingClientRect();
+  if (!targetRect.width || !targetRect.height) return;
+
+  shell.style.animation = "none";
+
+  const dx =
+    originRect.left +
+    originRect.width / 2 -
+    (targetRect.left + targetRect.width / 2);
+  const dy =
+    originRect.top +
+    originRect.height / 2 -
+    (targetRect.top + targetRect.height / 2);
+  const sx = Math.min(Math.max(originRect.width / targetRect.width, 0.001), 1);
+  const sy = Math.min(
+    Math.max(originRect.height / targetRect.height, 0.001),
+    1
+  );
+
+  const shellAnim = shell.animate(
+    [
+      { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` },
+      { transform: "translate(0, 0) scale(1, 1)" }
+    ],
+    { duration: 420, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "both" }
+  );
+  shellAnim.finished.then(() => shellAnim.cancel()).catch(() => {});
+
+  if (content) {
+    content.animate(
+      [{ opacity: 0 }, { opacity: 0, offset: 0.45 }, { opacity: 1 }],
+      { duration: 380, easing: "ease-out", fill: "both" }
+    );
+  }
+}
+
+function playCardMaximizeOut(overlay, shell, content, originRect) {
+  if (prefersReducedMotion() || !originRect || !originRect.width) {
+    return Promise.resolve();
+  }
+
+  const currentRect = shell.getBoundingClientRect();
+  if (!currentRect.width || !currentRect.height) return Promise.resolve();
+
+  const dx =
+    originRect.left +
+    originRect.width / 2 -
+    (currentRect.left + currentRect.width / 2);
+  const dy =
+    originRect.top +
+    originRect.height / 2 -
+    (currentRect.top + currentRect.height / 2);
+  const sx = Math.max(originRect.width / currentRect.width, 0.001);
+  const sy = Math.max(originRect.height / currentRect.height, 0.001);
+
+  overlay.animate([{ opacity: 1 }, { opacity: 0 }], {
+    duration: 240,
+    easing: "ease-in",
+    fill: "forwards"
+  });
+  if (content) {
+    content.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: 140,
+      easing: "ease-in",
+      fill: "forwards"
+    });
+  }
+  const shellAnim = shell.animate(
+    [
+      { transform: "translate(0, 0) scale(1, 1)" },
+      { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` }
+    ],
+    { duration: 240, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" }
+  );
+  return shellAnim.finished.catch(() => {});
+}
+
+function openRuleDetailsDialog(rule, originEl) {
+  closeDialog();
+
+  const originRect = originEl ? originEl.getBoundingClientRect() : null;
+
+  const overlay = el("div", "dialog-overlay");
+  const dialog = el("div", "dialog wide rule-detail-dialog");
+  const content = el("div", "rule-detail-content");
+
+  const head = el("div", "dialog-head");
+  const headText = el("div", "dialog-head-text");
+  head.appendChild(headText);
+  const closeBtn = iconButton("dialog-close", "close", "Fechar");
+  head.appendChild(closeBtn);
+  content.appendChild(head);
+
+  const body = el("div", "dialog-body");
+  content.appendChild(body);
+  dialog.appendChild(content);
+  overlay.appendChild(dialog);
+
+  function refreshBody() {
+    const fresh = allRules().find(r => r.id === rule.id) || rule;
+
+    headText.innerHTML = "";
+    const titleRow = el("div", "dialog-head-title-row");
+    titleRow.appendChild(el("b", null, fresh.name));
+    titleRow.appendChild(
+      el(
+        "span",
+        `chip ${fresh.enabled ? "ok" : "off"}`,
+        fresh.enabled ? "Ativa" : "Inativa"
+      )
+    );
+    headText.appendChild(titleRow);
+    const def = eventDef(fresh.event.type);
+    headText.appendChild(
+      el("span", "dialog-head-sub", def ? def.label : fresh.event.type)
+    );
+
+    body.innerHTML = "";
+    body.appendChild(buildRuleDetails(fresh));
+  }
+  refreshBody();
+
+  let closed = false;
+  function stopListening() {
+    document.removeEventListener("keydown", onKeydown);
+  }
+  function dismiss() {
+    if (closed) return;
+    closed = true;
+    stopListening();
+    playCardMaximizeOut(overlay, dialog, content, originRect).then(() =>
+      overlay.remove()
+    );
+  }
+  function jumpTo(action) {
+    if (closed) return;
+    closed = true;
+    stopListening();
+    overlay.remove();
+    action();
+  }
+  function onKeydown(event) {
+    if (event.key === "Escape") dismiss();
+  }
+
+  closeBtn.addEventListener("click", dismiss);
+  overlay.addEventListener("click", event => {
+    if (event.target === overlay) dismiss();
+  });
+  document.addEventListener("keydown", onKeydown);
+
+  body.addEventListener("click", event => {
+    const target = event.target.closest("[data-action]");
+    if (!target) return;
+    const fresh = allRules().find(r => r.id === rule.id);
+    if (!fresh) return;
+    switch (target.dataset.action) {
+      case "toggle":
+        toggleRule(fresh).then(() => {
+          if (!closed) refreshBody();
+        });
+        break;
+      case "edit":
+        jumpTo(() => openRuleDialog(fresh));
+        break;
+      case "duplicate":
+        jumpTo(() => duplicateRule(fresh));
+        break;
+      case "delete":
+        jumpTo(() => confirmDeleteRule(fresh));
+        break;
+    }
+  });
+
+  dom.dialogRoot.appendChild(overlay);
+  playCardMaximizeIn(dialog, content, originRect);
+}
+
 function handleRuleListClick(event) {
   const target = event.target.closest("[data-action]");
   const row = event.target.closest("[data-rule-id]");
@@ -1625,13 +1835,9 @@ function handleRuleListClick(event) {
     case "delete":
       confirmDeleteRule(rule);
       break;
-    case "expand": {
-      const willExpand = !expandedRules.has(rule.id);
-      if (willExpand) expandedRules.add(rule.id);
-      else expandedRules.delete(rule.id);
-      animateRuleRowExpansion(row, willExpand);
+    case "details":
+      openRuleDetailsDialog(rule, row);
       break;
-    }
   }
 }
 
@@ -2737,10 +2943,11 @@ function openRuleDialog(existingRule) {
         return;
       }
     }
+    const ruleId = isEdit ? existingRule.id : generateRuleId();
     const response = await performConfigMutation(
       () => {
         const persistedRule = {
-          id: isEdit ? existingRule.id : generateRuleId(),
+          id: ruleId,
           enabled: isEdit ? draft.enabled : true,
           name,
           event: deepClone(draft.event),
@@ -2778,6 +2985,7 @@ function openRuleDialog(existingRule) {
     if (response.ok !== false) {
       closeDialog();
       maybePromptActivateProvider(draft.provider, name);
+      scrollToAndHighlightRule(ruleId);
     }
   });
   foot.appendChild(cancelBtn);
