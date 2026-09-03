@@ -25,24 +25,35 @@ const PROVIDER_REGISTRY = {
     events: {
       typed_text: {
         label: "Texto digitado",
-        matchField: null,
-        allowedOperators: ["ends_with"],
+        matchField: "input",
+        allowedOperators: [
+          "match",
+          "contains",
+          "starts_with",
+          "ends_with",
+          "regex"
+        ],
+        fieldOperatorOverrides: {
+          input: ["ends_with"],
+          app_package: ["match", "contains", "starts_with", "regex"]
+        },
+        conditionFields: ["input", "app_package", "app_name"],
         lockedCondition: true,
         variables: [
-          { key: "trigger", label: "Gatilho reconhecido", example: "@pix" },
+          { key: "trigger", label: "Gatilho", example: "@pix" },
           {
             key: "input",
-            label: "Texto digitado antes do gatilho",
+            label: "Texto Digitado",
             example: "Pode me mandar a chave "
           },
           {
             key: "app_package",
-            label: "Pacote do app onde o campo está",
+            label: "Pacote do App",
             example: "com.whatsapp"
           },
           {
             key: "app_name",
-            label: "Nome amigável do app",
+            label: "Nome do App",
             example: "WhatsApp"
           }
         ]
@@ -64,16 +75,19 @@ const PROVIDER_REGISTRY = {
           "ends_with",
           "regex"
         ],
+        fieldOperatorOverrides: {
+          app_package: ["match", "contains", "starts_with", "regex"]
+        },
         lockedCondition: false,
         variables: [
           {
             key: "app_package",
-            label: "Pacote do app aberto",
+            label: "Pacote do App",
             example: "com.whatsapp"
           },
           {
             key: "app_name",
-            label: "Nome amigável do app",
+            label: "Nome do App",
             example: "WhatsApp"
           }
         ]
@@ -95,31 +109,34 @@ const PROVIDER_REGISTRY = {
           "ends_with",
           "regex"
         ],
+        fieldOperatorOverrides: {
+          app_package: ["match", "contains", "starts_with", "regex"]
+        },
         lockedCondition: false,
         variables: [
           {
             key: "app_package",
-            label: "Pacote do app que notificou",
+            label: "Pacote do App",
             example: "com.whatsapp"
           },
           {
             key: "app_name",
-            label: "Nome amigável do app",
+            label: "Nome do App",
             example: "WhatsApp"
           },
           {
             key: "title",
-            label: "Título da notificação",
+            label: "Título da Notificação",
             example: "João Silva"
           },
           {
             key: "body",
-            label: "Corpo da notificação",
+            label: "Corpo da Notificação",
             example: "Chegou o Pix?"
           },
           {
             key: "full_text",
-            label: "Título + corpo concatenados",
+            label: "Título + Corpo",
             example: "João Silva Chegou o Pix?"
           }
         ]
@@ -141,19 +158,22 @@ const PROVIDER_REGISTRY = {
           "ends_with",
           "regex"
         ],
+        fieldOperatorOverrides: {
+          app_package: ["match", "contains", "starts_with", "regex"]
+        },
         lockedCondition: false,
         variables: [
           {
             key: "app_package",
-            label: "Pacote do app de origem (quando identificável)",
+            label: "Pacote do App",
             example: "com.whatsapp"
           },
           {
             key: "app_name",
-            label: "Nome amigável do app de origem",
+            label: "Nome do App",
             example: "WhatsApp"
           },
-          { key: "text", label: "Conteúdo copiado", example: "https://..." }
+          { key: "text", label: "Conteúdo Copiado", example: "https://..." }
         ]
       }
     }
@@ -172,8 +192,16 @@ function eventDef(eventType) {
   return null;
 }
 
-function allowedOperatorsForEvent(eventType) {
-  return eventDef(eventType).allowedOperators;
+function allowedOperatorsForEvent(eventType, field) {
+  const def = eventDef(eventType);
+  if (
+    field &&
+    def.fieldOperatorOverrides &&
+    def.fieldOperatorOverrides[field]
+  ) {
+    return def.fieldOperatorOverrides[field];
+  }
+  return def.allowedOperators;
 }
 
 function isLockedConditionEvent(eventType) {
@@ -184,10 +212,20 @@ function variablesOfEvent(eventType) {
   return eventDef(eventType).variables || [];
 }
 
+function conditionFieldsOfEvent(eventType) {
+  const def = eventDef(eventType);
+  const all = variablesOfEvent(eventType);
+  if (!def.conditionFields) return all;
+  return def.conditionFields
+    .map(key => all.find(v => v.key === key))
+    .filter(Boolean);
+}
+
 function defaultConditionField(eventType) {
   const def = eventDef(eventType);
-  if (def.lockedCondition) return null;
-  return def.matchField || (variablesOfEvent(eventType)[0] || {}).key || "";
+  return (
+    def.matchField || (conditionFieldsOfEvent(eventType)[0] || {}).key || ""
+  );
 }
 
 const ACTION_REGISTRY = {
@@ -356,7 +394,8 @@ const ICONS = {
   chevron:
     '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
   alert:
-    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>'
+    '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>'
 };
 
 const DEFAULT_CONFIG = {
@@ -373,7 +412,7 @@ const DEFAULT_CONFIG = {
         enabled: true,
         name: "Resposta rápida Pix",
         event: { type: "typed_text" },
-        conditions: [{ operator: "ends_with", value: "@pix" }],
+        conditions: [{ field: "input", operator: "ends_with", value: "@pix" }],
         actions: [
           {
             type: "text_replacer",
@@ -386,7 +425,7 @@ const DEFAULT_CONFIG = {
         enabled: true,
         name: "Perguntar para IA",
         event: { type: "typed_text" },
-        conditions: [{ operator: "ends_with", value: "@ia" }],
+        conditions: [{ field: "input", operator: "ends_with", value: "@ia" }],
         actions: [
           {
             type: "ai",
@@ -405,7 +444,7 @@ const DEFAULT_CONFIG = {
         enabled: true,
         name: "Traduzir para Inglês",
         event: { type: "typed_text" },
-        conditions: [{ operator: "ends_with", value: "@en" }],
+        conditions: [{ field: "input", operator: "ends_with", value: "@en" }],
         actions: [
           {
             type: "translate",
@@ -422,7 +461,7 @@ const DEFAULT_CONFIG = {
         enabled: true,
         name: "Traduzir para Português",
         event: { type: "typed_text" },
-        conditions: [{ operator: "ends_with", value: "@pt" }],
+        conditions: [{ field: "input", operator: "ends_with", value: "@pt" }],
         actions: [
           {
             type: "translate",
@@ -439,7 +478,7 @@ const DEFAULT_CONFIG = {
         enabled: true,
         name: "Traduzir para Espanhol",
         event: { type: "typed_text" },
-        conditions: [{ operator: "ends_with", value: "@es" }],
+        conditions: [{ field: "input", operator: "ends_with", value: "@es" }],
         actions: [
           {
             type: "translate",
@@ -457,7 +496,9 @@ const DEFAULT_CONFIG = {
         enabled: true,
         name: "Deixar texto formal",
         event: { type: "typed_text" },
-        conditions: [{ operator: "ends_with", value: "@formal" }],
+        conditions: [
+          { field: "input", operator: "ends_with", value: "@formal" }
+        ],
         actions: [
           {
             type: "ai",
@@ -475,7 +516,9 @@ const DEFAULT_CONFIG = {
         enabled: true,
         name: "Deixar texto casual",
         event: { type: "typed_text" },
-        conditions: [{ operator: "ends_with", value: "@casual" }],
+        conditions: [
+          { field: "input", operator: "ends_with", value: "@casual" }
+        ],
         actions: [
           {
             type: "ai",
@@ -493,7 +536,9 @@ const DEFAULT_CONFIG = {
         enabled: true,
         name: "Corrigir texto",
         event: { type: "typed_text" },
-        conditions: [{ operator: "ends_with", value: "@corrigir" }],
+        conditions: [
+          { field: "input", operator: "ends_with", value: "@corrigir" }
+        ],
         actions: [
           {
             type: "ai",
@@ -511,7 +556,9 @@ const DEFAULT_CONFIG = {
         enabled: true,
         name: "Resumir texto",
         event: { type: "typed_text" },
-        conditions: [{ operator: "ends_with", value: "@resumir" }],
+        conditions: [
+          { field: "input", operator: "ends_with", value: "@resumir" }
+        ],
         actions: [
           {
             type: "ai",
@@ -529,7 +576,9 @@ const DEFAULT_CONFIG = {
         enabled: true,
         name: "Adicionar emojis",
         event: { type: "typed_text" },
-        conditions: [{ operator: "ends_with", value: "@emoji" }],
+        conditions: [
+          { field: "input", operator: "ends_with", value: "@emoji" }
+        ],
         actions: [
           {
             type: "ai",
@@ -592,19 +641,6 @@ function normalizeConfig(config) {
     if (!Array.isArray(normalized.rules_by_provider[id])) {
       normalized.rules_by_provider[id] = [];
     }
-    normalized.rules_by_provider[id].forEach(rule => {
-      if (!rule || !rule.event || !Array.isArray(rule.conditions)) return;
-      if (!eventDef(rule.event.type)) return;
-      if (isLockedConditionEvent(rule.event.type)) return;
-      const legacyMatchField = rule.event.matchField;
-      delete rule.event.matchField;
-      rule.conditions.forEach(cond => {
-        if (!cond.field) {
-          cond.field =
-            legacyMatchField || defaultConditionField(rule.event.type);
-        }
-      });
-    });
   });
   if (!normalized.settings || typeof normalized.settings !== "object") {
     normalized.settings = deepClone(DEFAULT_CONFIG.settings);
@@ -1946,7 +1982,7 @@ let dialogKeyHandler = null;
 function closeDialog() {
   teardownDialogScrollbar();
   dom.dialogRoot.innerHTML = "";
-  activeVariableDropdown = null;
+  purgePortaledVarDropdowns();
   if (dialogKeyHandler) {
     document.removeEventListener("keydown", dialogKeyHandler);
     dialogKeyHandler = null;
@@ -1955,8 +1991,9 @@ function closeDialog() {
 
 function sectionLabel(number, text) {
   const label = el("div", "editor-section-label");
-  if (number != null) label.appendChild(el("span", "n", `${number}·`));
+  if (number != null) label.appendChild(el("span", "n", `${number}`));
   label.appendChild(document.createTextNode(text));
+  label.appendChild(el("span", "editor-section-label-line"));
   return label;
 }
 
@@ -2004,7 +2041,7 @@ function createBoundVariableSelectRow(label, obj, key, vars) {
   const validKeys = vars.map(v => v.key);
 
   const options = vars.length
-    ? vars.map(v => [v.key, `{${v.key}} — ${v.label}`])
+    ? vars.map(v => [v.key, `{${v.key}} - ${v.label}`])
     : [["", "Nenhuma variável disponível"]];
   populateSelectOptions(select, options);
 
@@ -2054,6 +2091,14 @@ function buildVariableDropdown(vars) {
 
 let activeVariableDropdown = null;
 
+let portaledVarDropdowns = [];
+
+function purgePortaledVarDropdowns() {
+  portaledVarDropdowns.forEach(node => node.remove());
+  portaledVarDropdowns = [];
+  activeVariableDropdown = null;
+}
+
 function closeActiveVariableDropdown() {
   if (activeVariableDropdown) activeVariableDropdown.closeFn();
 }
@@ -2061,7 +2106,8 @@ function closeActiveVariableDropdown() {
 document.addEventListener("pointerdown", event => {
   if (
     activeVariableDropdown &&
-    !activeVariableDropdown.wrap.contains(event.target)
+    !activeVariableDropdown.wrap.contains(event.target) &&
+    !activeVariableDropdown.dropdown.contains(event.target)
   ) {
     closeActiveVariableDropdown();
   }
@@ -2086,22 +2132,54 @@ function attachVariableDropdown(rowEl, vars) {
   wrap.appendChild(fieldEl);
 
   const dropdown = buildVariableDropdown(vars);
-  wrap.appendChild(dropdown);
+  document.body.appendChild(dropdown);
+  portaledVarDropdowns.push(dropdown);
+
+  function positionDropdown() {
+    const rect = fieldEl.getBoundingClientRect();
+    const viewportH = window.innerHeight;
+    const gap = 6;
+    const minHeight = 120;
+    const preferredMax = 216;
+    const spaceBelow = viewportH - rect.bottom - gap;
+    const spaceAbove = rect.top - gap;
+
+    dropdown.style.left = `${rect.left}px`;
+    dropdown.style.width = `${rect.width}px`;
+
+    if (spaceBelow >= minHeight || spaceBelow >= spaceAbove) {
+      dropdown.style.top = `${rect.bottom + gap}px`;
+      dropdown.style.bottom = "";
+      dropdown.style.maxHeight = `${Math.max(minHeight, Math.min(preferredMax, spaceBelow))}px`;
+    } else {
+      dropdown.style.top = "";
+      dropdown.style.bottom = `${viewportH - rect.top + gap}px`;
+      dropdown.style.maxHeight = `${Math.max(minHeight, Math.min(preferredMax, spaceAbove))}px`;
+    }
+  }
 
   function closeThisDropdown() {
     dropdown.classList.remove("open");
+    window.removeEventListener("scroll", positionDropdown, true);
+    window.removeEventListener("resize", positionDropdown);
     if (activeVariableDropdown && activeVariableDropdown.wrap === wrap) {
       activeVariableDropdown = null;
     }
   }
   function openThisDropdown() {
     closeActiveVariableDropdown();
+    positionDropdown();
     dropdown.classList.add("open");
-    activeVariableDropdown = { wrap, closeFn: closeThisDropdown };
+    window.addEventListener("scroll", positionDropdown, true);
+    window.addEventListener("resize", positionDropdown);
+    activeVariableDropdown = { wrap, dropdown, closeFn: closeThisDropdown };
   }
 
   fieldEl.addEventListener("focus", openThisDropdown);
-  fieldEl.addEventListener("blur", closeThisDropdown);
+  fieldEl.addEventListener("blur", event => {
+    if (event.relatedTarget && dropdown.contains(event.relatedTarget)) return;
+    closeThisDropdown();
+  });
 
   function selectItem(item) {
     const insertText = `{${item.dataset.varKey}}`;
@@ -2118,32 +2196,11 @@ function attachVariableDropdown(rowEl, vars) {
     fieldEl.dispatchEvent(new Event("input"));
 
     closeThisDropdown();
-    fieldEl.focus();
     const cursor = start + insertText.length;
     fieldEl.setSelectionRange(cursor, cursor);
   }
 
-  let pressedItem = null;
-  dropdown.addEventListener("pointerdown", event => {
-    const item = event.target.closest(".var-dd-item");
-    pressedItem = item || null;
-    event.preventDefault();
-  });
-
-  dropdown.addEventListener("pointerup", event => {
-    const item = event.target.closest(".var-dd-item");
-    const same = item && item === pressedItem;
-    pressedItem = null;
-    if (!same) return;
-    selectItem(item);
-  });
-
-  dropdown.addEventListener("pointercancel", () => {
-    pressedItem = null;
-  });
-
   dropdown.addEventListener("click", event => {
-    if (event.detail !== 0) return;
     const item = event.target.closest(".var-dd-item");
     if (!item) return;
     selectItem(item);
@@ -2310,11 +2367,8 @@ function buildActionConfigFields(container, action, draft, actionIndex) {
 
 function renderConditionsList(container, draft) {
   container.innerHTML = "";
-  const locked = isLockedConditionEvent(draft.event.type);
-
-  if (locked && draft.conditions.length === 0) {
-    draft.conditions.push({ operator: "ends_with", value: "" });
-  }
+  const eventType = draft.event.type;
+  const fields = conditionFieldsOfEvent(eventType);
 
   if (draft.conditions.length === 0) {
     container.appendChild(
@@ -2326,41 +2380,10 @@ function renderConditionsList(container, draft) {
     );
   }
 
-  if (locked) {
-    const cond = draft.conditions[0];
-    cond.operator = "ends_with";
-    const row = el("div", "condition-row");
-    row.appendChild(
-      el("span", "condition-op-label", CONDITION_OPERATORS.ends_with)
-    );
-    const valInput = document.createElement("input");
-    valInput.type = "text";
-    valInput.value = cond.value;
-    valInput.placeholder = "texto do gatilho";
-    valInput.addEventListener("input", () => {
-      cond.value = valInput.value;
-    });
-    row.appendChild(valInput);
-    container.appendChild(row);
-    return;
-  }
-
-  const vars = variablesOfEvent(draft.event.type);
-
   draft.conditions.forEach((cond, index) => {
     const card = el("div", "action-card");
     const head = el("div", "action-card-head");
-
-    const fieldSelect = document.createElement("select");
-    populateSelectOptions(
-      fieldSelect,
-      vars.map(v => [v.key, `${v.key} - ${v.label}`])
-    );
-    fieldSelect.value = cond.field || vars[0].key;
-    fieldSelect.addEventListener("change", () => {
-      cond.field = fieldSelect.value;
-    });
-    head.appendChild(fieldSelect);
+    head.appendChild(el("span", "hint", `Condição ${index + 1}`));
 
     const delBtn = iconButton("icon-btn danger", "trash", "Remover condição");
     delBtn.addEventListener("click", () => {
@@ -2370,45 +2393,72 @@ function renderConditionsList(container, draft) {
     head.appendChild(delBtn);
     card.appendChild(head);
 
-    const fields = el("div", "action-card-fields");
+    const fieldsWrap = el("div", "action-card-fields");
+
+    const fieldRow = el("div", "field-row");
+    fieldRow.appendChild(el("label", null, "Variável"));
+    const fieldSelect = document.createElement("select");
+    populateSelectOptions(
+      fieldSelect,
+      fields.map(v => [v.key, `{${v.key}} - ${v.label}`])
+    );
+    fieldSelect.value = cond.field || fields[0].key;
+    fieldSelect.addEventListener("change", () => {
+      cond.field = fieldSelect.value;
+      const operators = allowedOperatorsForEvent(eventType, cond.field);
+      if (operators.indexOf(cond.operator) === -1) {
+        cond.operator = operators[0];
+      }
+      renderConditionsList(container, draft);
+    });
+    fieldRow.appendChild(fieldSelect);
+    fieldsWrap.appendChild(fieldRow);
 
     const opRow = el("div", "field-row");
     opRow.appendChild(el("label", null, "Operador"));
-    const opSelect = document.createElement("select");
-    populateSelectOptions(
-      opSelect,
-      allowedOperatorsForEvent(draft.event.type).map(op => [
-        op,
-        CONDITION_OPERATORS[op]
-      ])
-    );
-    opSelect.value = cond.operator;
-    opSelect.addEventListener("change", () => {
+    const operators = allowedOperatorsForEvent(eventType, cond.field);
+    if (operators.length === 1) {
+      cond.operator = operators[0];
+      const lockedOp = el("span", "condition-op-label");
+      lockedOp.innerHTML = `<span class="condition-op-text">${CONDITION_OPERATORS[operators[0]]}</span><span class="condition-op-lock">${ICONS.lock}</span>`;
+      opRow.appendChild(lockedOp);
+    } else {
+      const opSelect = document.createElement("select");
+      populateSelectOptions(
+        opSelect,
+        operators.map(op => [op, CONDITION_OPERATORS[op]])
+      );
+      opSelect.value =
+        operators.indexOf(cond.operator) !== -1 ? cond.operator : operators[0];
       cond.operator = opSelect.value;
-    });
-    opRow.appendChild(opSelect);
-    fields.appendChild(opRow);
+      opSelect.addEventListener("change", () => {
+        cond.operator = opSelect.value;
+      });
+      opRow.appendChild(opSelect);
+    }
+    fieldsWrap.appendChild(opRow);
 
     const valRow = el("div", "field-row");
     valRow.appendChild(el("label", null, "Valor"));
     const valInput = document.createElement("input");
     valInput.type = "text";
     valInput.value = cond.value;
-    valInput.placeholder = "valor";
+    const fieldMeta = fields.find(v => v.key === cond.field);
+    valInput.placeholder = (fieldMeta && fieldMeta.example) || "valor";
     valInput.addEventListener("input", () => {
       cond.value = valInput.value;
     });
     valRow.appendChild(valInput);
-    fields.appendChild(valRow);
+    fieldsWrap.appendChild(valRow);
 
-    card.appendChild(fields);
+    card.appendChild(fieldsWrap);
     container.appendChild(card);
   });
 }
 
 function renderActionsList(container, draft) {
   container.innerHTML = "";
-  activeVariableDropdown = null;
+  purgePortaledVarDropdowns();
   const allowedTypes = allowedActionTypesForEvent(draft.event.type);
 
   if (draft.actions.length === 0) {
@@ -2486,7 +2536,12 @@ function openRuleDialog(existingRule) {
   const dialog = el("div", "dialog wide");
 
   const head = el("div", "dialog-head");
-  head.appendChild(el("b", null, isEdit ? "Editar Regra" : "Nova Regra"));
+  const headText = el("div", "dialog-head-text");
+  headText.appendChild(el("b", null, isEdit ? "Editar Regra" : "Nova Regra"));
+  headText.appendChild(
+    el("span", "dialog-head-sub", "Evento, condições e ações da regra")
+  );
+  head.appendChild(headText);
   const closeBtn = iconButton("dialog-close", "close", "Fechar");
   closeBtn.addEventListener("click", closeDialog);
   head.appendChild(closeBtn);
@@ -2526,15 +2581,7 @@ function openRuleDialog(existingRule) {
   eventRow.appendChild(eventSelect);
   eventSection.appendChild(eventRow);
 
-  const condHint = el("div", "hint");
   body.appendChild(eventSection);
-
-  function updateCondHint() {
-    const def = eventDef(draft.event.type);
-    condHint.textContent = def.lockedCondition
-      ? "Condição fixa: a regra dispara quando o texto digitado termina com o valor abaixo."
-      : "";
-  }
 
   function refreshEventOptions() {
     populateSelectOptions(
@@ -2556,16 +2603,17 @@ function openRuleDialog(existingRule) {
 
   const condSection = el("div", "editor-section");
   condSection.appendChild(sectionLabel(2, "Condições"));
-  condSection.appendChild(condHint);
   const condList = el("div");
   condSection.appendChild(condList);
   const addCondBtn = el("button", "add-row-btn");
   addCondBtn.type = "button";
   addCondBtn.innerHTML = `${ICONS.plus}<span>Adicionar condição</span>`;
   addCondBtn.addEventListener("click", () => {
+    const field = defaultConditionField(draft.event.type);
+    const operators = allowedOperatorsForEvent(draft.event.type, field);
     draft.conditions.push({
-      field: defaultConditionField(draft.event.type),
-      operator: "contains",
+      field,
+      operator: operators.length === 1 ? operators[0] : "contains",
       value: ""
     });
     renderConditionsList(condList, draft);
@@ -2598,27 +2646,28 @@ function openRuleDialog(existingRule) {
   function refreshEventDependents() {
     delete draft.event.matchField;
     const locked = isLockedConditionEvent(draft.event.type);
+    const validFields = conditionFieldsOfEvent(draft.event.type).map(
+      v => v.key
+    );
 
-    if (locked) {
-      const preservedValue =
-        draft.conditions.length === 1 ? draft.conditions[0].value : "";
-      if (
-        draft.conditions.length !== 1 ||
-        draft.conditions[0].operator !== "ends_with"
-      ) {
-        draft.conditions = [{ operator: "ends_with", value: preservedValue }];
+    draft.conditions.forEach(cond => {
+      if (!cond.field || validFields.indexOf(cond.field) === -1) {
+        cond.field = defaultConditionField(draft.event.type);
       }
-    } else {
-      const validKeys = variablesOfEvent(draft.event.type).map(v => v.key);
-      draft.conditions.forEach(cond => {
-        if (!cond.field || validKeys.indexOf(cond.field) === -1) {
-          cond.field = defaultConditionField(draft.event.type);
-        }
-      });
+      const operators = allowedOperatorsForEvent(draft.event.type, cond.field);
+      if (operators.indexOf(cond.operator) === -1) {
+        cond.operator = operators[0];
+      }
+    });
+
+    if (locked && draft.conditions.length === 0) {
+      const field = defaultConditionField(draft.event.type);
+      const operators = allowedOperatorsForEvent(draft.event.type, field);
+      draft.conditions.push({ field, operator: operators[0], value: "" });
     }
-    updateCondHint();
+
     renderConditionsList(condList, draft);
-    addCondBtn.style.display = locked ? "none" : "flex";
+    addCondBtn.style.display = "flex";
 
     const allowedTypes = allowedActionTypesForEvent(draft.event.type);
     const beforeCount = draft.actions.length;
@@ -2679,9 +2728,12 @@ function openRuleDialog(existingRule) {
       return;
     }
     if (isLockedConditionEvent(draft.event.type)) {
-      const cond = draft.conditions[0];
-      if (!cond || !cond.value || !cond.value.trim()) {
-        showToast("Informe o texto do gatilho (condição 'Termina com')", true);
+      const inputCond = draft.conditions.find(c => c.field === "input");
+      if (!inputCond || !inputCond.value || !inputCond.value.trim()) {
+        showToast(
+          "Informe o texto do gatilho (condição do campo 'input' com operador 'Termina com')",
+          true
+        );
         return;
       }
     }
@@ -2743,7 +2795,6 @@ function openRuleDialog(existingRule) {
 
   dom.dialogRoot.appendChild(overlay);
   attachDialogScrollbar(dialog);
-  nameInput.focus();
 }
 
 const SCROLL_IDLE_MS = 1000;

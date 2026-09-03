@@ -62,6 +62,12 @@
   --dropdown-shadow-1: rgba(0, 0, 0, 0.7);
   --dropdown-shadow-2: rgba(0, 0, 0, 0.4);
   --dropdown-divider: rgba(255, 255, 255, 0.05);
+
+  --radius-dialog: 20px;
+  --radius-card: 14px;
+  --radius-field: 10px;
+  --shadow-btn-quiet:
+    0 1px 2px rgba(0, 0, 0, 0.35), 0 4px 10px -4px rgba(0, 0, 0, 0.45);
 }
 
 :root[data-theme="light"] {
@@ -119,6 +125,9 @@
   --dropdown-shadow-1: rgba(15, 23, 42, 0.16);
   --dropdown-shadow-2: rgba(15, 23, 42, 0.08);
   --dropdown-divider: rgba(15, 23, 42, 0.08);
+
+  --shadow-btn-quiet:
+    0 1px 2px rgba(15, 23, 42, 0.08), 0 4px 10px -4px rgba(15, 23, 42, 0.12);
 }
 
 * {
@@ -168,7 +177,6 @@ body {
   z-index: 2;
 }
 
-/* Grade de fundo */
 .app::before {
   content: "";
   position: fixed;
@@ -218,7 +226,6 @@ header::before {
   );
 }
 
-/* Luz ambiente */
 .app::after {
   content: "";
   position: fixed;
@@ -398,9 +405,6 @@ header::after {
   letter-spacing: 0.05em;
 }
 
-/* =========================================
-   SWITCHES / TOGGLES
-   ========================================= */
 .switch {
   position: relative;
   width: 46px;
@@ -510,7 +514,6 @@ main {
   padding: 4px 16px 40px;
 }
 
-/* Scrollbar customizada */
 .custom-scrollbar {
   position: fixed;
   top: var(--header-height, 220px);
@@ -624,11 +627,34 @@ main {
 }
 .editor-section-label {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
 }
 .editor-section-label .n {
-  color: var(--accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent-2);
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.editor-section-label-line {
+  flex: 1;
+  height: 1px;
+  min-width: 12px;
+  background: var(--border-soft);
 }
 
 .field-row {
@@ -645,22 +671,19 @@ main {
   flex-shrink: 0;
 }
 
-/* =========================================
-   INPUTS
-   ========================================= */
 .field-row input[type="text"],
 .field-row input[type="number"],
-.condition-row input,
 select,
 textarea {
   flex: 1;
   min-width: 0;
   background: var(--input-bg);
   border: 1px solid var(--border);
-  border-radius: 17px;
+  border-radius: var(--radius-field);
   color: var(--text);
   padding: 10px 12px;
   font-size: 13px;
+  font-family: var(--sans);
   box-shadow: inset 0 2px 4px var(--input-shadow);
   transition:
     border-color 0.2s,
@@ -668,21 +691,17 @@ textarea {
     background 0.2s;
 }
 
-.field-row input[type="text"],
-.field-row input[type="number"],
-.condition-row input {
+#geminiApiKeyInput {
   font-family: var(--mono);
 }
 
 select,
 textarea {
-  font-family: var(--sans);
   width: 100%;
 }
 
 .field-row input[type="text"]:focus,
 .field-row input[type="number"]:focus,
-.condition-row input:focus,
 select:focus,
 textarea:focus {
   outline: none;
@@ -697,24 +716,31 @@ textarea {
   resize: vertical;
 }
 
-.condition-row select {
-  flex: 0 0 112px;
-  width: auto;
-}
-
 .condition-op-label {
-  flex: 0 0 112px;
-  font-size: 12px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  font-size: 13px;
   color: var(--text-dim);
-  background: rgba(59, 130, 246, 0.1);
-  border-color: rgba(96, 165, 250, 0.5);
-  border: 1px solid var(--border);
-  border-radius: 17px;
+  background: var(--input-bg);
+  border: 1px dashed var(--border-accent);
+  border-radius: var(--radius-field);
   padding: 10px 12px;
   font-family: var(--mono);
-  white-space: nowrap;
+}
+.condition-op-text {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.condition-op-lock {
+  display: flex;
+  flex-shrink: 0;
+  opacity: 0.5;
 }
 
 .field-row input[type="checkbox"] {
@@ -761,7 +787,7 @@ textarea {
   color: var(--accent-2);
   border: 1px dashed rgba(96, 165, 250, 0.25);
   background: rgba(59, 130, 246, 0.02);
-  border-radius: 20px;
+  border-radius: var(--radius-field);
   padding: 11px 10px;
   width: 100%;
   justify-content: center;
@@ -865,9 +891,6 @@ textarea {
   color: var(--text-dim);
 }
 
-/* =========================================
-   FLUXO DE EXECUÇÃO (PIPELINE)
-   ========================================= */
 .flow-diagram {
   margin-bottom: 20px;
 }
@@ -1057,9 +1080,6 @@ textarea {
   font-weight: 600;
 }
 
-/* =========================================
-   PROVIDER BADGES
-   ========================================= */
 .provider-badge {
   display: inline-flex;
   align-items: center;
@@ -1254,7 +1274,7 @@ textarea {
   overflow-y: auto;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 28px;
+  border-radius: var(--radius-dialog);
   padding: 18px;
   box-shadow: 0 24px 60px rgba(0, 5, 15, 0.5);
   animation: dialogIn 0.16s ease-out;
@@ -1297,29 +1317,43 @@ textarea {
 }
 .dialog-head {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   gap: 10px;
 }
+.dialog-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
 .dialog-head b {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
+  letter-spacing: -0.01em;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.dialog-head-sub {
+  font-size: 12px;
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .dialog-close {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-dim);
   background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 50%;
+  border-radius: var(--radius-field);
   flex-shrink: 0;
 }
 .dialog-close:active {
@@ -1330,25 +1364,27 @@ textarea {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 16px;
+  margin-top: 20px;
+}
+.dialog-foot .btn-accent {
+  box-shadow: var(--shadow-btn-quiet);
+}
+.dialog-foot .btn-accent:active {
+  box-shadow: var(--shadow-btn-quiet);
 }
 .editor-section {
   margin-bottom: 18px;
 }
-.condition-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 8px;
+.editor-section + .editor-section {
+  padding-top: 16px;
 }
 
 .action-card {
   background: rgba(96, 165, 250, 0.03);
   border: 1px solid rgba(96, 165, 250, 0.15);
-  border-radius: 22px;
+  border-radius: var(--radius-card);
   padding: 12px;
   margin-bottom: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 .action-card-head {
   display: flex;
@@ -1362,10 +1398,19 @@ textarea {
   flex: 1;
   min-width: 120px;
 }
+.action-card-head .hint {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-top: 0;
+}
 .action-card-move {
   display: flex;
   gap: 4px;
   flex-shrink: 0;
+}
+.action-card .icon-btn {
+  border-radius: var(--radius-field);
 }
 .action-card-fields .field-row,
 .action-card-fields .field-block {
@@ -1379,9 +1424,6 @@ textarea {
   width: 68px;
 }
 
-/* =========================================
-   DROPDOWN MENU
-   ========================================= */
 .var-field-wrap {
   position: relative;
   flex: 1;
@@ -1393,19 +1435,18 @@ textarea {
 }
 .var-dropdown {
   display: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(100% + 6px);
-  z-index: 20;
+  position: fixed;
+  z-index: 70;
   background: var(--dropdown-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(96, 165, 250, 0.25);
-  border-radius: 20px;
+  border-radius: var(--radius-card);
   padding: 6px;
   max-height: 216px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   box-shadow:
     0 18px 40px var(--dropdown-shadow-1),
     0 0 0 1px var(--dropdown-shadow-2);
@@ -1422,7 +1463,7 @@ textarea {
   width: 100%;
   text-align: left;
   padding: 10px 12px;
-  border-radius: 14px;
+  border-radius: var(--radius-field);
   transition: background 0.15s ease;
 }
 .var-dd-item:hover,
@@ -1887,4 +1928,10 @@ textarea {
   color: #fff;
   font-weight: 700;
   border: none;
+}
+
+.dialog.wide {
+  --radius-dialog: 28px;
+  --radius-card: 20px;
+  --radius-field: 16px;
 }

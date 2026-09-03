@@ -41,12 +41,13 @@ HashMap matchRuleConditions(JSONObject rule, String provider, String rawValue, H
         JSONObject cond = conditions.getJSONObject(ci);
         String op = cond.getString("operator");
         String cv = cond.optString("value", "");
+        String fieldKey = cond.optString("field", "");
+        boolean isInputField = fieldKey.length() == 0 || fieldKey.equals("input");
 
         String testValue;
-        if (provider.equals("keyboard")) {
+        if (provider.equals("keyboard") && isInputField) {
             testValue = rawValue;
         } else {
-            String fieldKey = cond.optString("field", "");
             if (fieldKey.equals("app_name") && !eventContext.containsKey("app_name") && eventContext.containsKey("app_package")) {
                 eventContext.put("app_name", resolveAppName((String) eventContext.get("app_package")));
             }
@@ -75,7 +76,7 @@ HashMap matchRuleConditions(JSONObject rule, String provider, String rawValue, H
             }
         }
 
-        if (ok && op.equals("ends_with") && provider.equals("keyboard")) matchedEndsWithValue = cv;
+        if (ok && op.equals("ends_with") && provider.equals("keyboard") && isInputField) matchedEndsWithValue = cv;
         if (!ok) {
             result.put("passed", Boolean.FALSE);
             result.put("matchedEndsWithValue", matchedEndsWithValue);
