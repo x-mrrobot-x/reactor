@@ -1085,15 +1085,15 @@ async function performAction(action, payload) {
 
 let configMutationQueue = Promise.resolve();
 
-function performConfigMutation(mutateFn, successMessage) {
+function performConfigMutation(mutateFn, successMessage, onSuccess) {
   const task = configMutationQueue.then(() =>
-    runConfigMutation(mutateFn, successMessage)
+    runConfigMutation(mutateFn, successMessage, onSuccess)
   );
   configMutationQueue = task.catch(() => {});
   return task;
 }
 
-async function runConfigMutation(mutateFn, successMessage) {
+async function runConfigMutation(mutateFn, successMessage, onSuccess) {
   const beforeProviders = cloneProviders(appState.config.providers);
   const backup = deepClone(appState.config);
 
@@ -1123,7 +1123,12 @@ async function runConfigMutation(mutateFn, successMessage) {
   if (Object.prototype.hasOwnProperty.call(response, "monitorStartedAt")) {
     appState.monitorStartedAt = response.monitorStartedAt || null;
   }
-  syncUI();
+
+  if (response.ok === false || !onSuccess) {
+    syncUI();
+  } else {
+    onSuccess();
+  }
 
   const feedback =
     response.error ||
@@ -1344,6 +1349,7 @@ function buildRuleRow(rule) {
     `card rule-row${rule.enabled ? "" : " off"}${compact ? " compact" : ""}`
   );
   row.dataset.ruleId = rule.id;
+  row.dataset.providerId = rule.providerId;
 
   const head = el("div", "rule-head");
   head.dataset.action = "details";
@@ -1433,6 +1439,7 @@ function renderGroupedRuleList(rules, emptyMessage) {
     const meta = PROVIDER_REGISTRY[providerId];
 
     const group = el("div", "rule-group");
+    group.dataset.providerId = providerId;
     const header = el("div", "rule-group-header");
     const iconWrap = el("span", "rule-group-icon");
     iconWrap.innerHTML = ICONS[meta.icon] || "";
@@ -1476,6 +1483,144 @@ function updateRulesPageStats() {
   )}`;
 }
 
+function syncRuleUI() {
+  updateMasterPower();
+  updateDashboardCards();
+  updateRulesPageStats();
+}
+
+function ruleMatchesFilters(rule) {
+  if (ruleFilters.provider && rule.providerId !== ruleFilters.provider) {
+    return false;
+  }
+  if (ruleFilters.status === "active" && !rule.enabled) return false;
+  if (ruleFilters.status === "inactive" && rule.enabled) return false;
+  const q = ruleSearchQuery.trim().toLowerCase();
+  if (q && !ruleSearchText(rule).includes(q)) return false;
+  return true;
+}
+
+function clearRuleListEmptyState() {
+  const hint = dom.ruleList.querySelector(".empty-hint");
+  if (hint) hint.remove();
+}
+
+function showRuleListEmptyStateIfNeeded() {
+  if (dom.ruleList.querySelector(".rule-row")) return;
+  dom.ruleList.innerHTML = "";
+  dom.ruleList.appendChild(el("div", "empty-hint", ruleListEmptyMessage()));
+}
+
+function setRuleGroupCount(group, count) {
+  const countEl = qs(".rule-group-count", group);
+  if (countEl) countEl.textContent = countLabel(count, "regra", "regras");
+}
+
+function findRuleGroupEl(providerId) {
+  return dom.ruleList.querySelector(
+    `.rule-group[data-provider-id="${providerId}"]`
+  );
+}
+
+function createRuleGroupEl(providerId) {
+  const meta = PROVIDER_REGISTRY[providerId];
+  const group = el("div", "rule-group");
+  group.dataset.providerId = providerId;
+
+  const header = el("div", "rule-group-header");
+  const iconWrap = el("span", "rule-group-icon");
+  iconWrap.innerHTML = ICONS[meta.icon] || "";
+  header.appendChild(iconWrap);
+  header.appendChild(el("span", "rule-group-name", meta.name));
+  header.appendChild(el("span", "rule-group-count", ""));
+  group.appendChild(header);
+  group.appendChild(el("div", "rule-group-list"));
+
+  const order = Object.keys(PROVIDER_REGISTRY);
+  const targetIdx = order.indexOf(providerId);
+  const refGroup = Array.from(dom.ruleList.children).find(
+    child =>
+      child.classList.contains("rule-group") &&
+      order.indexOf(child.dataset.providerId) > targetIdx
+  );
+  if (refGroup) dom.ruleList.insertBefore(group, refGroup);
+  else dom.ruleList.appendChild(group);
+  return group;
+}
+
+function insertRuleRowAtTop(rule) {
+  const row = buildRuleRow(rule);
+  clearRuleListEmptyState();
+
+  if (ruleViewMode === "grouped") {
+    let group = findRuleGroupEl(rule.providerId);
+    if (!group) group = createRuleGroupEl(rule.providerId);
+    const list = qs(".rule-group-list", group);
+    list.insertBefore(row, list.firstChild);
+    setRuleGroupCount(group, list.children.length);
+  } else {
+    const order = Object.keys(PROVIDER_REGISTRY);
+    const targetIdx = order.indexOf(rule.providerId);
+    const refRow = Array.from(dom.ruleList.children).find(
+      child =>
+        child.classList.contains("rule-row") &&
+        order.indexOf(child.dataset.providerId) >= targetIdx
+    );
+    if (refRow) dom.ruleList.insertBefore(row, refRow);
+    else dom.ruleList.appendChild(row);
+  }
+  return row;
+}
+
+function removeRuleRowById(ruleId) {
+  const row = dom.ruleList.querySelector(`.rule-row[data-rule-id="${ruleId}"]`);
+  if (!row) return;
+  const list = row.closest(".rule-group-list");
+  row.remove();
+  if (list) {
+    const group = list.closest(".rule-group");
+    if (!list.children.length) {
+      group.remove();
+    } else {
+      setRuleGroupCount(group, list.children.length);
+    }
+  }
+  showRuleListEmptyStateIfNeeded();
+}
+
+function patchRuleAdded(rule) {
+  if (!ruleMatchesFilters(rule)) return;
+  insertRuleRowAtTop(rule);
+}
+
+function patchRuleRemoved(ruleId) {
+  removeRuleRowById(ruleId);
+}
+
+function patchRuleUpdated(ruleId, rule, moved) {
+  const stillMatches = ruleMatchesFilters(rule);
+  const existingRow = dom.ruleList.querySelector(
+    `.rule-row[data-rule-id="${ruleId}"]`
+  );
+
+  if (moved) {
+    if (existingRow) removeRuleRowById(ruleId);
+    if (stillMatches) insertRuleRowAtTop(rule);
+    return;
+  }
+
+  if (!stillMatches) {
+    if (existingRow) removeRuleRowById(ruleId);
+    return;
+  }
+
+  if (existingRow) {
+    existingRow.replaceWith(buildRuleRow(rule));
+  } else {
+    insertRuleRowAtTop(rule);
+  }
+}
+
 function scrollToAndHighlightRule(ruleId) {
   if (!ruleId) return;
   requestAnimationFrame(() => {
@@ -1495,38 +1640,60 @@ function scrollToAndHighlightRule(ruleId) {
 
 function toggleRule(rule) {
   const nextEnabled = !rule.enabled;
+  let updatedRule = null;
   return performConfigMutation(
     () => {
       const loc = findRuleLocation(rule.id);
       if (!loc) throw new Error("Regra não encontrada");
       loc.rule.enabled = nextEnabled;
+      updatedRule = Object.assign({}, loc.rule, { providerId: loc.providerId });
     },
-    nextEnabled ? "Regra ativada" : "Regra desativada"
+    nextEnabled ? "Regra ativada" : "Regra desativada",
+    () => {
+      syncRuleUI();
+      if (updatedRule) patchRuleUpdated(updatedRule.id, updatedRule, false);
+    }
   );
 }
 
 function duplicateRule(rule) {
   let newRuleId = null;
-  return performConfigMutation(() => {
-    const loc = findRuleLocation(rule.id);
-    if (!loc) throw new Error("Regra não encontrada");
-    const clone = deepClone(loc.rule);
-    clone.id = generateRuleId();
-    clone.name = `${clone.name} (cópia)`;
-    loc.arr.splice(loc.index + 1, 0, clone);
-    newRuleId = clone.id;
-  }, "Regra clonada").then(response => {
+  let clonedRule = null;
+  return performConfigMutation(
+    () => {
+      const loc = findRuleLocation(rule.id);
+      if (!loc) throw new Error("Regra não encontrada");
+      const clone = deepClone(loc.rule);
+      clone.id = generateRuleId();
+      clone.name = `${clone.name} (cópia)`;
+      loc.arr.unshift(clone);
+      newRuleId = clone.id;
+      clonedRule = Object.assign({}, clone, { providerId: loc.providerId });
+    },
+    "Regra clonada",
+    () => {
+      syncRuleUI();
+      if (clonedRule) patchRuleAdded(clonedRule);
+    }
+  ).then(response => {
     if (response.ok !== false) scrollToAndHighlightRule(newRuleId);
     return response;
   });
 }
 
 function deleteRule(rule) {
-  return performConfigMutation(() => {
-    const loc = findRuleLocation(rule.id);
-    if (!loc) throw new Error("Regra não encontrada");
-    loc.arr.splice(loc.index, 1);
-  }, "Regra excluída");
+  return performConfigMutation(
+    () => {
+      const loc = findRuleLocation(rule.id);
+      if (!loc) throw new Error("Regra não encontrada");
+      loc.arr.splice(loc.index, 1);
+    },
+    "Regra excluída",
+    () => {
+      syncRuleUI();
+      patchRuleRemoved(rule.id);
+    }
+  );
 }
 
 function confirmDeleteRule(rule) {
@@ -2944,6 +3111,8 @@ function openRuleDialog(existingRule) {
       }
     }
     const ruleId = isEdit ? existingRule.id : generateRuleId();
+    let finalRule = null;
+    let providerMoved = false;
     const response = await performConfigMutation(
       () => {
         const persistedRule = {
@@ -2967,9 +3136,10 @@ function openRuleDialog(existingRule) {
             ) {
               appState.config.rules_by_provider[draft.provider] = [];
             }
-            appState.config.rules_by_provider[draft.provider].push(
+            appState.config.rules_by_provider[draft.provider].unshift(
               persistedRule
             );
+            providerMoved = true;
           }
         } else {
           if (
@@ -2977,10 +3147,25 @@ function openRuleDialog(existingRule) {
           ) {
             appState.config.rules_by_provider[draft.provider] = [];
           }
-          appState.config.rules_by_provider[draft.provider].push(persistedRule);
+          appState.config.rules_by_provider[draft.provider].unshift(
+            persistedRule
+          );
         }
+
+        finalRule = Object.assign({}, persistedRule, {
+          providerId: draft.provider
+        });
       },
-      isEdit ? "Regra atualizada" : "Regra criada"
+      isEdit ? "Regra atualizada" : "Regra criada",
+      () => {
+        syncRuleUI();
+        if (!finalRule) return;
+        if (isEdit) {
+          patchRuleUpdated(ruleId, finalRule, providerMoved);
+        } else {
+          patchRuleAdded(finalRule);
+        }
+      }
     );
     if (response.ok !== false) {
       closeDialog();
