@@ -1829,7 +1829,9 @@ function playCardMaximizeIn(shell, content, originRect) {
 
   const shellAnim = shell.animate(
     [
-      { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` },
+      {
+        transform: `translate(${dx / 10}rem, ${dy / 10}rem) scale(${sx}, ${sy})`
+      },
       { transform: "translate(0, 0) scale(1, 1)" }
     ],
     { duration: 420, easing: "cubic-bezier(0.16, 1, 0.3, 1)", fill: "both" }
@@ -1878,7 +1880,9 @@ function playCardMaximizeOut(overlay, shell, content, originRect) {
   const shellAnim = shell.animate(
     [
       { transform: "translate(0, 0) scale(1, 1)" },
-      { transform: `translate(${dx}px, ${dy}px) scale(${sx}, ${sy})` }
+      {
+        transform: `translate(${dx / 10}rem, ${dy / 10}rem) scale(${sx}, ${sy})`
+      }
     ],
     { duration: 240, easing: "cubic-bezier(0.4, 0, 1, 1)", fill: "forwards" }
   );
@@ -2037,7 +2041,7 @@ function openRuleFilterPanel() {
   ruleFilterPanelOpen = true;
   dom.ruleSearchFilter.classList.add("filter-open");
   dom.ruleFilterToggle.setAttribute("aria-expanded", "true");
-  dom.ruleFilterPanel.style.maxHeight = `${dom.ruleFilterPanel.scrollHeight}px`;
+  dom.ruleFilterPanel.style.maxHeight = `${dom.ruleFilterPanel.scrollHeight / 10}rem`;
 }
 
 function closeRuleFilterPanel() {
@@ -2045,7 +2049,7 @@ function closeRuleFilterPanel() {
   ruleFilterPanelOpen = false;
   dom.ruleSearchFilter.classList.remove("filter-open");
   dom.ruleFilterToggle.setAttribute("aria-expanded", "false");
-  dom.ruleFilterPanel.style.maxHeight = "0px";
+  dom.ruleFilterPanel.style.maxHeight = "0rem";
 }
 
 function toggleRuleFilterPanel() {
@@ -2521,17 +2525,17 @@ function attachVariableDropdown(rowEl, vars) {
     const spaceBelow = viewportH - rect.bottom - gap;
     const spaceAbove = rect.top - gap;
 
-    dropdown.style.left = `${rect.left}px`;
-    dropdown.style.width = `${rect.width}px`;
+    dropdown.style.left = `${rect.left / 10}rem`;
+    dropdown.style.width = `${rect.width / 10}rem`;
 
     if (spaceBelow >= minHeight || spaceBelow >= spaceAbove) {
-      dropdown.style.top = `${rect.bottom + gap}px`;
+      dropdown.style.top = `${(rect.bottom + gap) / 10}rem`;
       dropdown.style.bottom = "";
-      dropdown.style.maxHeight = `${Math.max(minHeight, Math.min(preferredMax, spaceBelow))}px`;
+      dropdown.style.maxHeight = `${Math.max(minHeight, Math.min(preferredMax, spaceBelow)) / 10}rem`;
     } else {
       dropdown.style.top = "";
-      dropdown.style.bottom = `${viewportH - rect.top + gap}px`;
-      dropdown.style.maxHeight = `${Math.max(minHeight, Math.min(preferredMax, spaceAbove))}px`;
+      dropdown.style.bottom = `${(viewportH - rect.top + gap) / 10}rem`;
+      dropdown.style.maxHeight = `${Math.max(minHeight, Math.min(preferredMax, spaceAbove)) / 10}rem`;
     }
   }
 
@@ -3231,16 +3235,16 @@ function createScrollbar({ extraClass, getTrackRect } = {}) {
         ? (scrollTop / maxScrollTop) * (trackHeight - thumbHeight)
         : 0;
     thumb.style.display = "block";
-    thumb.style.height = `${thumbHeight}px`;
-    thumb.style.transform = `translate3d(0, ${thumbTop}px, 0)`;
+    thumb.style.height = `${thumbHeight / 10}rem`;
+    thumb.style.transform = `translate3d(0, ${thumbTop / 10}rem, 0)`;
   }
 
   function updatePosition() {
     if (getTrackRect) {
       const r = getTrackRect();
-      track.style.top = `${r.top}px`;
-      track.style.right = `${r.right}px`;
-      track.style.bottom = `${r.bottom}px`;
+      track.style.top = `${r.top / 10}rem`;
+      track.style.right = `${r.right / 10}rem`;
+      track.style.bottom = `${r.bottom / 10}rem`;
     }
     updateThumb();
   }
@@ -3291,7 +3295,7 @@ function createScrollbar({ extraClass, getTrackRect } = {}) {
 }
 
 function setCssVar(name, px) {
-  document.documentElement.style.setProperty(name, `${px}px`);
+  document.documentElement.style.setProperty(name, `${px / 10}rem`);
 }
 
 function updateHeaderHeightVar() {
