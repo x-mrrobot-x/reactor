@@ -42,19 +42,19 @@
             </span>
           </div>
           <div class="card power">
-            <div class="led off" id="masterLed"></div>
+            <div class="led off" id="master-led"></div>
             <div class="power-info">
-              <b>Monitor do Reactor</b>
-              <span id="masterState">Nenhum evento está sendo observado.</span>
+              <strong>Monitor do Reactor</strong>
+              <span id="master-state">Nenhum evento está sendo observado.</span>
             </div>
             <label class="switch">
-              <input type="checkbox" id="masterSwitch" />
+              <input type="checkbox" id="master-switch" />
               <span class="track"></span>
               <span class="knob"></span>
             </label>
           </div>
         </div>
-        <nav class="card tabs" id="tabBar">
+        <nav class="card tabs" id="tab-bar">
           <button class="tab active" type="button" data-page="dashboard">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -158,8 +158,8 @@
             </p>
           </div>
 
-          <div class="stat-grid">
-            <div class="card stat-card">
+          <ul class="stat-grid">
+            <li class="card stat-card">
               <div class="stat-card-top">
                 <svg
                   viewBox="0 0 24 24"
@@ -172,10 +172,10 @@
                 </svg>
                 <span>Regras</span>
               </div>
-              <div class="stat-value" id="statRulesActive">0/0</div>
+              <div class="stat-value" id="stat-rules-active">0/0</div>
               <div class="stat-label">Regras ativas</div>
-            </div>
-            <div class="card stat-card">
+            </li>
+            <li class="card stat-card">
               <div class="stat-card-top">
                 <svg
                   viewBox="0 0 24 24"
@@ -190,10 +190,10 @@
                 </svg>
                 <span>Providers</span>
               </div>
-              <div class="stat-value" id="statProvidersActive">0/0</div>
+              <div class="stat-value" id="stat-providers-active">0/0</div>
               <div class="stat-label">Fontes de evento ativas</div>
-            </div>
-            <div class="card stat-card">
+            </li>
+            <li class="card stat-card">
               <div class="stat-card-top">
                 <svg
                   viewBox="0 0 24 24"
@@ -207,10 +207,10 @@
                 </svg>
                 <span>Execuções</span>
               </div>
-              <div class="stat-value" id="statRulesExecuted">0</div>
+              <div class="stat-value" id="stat-rules-executed">0</div>
               <div class="stat-label">Regras executadas</div>
-            </div>
-            <div class="card stat-card">
+            </li>
+            <li class="card stat-card">
               <div class="stat-card-top">
                 <svg
                   viewBox="0 0 24 24"
@@ -224,15 +224,15 @@
                 </svg>
                 <span>Tempo de execução</span>
               </div>
-              <div class="stat-value" id="statMonitorUptime">--</div>
+              <div class="stat-value" id="stat-monitor-uptime">--</div>
               <div class="stat-label">Desde que o monitor iniciou</div>
-            </div>
-          </div>
+            </li>
+          </ul>
 
-          <div class="flow-diagram">
-            <div class="section-label">Fluxo de execução</div>
-            <div class="flow-pipeline" id="flowTrack">
-              <div class="flow-step">
+          <section class="flow-diagram">
+            <h3 class="section-label">Fluxo de execução</h3>
+            <ol class="flow-pipeline" id="flow-track">
+              <li class="flow-step">
                 <div class="flow-step-icon">
                   <svg
                     viewBox="0 0 24 24"
@@ -248,11 +248,11 @@
                   </svg>
                 </div>
                 <div class="flow-step-body">
-                  <b>Provider</b>
+                  <strong>Provider</strong>
                   <span>Teclado, apps, notificações, clipboard e mais</span>
                 </div>
-              </div>
-              <div class="flow-step">
+              </li>
+              <li class="flow-step">
                 <div class="flow-step-icon">
                   <svg
                     viewBox="0 0 24 24"
@@ -266,11 +266,11 @@
                   </svg>
                 </div>
                 <div class="flow-step-body">
-                  <b>Evento</b>
+                  <strong>Evento</strong>
                   <span>Texto digitado, app aberto, notificação e mais</span>
                 </div>
-              </div>
-              <div class="flow-step">
+              </li>
+              <li class="flow-step">
                 <div class="flow-step-icon">
                   <svg
                     viewBox="0 0 24 24"
@@ -284,11 +284,11 @@
                   </svg>
                 </div>
                 <div class="flow-step-body">
-                  <b>Condições</b>
+                  <strong>Condições</strong>
                   <span>Contém, termina com, regex e mais</span>
                 </div>
-              </div>
-              <div class="flow-step">
+              </li>
+              <li class="flow-step">
                 <div class="flow-step-icon">
                   <svg
                     viewBox="0 0 24 24"
@@ -302,50 +302,50 @@
                   </svg>
                 </div>
                 <div class="flow-step-body">
-                  <b>Ações</b>
+                  <strong>Ações</strong>
                   <span
                     >Substitui texto, abre app, executa tarefa, IA e mais</span
                   >
                 </div>
-              </div>
-            </div>
-          </div>
+              </li>
+            </ol>
+          </section>
 
-          <div class="section">
-            <div class="section-label">Como começar</div>
-            <div class="steps">
-              <div class="step">
+          <section class="section">
+            <h3 class="section-label">Como começar</h3>
+            <ol class="steps">
+              <li class="step">
                 <span class="step-n">1</span>
                 <div class="step-body">
-                  <b>Ative um provider</b>
+                  <strong>Ative um provider</strong>
                   <span
                     >Escolha as fontes de evento que o Reactor deve
                     observar.</span
                   >
                 </div>
-              </div>
-              <div class="step">
+              </li>
+              <li class="step">
                 <span class="step-n">2</span>
                 <div class="step-body">
-                  <b>Crie uma regra</b>
+                  <strong>Crie uma regra</strong>
                   <span
                     >Defina o evento, as condições e as ações que serão
                     executadas.</span
                   >
                 </div>
-              </div>
-              <div class="step">
+              </li>
+              <li class="step">
                 <span class="step-n">3</span>
                 <div class="step-body">
-                  <b>Ligue o monitor</b>
+                  <strong>Ligue o monitor</strong>
                   <span
                     >Com o monitor ativo suas regras reagem
                     instantaneamente.</span
                   >
                 </div>
-              </div>
-            </div>
-          </div>
+              </li>
+            </ol>
+          </section>
         </section>
 
         <section class="page" id="page-rules" data-page="rules" hidden>
@@ -353,7 +353,7 @@
             <div class="page-head-top">
               <h2>Regras</h2>
               <div class="page-head-actions">
-                <button class="btn-header-add" type="button" id="addRuleBtn">
+                <button class="btn-header-add" type="button" id="add-rule-btn">
                   <svg
                     viewBox="0 0 24 24"
                     width="14"
@@ -374,13 +374,13 @@
             </p>
             <div class="page-stats">
               <div class="page-stats-info">
-                <span class="count" id="rulesCountLabel"
+                <span class="count" id="rules-count-label"
                   >0 regras · 0 ativas</span
                 >
               </div>
               <div
                 class="view-switch"
-                id="ruleViewSwitch"
+                id="rule-view-switch"
                 role="group"
                 aria-label="Modo de visualização"
               >
@@ -442,7 +442,7 @@
                 </button>
               </div>
             </div>
-            <div class="card search-filter-card" id="ruleSearchFilter">
+            <div class="card search-filter-card" id="rule-search-filter">
               <div class="search-filter-bar">
                 <svg
                   viewBox="0 0 24 24"
@@ -459,7 +459,7 @@
                 </svg>
                 <input
                   type="text"
-                  id="ruleSearchInput"
+                  id="rule-search-input"
                   placeholder="Buscar regras…"
                   autocomplete="off"
                 />
@@ -467,9 +467,9 @@
                 <button
                   type="button"
                   class="icon-btn filter-toggle-btn"
-                  id="ruleFilterToggle"
+                  id="rule-filter-toggle"
                   aria-expanded="false"
-                  aria-controls="ruleFilterPanel"
+                  aria-controls="rule-filter-panel"
                   aria-label="Filtros"
                 >
                   <svg
@@ -486,31 +486,31 @@
                   </svg>
                   <span
                     class="filter-toggle-dot"
-                    id="ruleFilterDot"
+                    id="rule-filter-dot"
                     hidden
                   ></span>
                 </button>
               </div>
-              <div class="filter-panel" id="ruleFilterPanel">
+              <div class="filter-panel" id="rule-filter-panel">
                 <div class="filter-panel-inner">
                   <div class="filter-grid">
                     <div class="field-block">
-                      <label class="block-label" for="ruleFilterProvider"
+                      <label class="block-label" for="rule-filter-provider"
                         >Provider</label
                       >
-                      <select id="ruleFilterProvider"></select>
+                      <select id="rule-filter-provider"></select>
                     </div>
                     <div class="field-block">
-                      <label class="block-label" for="ruleFilterStatus"
+                      <label class="block-label" for="rule-filter-status"
                         >Status</label
                       >
-                      <select id="ruleFilterStatus"></select>
+                      <select id="rule-filter-status"></select>
                     </div>
                   </div>
                   <button
                     type="button"
                     class="btn btn-ghost filter-clear-btn"
-                    id="ruleFilterClear"
+                    id="rule-filter-clear"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -530,9 +530,9 @@
             </div>
           </div>
 
-          <div class="section">
-            <div class="rule-list" id="ruleList"></div>
-          </div>
+          <section class="section">
+            <ul class="rule-list" id="rule-list"></ul>
+          </section>
         </section>
 
         <section class="page" id="page-providers" data-page="providers" hidden>
@@ -545,16 +545,16 @@
             </p>
             <div class="page-stats">
               <div class="page-stats-info">
-                <span class="count" id="providersCountLabel"
+                <span class="count" id="providers-count-label"
                   >0 de 0 ativos</span
                 >
               </div>
             </div>
           </div>
 
-          <div class="section">
-            <div class="provider-list" id="providerList"></div>
-          </div>
+          <section class="section">
+            <ul class="provider-list" id="provider-list"></ul>
+          </section>
         </section>
 
         <section class="page" id="page-settings" data-page="settings" hidden>
@@ -567,42 +567,42 @@
             </p>
           </div>
 
-          <div class="section">
-            <div class="section-label">Geral</div>
+          <section class="section">
+            <h3 class="section-label">Geral</h3>
             <div class="card settings-card">
               <div class="field-row">
-                <label for="themeSelect">Tema</label>
-                <select id="themeSelect">
+                <label for="theme-select">Tema</label>
+                <select id="theme-select">
                   <option value="dark">Escuro</option>
                   <option value="light">Claro</option>
                 </select>
               </div>
               <div class="field-row">
-                <label for="langSelect">Idioma</label>
-                <select id="langSelect">
+                <label for="lang-select">Idioma</label>
+                <select id="lang-select">
                   <option value="pt">Português</option>
                   <option value="en">English</option>
                 </select>
               </div>
             </div>
-          </div>
+          </section>
 
-          <div class="section">
-            <div class="section-label">IA · Gemini</div>
+          <section class="section">
+            <h3 class="section-label">IA · Gemini</h3>
             <div class="card settings-card">
               <div class="field-row">
-                <label for="geminiModelSelect">Modelo</label>
-                <select id="geminiModelSelect">
+                <label for="gemini-model-select">Modelo</label>
+                <select id="gemini-model-select">
                   <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
                   <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
                   <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
                 </select>
               </div>
               <div class="field-row">
-                <label for="geminiApiKeyInput">Chave API</label>
+                <label for="gemini-api-key-input">Chave API</label>
                 <input
                   type="text"
-                  id="geminiApiKeyInput"
+                  id="gemini-api-key-input"
                   placeholder="AIza..."
                 />
               </div>
@@ -610,59 +610,59 @@
                 A chave fica salva apenas neste dispositivo, no armazenamento
                 local.
               </p>
-              <p class="hint hint-warn" id="geminiApiKeyWarning"></p>
+              <p class="hint hint-warn" id="gemini-api-key-warning"></p>
             </div>
-          </div>
+          </section>
 
-          <div class="section">
-            <div class="section-label">Backup</div>
+          <section class="section">
+            <h3 class="section-label">Backup</h3>
             <div class="card settings-card">
               <div class="backup-row">
                 <button
                   class="btn btn-ghost"
                   type="button"
-                  id="exportConfigBtn"
+                  id="export-config-btn"
                 >
                   Exportar configuração
                 </button>
                 <button
                   class="btn btn-ghost"
                   type="button"
-                  id="importConfigBtn"
+                  id="import-config-btn"
                 >
                   Importar configuração
                 </button>
                 <input
                   type="file"
-                  id="importFileInput"
+                  id="import-file-input"
                   accept="application/json"
                   style="display: none"
                 />
               </div>
             </div>
-          </div>
+          </section>
 
-          <div class="section">
-            <div class="section-label">Registro e logs</div>
+          <section class="section">
+            <h3 class="section-label">Registro e logs</h3>
             <div class="card settings-card">
               <div class="field-row">
-                <label for="fileLoggingToggle">Gerar logs</label>
+                <label for="file-logging-toggle">Gerar logs</label>
                 <label class="switch sm">
-                  <input type="checkbox" id="fileLoggingToggle" />
+                  <input type="checkbox" id="file-logging-toggle" />
                   <span class="track"></span>
                   <span class="knob"></span>
                 </label>
               </div>
               <p class="hint">
-                Grava eventos e erros do Reactor em um arquivo de texto na
-                pasta de dados, para ajudar a investigar problemas. Quando
-                desativado, nada é registrado.
+                Grava eventos e erros do Reactor em um arquivo de texto na pasta
+                de dados, para ajudar a investigar problemas. Quando desativado,
+                nada é registrado.
               </p>
             </div>
-          </div>
+          </section>
 
-          <div class="section">
-            <div class="section-label">Sobre</div>
+          <section class="section">
+            <h3 class="section-label">Sobre</h3>
             <div class="card settings-card">
               <div class="about-line">
                 <span class="about-label">Versão</span>
@@ -673,17 +673,17 @@
                 <span class="about-value">x-mrrobot-x</span>
               </div>
             </div>
-          </div>
+          </section>
         </section>
       </main>
     </div>
 
     <div id="toast">
-      <div class="msg" id="toastMsg">
+      <div class="msg" id="toast-msg">
         <span class="toast-dot"></span>
-        <span class="toast-text" id="toastText"></span>
+        <span class="toast-text" id="toast-text"></span>
       </div>
     </div>
-    <div id="dialogRoot"></div>
+    <div id="dialog-root"></div>
   </body>
 </html>

@@ -738,7 +738,7 @@ function countLabel(count, singular, plural) {
 function renderCollection(container, items, emptyMessage, renderItem) {
   container.innerHTML = "";
   if (!items.length) {
-    container.appendChild(el("div", "empty-hint", emptyMessage));
+    container.appendChild(el("li", "empty-hint", emptyMessage));
     return;
   }
   items.forEach((item, index) =>
@@ -994,46 +994,46 @@ const dom = {};
 const DOM_SELECTORS = {
   header: "header",
   scrollContainer: ".app",
-  masterSwitch: "#masterSwitch",
-  masterLed: "#masterLed",
-  masterState: "#masterState",
+  masterSwitch: "#master-switch",
+  masterLed: "#master-led",
+  masterState: "#master-state",
 
-  statRulesActive: "#statRulesActive",
-  statProvidersActive: "#statProvidersActive",
-  statRulesExecuted: "#statRulesExecuted",
-  statMonitorUptime: "#statMonitorUptime",
-  flowTrack: "#flowTrack",
+  statRulesActive: "#stat-rules-active",
+  statProvidersActive: "#stat-providers-active",
+  statRulesExecuted: "#stat-rules-executed",
+  statMonitorUptime: "#stat-monitor-uptime",
+  flowTrack: "#flow-track",
 
-  addRuleBtn: "#addRuleBtn",
-  rulesCountLabel: "#rulesCountLabel",
-  ruleList: "#ruleList",
-  ruleSearchInput: "#ruleSearchInput",
-  ruleViewSwitch: "#ruleViewSwitch",
-  ruleSearchFilter: "#ruleSearchFilter",
-  ruleFilterToggle: "#ruleFilterToggle",
-  ruleFilterDot: "#ruleFilterDot",
-  ruleFilterPanel: "#ruleFilterPanel",
-  ruleFilterProvider: "#ruleFilterProvider",
-  ruleFilterStatus: "#ruleFilterStatus",
-  ruleFilterClear: "#ruleFilterClear",
+  addRuleBtn: "#add-rule-btn",
+  rulesCountLabel: "#rules-count-label",
+  ruleList: "#rule-list",
+  ruleSearchInput: "#rule-search-input",
+  ruleViewSwitch: "#rule-view-switch",
+  ruleSearchFilter: "#rule-search-filter",
+  ruleFilterToggle: "#rule-filter-toggle",
+  ruleFilterDot: "#rule-filter-dot",
+  ruleFilterPanel: "#rule-filter-panel",
+  ruleFilterProvider: "#rule-filter-provider",
+  ruleFilterStatus: "#rule-filter-status",
+  ruleFilterClear: "#rule-filter-clear",
 
-  providersCountLabel: "#providersCountLabel",
-  providerList: "#providerList",
+  providersCountLabel: "#providers-count-label",
+  providerList: "#provider-list",
 
-  themeSelect: "#themeSelect",
-  langSelect: "#langSelect",
-  geminiModelSelect: "#geminiModelSelect",
-  geminiApiKeyInput: "#geminiApiKeyInput",
-  geminiApiKeyWarning: "#geminiApiKeyWarning",
-  fileLoggingToggle: "#fileLoggingToggle",
-  exportConfigBtn: "#exportConfigBtn",
-  importConfigBtn: "#importConfigBtn",
-  importFileInput: "#importFileInput",
+  themeSelect: "#theme-select",
+  langSelect: "#lang-select",
+  geminiModelSelect: "#gemini-model-select",
+  geminiApiKeyInput: "#gemini-api-key-input",
+  geminiApiKeyWarning: "#gemini-api-key-warning",
+  fileLoggingToggle: "#file-logging-toggle",
+  exportConfigBtn: "#export-config-btn",
+  importConfigBtn: "#import-config-btn",
+  importFileInput: "#import-file-input",
 
   toast: "#toast",
-  toastMsg: "#toastMsg",
-  toastText: "#toastText",
-  dialogRoot: "#dialogRoot"
+  toastMsg: "#toast-msg",
+  toastText: "#toast-text",
+  dialogRoot: "#dialog-root"
 };
 
 const DOM_SELECTOR_LISTS = {
@@ -1245,16 +1245,16 @@ function buildRuleDetails(rule) {
   const def = eventDef(rule.event.type);
   const providerMeta = PROVIDER_REGISTRY[rule.providerId];
 
-  const metaGrid = el("div", "rule-meta-grid");
+  const metaGrid = el("dl", "rule-meta-grid");
   function metaItem(iconName, label, value) {
     const item = el("div", "rule-meta-item");
-    const top = el("div", "rule-meta-top");
+    const top = el("dt", "rule-meta-top");
     const icon = el("span", "rule-meta-icon");
     icon.innerHTML = ICONS[iconName] || "";
     top.appendChild(icon);
     top.appendChild(el("span", "rule-meta-label", label));
     item.appendChild(top);
-    item.appendChild(el("span", "rule-meta-value", value));
+    item.appendChild(el("dd", "rule-meta-value", value));
     metaGrid.appendChild(item);
   }
   metaItem(
@@ -1266,7 +1266,7 @@ function buildRuleDetails(rule) {
   details.appendChild(metaGrid);
 
   function blockTitle(iconName, text) {
-    const title = el("div", "rule-block-title");
+    const title = el("h4", "rule-block-title");
     const icon = el("span", "rule-block-title-icon");
     icon.innerHTML = ICONS[iconName] || "";
     title.appendChild(icon);
@@ -1274,35 +1274,39 @@ function buildRuleDetails(rule) {
     return title;
   }
 
-  const condBlock = el("div", "rule-block");
+  const condBlock = el("section", "rule-block");
   condBlock.appendChild(
     blockTitle("filter", `Condições (${rule.conditions.length})`)
   );
   if (!rule.conditions.length) {
     condBlock.appendChild(
-      el("div", "rule-block-empty", "Sem condições — sempre executa.")
+      el("p", "rule-block-empty", "Sem condições — sempre executa.")
     );
   } else {
+    const condLines = el("ul", "rule-block-list");
     rule.conditions.forEach(cond => {
-      condBlock.appendChild(el("div", "rule-line", conditionSummary(cond)));
+      condLines.appendChild(el("li", "rule-line", conditionSummary(cond)));
     });
+    condBlock.appendChild(condLines);
   }
   details.appendChild(condBlock);
 
-  const actBlock = el("div", "rule-block");
+  const actBlock = el("section", "rule-block");
   actBlock.appendChild(blockTitle("play", `Ações (${rule.actions.length})`));
   if (!rule.actions.length) {
-    actBlock.appendChild(el("div", "rule-block-empty", "Nenhuma ação."));
+    actBlock.appendChild(el("p", "rule-block-empty", "Nenhuma ação."));
   } else {
+    const actLines = el("ul", "rule-block-list");
     rule.actions.forEach((action, index) => {
       const info = actionSummary(action);
-      const line = el("div", "rule-line");
+      const line = el("li", "rule-line");
       line.appendChild(el("span", "rule-line-idx", `${index + 1}`));
       line.appendChild(el("span", "rule-line-main", info.label));
       if (info.detail)
         line.appendChild(el("span", "rule-line-sub", info.detail));
-      actBlock.appendChild(line);
+      actLines.appendChild(line);
     });
+    actBlock.appendChild(actLines);
   }
   details.appendChild(actBlock);
 
@@ -1345,7 +1349,7 @@ function buildRuleDetails(rule) {
 function buildRuleRow(rule) {
   const compact = ruleViewMode === "compact";
   const row = el(
-    "div",
+    "li",
     `card rule-row${rule.enabled ? "" : " off"}${compact ? " compact" : ""}`
   );
   row.dataset.ruleId = rule.id;
@@ -1430,7 +1434,7 @@ function ruleListEmptyMessage() {
 function renderGroupedRuleList(rules, emptyMessage) {
   dom.ruleList.innerHTML = "";
   if (!rules.length) {
-    dom.ruleList.appendChild(el("div", "empty-hint", emptyMessage));
+    dom.ruleList.appendChild(el("li", "empty-hint", emptyMessage));
     return;
   }
   Object.keys(PROVIDER_REGISTRY).forEach(providerId => {
@@ -1438,9 +1442,9 @@ function renderGroupedRuleList(rules, emptyMessage) {
     if (!groupRules.length) return;
     const meta = PROVIDER_REGISTRY[providerId];
 
-    const group = el("div", "rule-group");
+    const group = el("li", "rule-group");
     group.dataset.providerId = providerId;
-    const header = el("div", "rule-group-header");
+    const header = el("header", "rule-group-header");
     const iconWrap = el("span", "rule-group-icon");
     iconWrap.innerHTML = ICONS[meta.icon] || "";
     header.appendChild(iconWrap);
@@ -1454,7 +1458,7 @@ function renderGroupedRuleList(rules, emptyMessage) {
     );
     group.appendChild(header);
 
-    const list = el("div", "rule-group-list");
+    const list = el("ul", "rule-group-list");
     groupRules.forEach(rule => list.appendChild(buildRuleRow(rule)));
     group.appendChild(list);
 
@@ -1508,7 +1512,7 @@ function clearRuleListEmptyState() {
 function showRuleListEmptyStateIfNeeded() {
   if (dom.ruleList.querySelector(".rule-row")) return;
   dom.ruleList.innerHTML = "";
-  dom.ruleList.appendChild(el("div", "empty-hint", ruleListEmptyMessage()));
+  dom.ruleList.appendChild(el("li", "empty-hint", ruleListEmptyMessage()));
 }
 
 function setRuleGroupCount(group, count) {
@@ -1524,17 +1528,17 @@ function findRuleGroupEl(providerId) {
 
 function createRuleGroupEl(providerId) {
   const meta = PROVIDER_REGISTRY[providerId];
-  const group = el("div", "rule-group");
+  const group = el("li", "rule-group");
   group.dataset.providerId = providerId;
 
-  const header = el("div", "rule-group-header");
+  const header = el("header", "rule-group-header");
   const iconWrap = el("span", "rule-group-icon");
   iconWrap.innerHTML = ICONS[meta.icon] || "";
   header.appendChild(iconWrap);
   header.appendChild(el("span", "rule-group-name", meta.name));
   header.appendChild(el("span", "rule-group-count", ""));
   group.appendChild(header);
-  group.appendChild(el("div", "rule-group-list"));
+  group.appendChild(el("ul", "rule-group-list"));
 
   const order = Object.keys(PROVIDER_REGISTRY);
   const targetIdx = order.indexOf(providerId);
@@ -1713,7 +1717,7 @@ function confirmDeleteRule(rule) {
     )
   );
 
-  const foot = el("div", "dialog-foot");
+  const foot = el("footer", "dialog-foot");
   const cancelBtn = el("button", "btn btn-ghost", "Cancelar");
   cancelBtn.type = "button";
   cancelBtn.addEventListener("click", closeDialog);
@@ -1759,7 +1763,7 @@ function confirmActivateProvider(providerId, ruleName) {
     )
   );
 
-  const foot = el("div", "dialog-foot");
+  const foot = el("footer", "dialog-foot");
   const laterBtn = el("button", "btn btn-ghost", "Agora não");
   laterBtn.type = "button";
   laterBtn.addEventListener("click", closeDialog);
@@ -1890,7 +1894,7 @@ function openRuleDetailsDialog(rule, originEl) {
   const dialog = el("div", "dialog wide rule-detail-dialog");
   const content = el("div", "rule-detail-content");
 
-  const head = el("div", "dialog-head");
+  const head = el("header", "dialog-head");
   const headText = el("div", "dialog-head-text");
   head.appendChild(headText);
   const closeBtn = iconButton("dialog-close", "close", "Fechar");
@@ -1907,7 +1911,7 @@ function openRuleDetailsDialog(rule, originEl) {
 
     headText.innerHTML = "";
     const titleRow = el("div", "dialog-head-title-row");
-    titleRow.appendChild(el("b", null, fresh.name));
+    titleRow.appendChild(el("strong", null, fresh.name));
     titleRow.appendChild(
       el(
         "span",
@@ -2124,7 +2128,7 @@ function buildProviderRow(id) {
   const enabled = !!(providers[id] && providers[id].enabled);
   const live = enabled && appState.monitorActive;
 
-  const row = el("div", `card provider-row${enabled ? "" : " off"}`);
+  const row = el("li", `card provider-row${enabled ? "" : " off"}`);
   row.dataset.providerId = id;
 
   const iconWrap = el("span", "provider-icon");
@@ -2363,7 +2367,7 @@ function closeDialog() {
 }
 
 function sectionLabel(number, text) {
-  const label = el("div", "editor-section-label");
+  const label = el("legend", "editor-section-label");
   if (number != null) label.appendChild(el("span", "n", `${number}`));
   label.appendChild(document.createTextNode(text));
   label.appendChild(el("span", "editor-section-label-line"));
@@ -2594,7 +2598,7 @@ function buildTemplateTextareaFields(container, action, config, vars) {
   if (action.type === "text_replacer") {
     container.appendChild(
       el(
-        "div",
+        "p",
         "hint",
         "Use {trigger} para inserir o texto do gatilho reconhecido. O texto digitado antes do gatilho (input) é mantido automaticamente antes do texto de substituição."
       )
@@ -2649,12 +2653,12 @@ function buildAiFields(container, action, config, vars, draft) {
     )
   );
   container.appendChild(
-    el("div", "hint", outputModeHint("ai", config.outputMode))
+    el("p", "hint", outputModeHint("ai", config.outputMode))
   );
   if (!isGeminiConfigured()) {
     container.appendChild(
       el(
-        "div",
+        "p",
         "hint hint-warn",
         "Chave de API do Gemini não configurada — esta ação vai falhar quando disparada. Configure em Configurações > IA · Gemini."
       )
@@ -2683,7 +2687,7 @@ function buildTranslateFields(container, action, config, vars, draft) {
     )
   );
   container.appendChild(
-    el("div", "hint", outputModeHint("translate", config.outputMode))
+    el("p", "hint", outputModeHint("translate", config.outputMode))
   );
 }
 
@@ -2746,7 +2750,7 @@ function renderConditionsList(container, draft) {
   if (draft.conditions.length === 0) {
     container.appendChild(
       el(
-        "div",
+        "li",
         "empty-hint",
         "Nenhuma condição — a regra sempre será executada."
       )
@@ -2754,8 +2758,8 @@ function renderConditionsList(container, draft) {
   }
 
   draft.conditions.forEach((cond, index) => {
-    const card = el("div", "action-card");
-    const head = el("div", "action-card-head");
+    const card = el("li", "action-card");
+    const head = el("header", "action-card-head");
     head.appendChild(el("span", "hint", `Condição ${index + 1}`));
 
     const delBtn = iconButton("icon-btn danger", "trash", "Remover condição");
@@ -2837,7 +2841,7 @@ function renderActionsList(container, draft) {
   if (draft.actions.length === 0) {
     container.appendChild(
       el(
-        "div",
+        "li",
         "empty-hint",
         "Nenhuma ação — adicione ao menos uma para que a regra tenha efeito."
       )
@@ -2845,8 +2849,8 @@ function renderActionsList(container, draft) {
   }
 
   draft.actions.forEach((action, index) => {
-    const card = el("div", "action-card");
-    const head = el("div", "action-card-head");
+    const card = el("li", "action-card");
+    const head = el("header", "action-card-head");
 
     const typeSelect = document.createElement("select");
     populateSelectOptions(
@@ -2908,9 +2912,11 @@ function openRuleDialog(existingRule) {
   const overlay = el("div", "dialog-overlay");
   const dialog = el("div", "dialog wide");
 
-  const head = el("div", "dialog-head");
+  const head = el("header", "dialog-head");
   const headText = el("div", "dialog-head-text");
-  headText.appendChild(el("b", null, isEdit ? "Editar Regra" : "Nova Regra"));
+  headText.appendChild(
+    el("strong", null, isEdit ? "Editar Regra" : "Nova Regra")
+  );
   headText.appendChild(
     el("span", "dialog-head-sub", "Evento, condições e ações da regra")
   );
@@ -2923,7 +2929,7 @@ function openRuleDialog(existingRule) {
   const body = el("div", "dialog-body");
   dialog.appendChild(body);
 
-  const infoSection = el("div", "editor-section");
+  const infoSection = el("fieldset", "editor-section");
   infoSection.appendChild(sectionLabel(null, "Informações"));
   const nameRow = el("div", "field-row");
   nameRow.appendChild(el("label", null, "Nome"));
@@ -2935,7 +2941,7 @@ function openRuleDialog(existingRule) {
   infoSection.appendChild(nameRow);
   body.appendChild(infoSection);
 
-  const eventSection = el("div", "editor-section");
+  const eventSection = el("fieldset", "editor-section");
   eventSection.appendChild(sectionLabel(1, "Evento"));
   const providerRow = el("div", "field-row");
   providerRow.appendChild(el("label", null, "Provider"));
@@ -2974,9 +2980,9 @@ function openRuleDialog(existingRule) {
   }
   refreshEventOptions();
 
-  const condSection = el("div", "editor-section");
+  const condSection = el("fieldset", "editor-section");
   condSection.appendChild(sectionLabel(2, "Condições"));
-  const condList = el("div");
+  const condList = el("ul", "action-card-list");
   condSection.appendChild(condList);
   const addCondBtn = el("button", "add-row-btn");
   addCondBtn.type = "button";
@@ -2994,9 +3000,9 @@ function openRuleDialog(existingRule) {
   condSection.appendChild(addCondBtn);
   body.appendChild(condSection);
 
-  const actSection = el("div", "editor-section");
+  const actSection = el("fieldset", "editor-section");
   actSection.appendChild(sectionLabel(3, "Ações"));
-  const actList = el("div");
+  const actList = el("ul", "action-card-list");
   actSection.appendChild(actList);
   const addActBtn = el("button", "add-row-btn");
   addActBtn.type = "button";
@@ -3084,7 +3090,7 @@ function openRuleDialog(existingRule) {
 
   refreshEventDependents();
 
-  const foot = el("div", "dialog-foot");
+  const foot = el("footer", "dialog-foot");
   const cancelBtn = el("button", "btn btn-ghost", "Cancelar");
   cancelBtn.type = "button";
   cancelBtn.addEventListener("click", closeDialog);
